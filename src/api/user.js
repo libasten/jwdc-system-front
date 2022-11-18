@@ -1,24 +1,32 @@
 import request from '@/utils/request'
 
-export function login(data) {
+export function login(pa) {
   return request({
-    url: '/vue-element-admin/user/login',
+    url: 'Accounts/Login',
     method: 'post',
-    data
+    params: pa
   })
 }
 
-export function getInfo(token) {
+// export function getInfo(token) {
+//   return request({
+//     url: '/vue-element-admin/user/info',
+//     method: 'get',
+//     params: { token }
+//   })
+// }
+
+// 重写经纬地诚系统后台获取用户信息的方法-无需token
+export function getInfo() {
   return request({
-    url: '/vue-element-admin/user/info',
+    url: 'UserInfos/Get',
     method: 'get',
-    params: { token }
   })
 }
 
 export function logout() {
   return request({
-    url: '/vue-element-admin/user/logout',
+    url: 'Accounts/LogOut',
     method: 'post'
   })
 }

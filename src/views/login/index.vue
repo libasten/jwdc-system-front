@@ -25,7 +25,7 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">Login</el-button>
+      <el-button :loading="loading" type="primary" style="width:100%;margin-bottom:30px;" @click.native.prevent="handleLogin">登 录</el-button>
 
       <div style="position:relative">
         <div class="tips">
@@ -44,14 +44,14 @@ export default {
   data() {
     const validateUsername = (rule, value, callback) => {
       if (!validUsername(value)) {
-        callback(new Error('Please enter the correct user name'))
+        callback(new Error('请输入正确的用户名！'))
       } else {
         callback()
       }
     }
     const validatePassword = (rule, value, callback) => {
-      if (value.length < 6) {
-        callback(new Error('The password can not be less than 6 digits'))
+      if (value.length < 4) {
+        callback(new Error('密码不能少于4位！'))
       } else {
         callback()
       }
@@ -206,7 +206,7 @@ $light_gray: #eee;
     width: 520px;
     max-width: 100%;
     padding: 40px 35px 20px 35px;
-    margin: 220px auto;
+    margin: 150px auto 0 auto;
     overflow: hidden;
     border-radius: 10px;
   }
