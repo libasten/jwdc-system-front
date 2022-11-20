@@ -25,7 +25,6 @@ const mutations = {
     state.authorize = authorize
   },
   SET_ROLES: (state, roles) => {
-    console.log(roles)
     state.roles = roles
   }
 }

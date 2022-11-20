@@ -30,7 +30,7 @@
       <div style="position:relative">
         <div class="tips">
           <span>请注意键盘大小写 ！</span>
-          <!-- <span>测试：18900658032 / 1985</span> -->
+          <!-- <span>测试： 18900658032  /  1985 </span> -->
         </div>
       </div>
     </el-form>

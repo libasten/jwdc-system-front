@@ -24,6 +24,14 @@ export function getInfo() {
   })
 }
 
+
+export function getSta() {
+  return request({
+    url: 'Projects/GetProjectStatistics',
+    method: 'get',
+  })
+}
+
 export function logout() {
   return request({
     url: 'Accounts/LogOut',

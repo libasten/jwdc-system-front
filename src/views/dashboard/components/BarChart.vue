@@ -12,6 +12,10 @@ const animationDuration = 6000
 export default {
   mixins: [resize],
   props: {
+    chartData: {
+      type: Object,
+      required: true
+    },
     className: {
       type: String,
       default: 'chart'
@@ -22,7 +26,7 @@ export default {
     },
     height: {
       type: String,
-      default: '300px'
+      default: '350px'
     }
   },
   data() {
@@ -42,10 +46,21 @@ export default {
     this.chart.dispose()
     this.chart = null
   },
+  watch: {
+    chartData: {
+      deep: true,
+      handler(val) {
+        this.setOptions(val)
+      }
+    }
+  },
   methods: {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
+      this.setOptions(this.chartData)
+    },
 
+    setOptions(pData) {
       this.chart.setOption({
         tooltip: {
           trigger: 'axis',
@@ -62,7 +77,8 @@ export default {
         },
         xAxis: [{
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          // data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          data: pData.yearNames,
           axisTick: {
             alignWithLabel: true
           }
@@ -73,26 +89,15 @@ export default {
             show: false
           }
         }],
+        legend: {
+          data: ['项目数量'],
+        },
         series: [{
-          name: 'pageA',
+          name: '项目数量',
           type: 'bar',
-          stack: 'vistors',
           barWidth: '60%',
-          data: [79, 52, 200, 334, 390, 330, 220],
-          animationDuration
-        }, {
-          name: 'pageB',
-          type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [80, 52, 200, 334, 390, 330, 220],
-          animationDuration
-        }, {
-          name: 'pageC',
-          type: 'bar',
-          stack: 'vistors',
-          barWidth: '60%',
-          data: [30, 52, 200, 334, 390, 330, 220],
+          // data: [79, 52, 200, 334, 390, 330, 220],
+          data: pData.yearCounts,
           animationDuration
         }]
       })
