@@ -47,12 +47,16 @@ service.interceptors.response.use(
 
     // if the custom code is not 20000, it is judged as an error.
     if (res.status !== 1) {
+      // 后台约定，等于0的时候，表示没有权限
+      if (res.status === 0) {
+        return Promise.reject(res.info)
+      }
       Message({
-        message: res.message || 'Error',
+        message: res.info || 'Error',
         type: 'error',
         duration: 5 * 1000
       })
-      return Promise.reject(new Error(res.message || 'Error'))
+      return Promise.reject(new Error(res.info || 'Error'))
     } else {
       return res
     }
