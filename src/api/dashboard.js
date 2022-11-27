@@ -6,3 +6,10 @@ export function getProjectStatistics() {
     method: 'get',
   })
 }
+
+export function getRemindList() {
+  return request({
+    url: 'Projects/GetReminds',
+    method: 'get',
+  })
+}

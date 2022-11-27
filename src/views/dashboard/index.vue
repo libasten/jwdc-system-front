@@ -1,32 +1,38 @@
 <template>
   <div class="dashboard-container">
-    <div style="height:100px;">通知和提醒</div>
-    <panel-group :dataListInPanel=panelInfoList />
-    <!-- 权限控制参考这里 -->
-    <el-row :gutter="32" v-if="checkAuth('29-1')">
-      <el-col :xs="24" :sm="12" :lg="12">
-        <div class="chart-wrapper">
-          <bar-chart :chartData="barChart" v-if="chartFlag" />
-        </div>
-      </el-col>
-      <el-col :xs="24" :sm="12" :lg="12">
-        <div class="chart-wrapper">
-          <line-chart :chartData="lineChart" v-if="chartFlag" />
-        </div>
-      </el-col>
-    </el-row>
+    <div class="section-title">通知和提醒</div>
+    <remind-table />
+    <div v-if="checkAuth('29-1')">
+      <el-divider></el-divider>
+      <panel-group :dataListInPanel=panelInfoList />
+      <!-- 权限控制参考这里 -->
+      <el-row :gutter="32">
+        <el-col :xs="24" :sm="12" :lg="12">
+          <div class="chart-wrapper">
+            <bar-chart :chartData="barChart" v-if="chartFlag" />
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="12" :lg="12">
+          <div class="chart-wrapper">
+            <line-chart :chartData="lineChart" v-if="chartFlag" />
+          </div>
+        </el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 
 <script>
 import { checkAuth } from '@/utils/permission'
 import { getProjectStatistics } from '@/api/dashboard'
+import RemindTable from './components/RemindTable.vue'
 import PanelGroup from './components/PanelGroup'
 import BarChart from './components/BarChart'
 import LineChart from './components/LineChart'
 export default {
   name: 'DashboardAdmin',
   components: {
+    RemindTable,
     PanelGroup,
     BarChart,
     LineChart
@@ -69,6 +75,11 @@ export default {
 
 <style lang="scss" scoped>
 .dashboard-container {
+  .section-title {
+    border-left: 4px solid #2479c9;
+    padding-left: 5px;
+    margin-bottom: 10px;
+  }
   padding: 32px;
   background-color: rgb(240, 242, 245);
   position: relative;
