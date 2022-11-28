@@ -38,6 +38,9 @@ import nestedRouter from './modules/nested'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
+
+// 动态菜单参考
+// https://blog.csdn.net/weixin_42349568/article/details/113385910
 export const constantRoutes = [
   {
     path: '/redirect',
@@ -78,45 +81,6 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/documentation',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/documentation/index'),
-        name: 'Documentation',
-        meta: { title: '文档', icon: 'documentation', affix: false }
-      }
-    ]
-  },
-  {
-    path: '/guide',
-    component: Layout,
-    redirect: '/guide/index',
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/guide/index'),
-        name: 'Guide',
-        meta: { title: 'Guide', icon: 'guide', noCache: true }
-      }
-    ]
-  },
-  {
-    path: '/profile',
-    component: Layout,
-    redirect: '/profile/index',
-    hidden: true,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/profile/index'),
-        name: 'Profile',
-        meta: { title: 'Profile', icon: 'user', noCache: true }
-      }
-    ]
-  }
 ]
 
 /**
@@ -124,7 +88,43 @@ export const constantRoutes = [
  * the routes that need to be dynamically loaded based on user roles
  */
 export const asyncRoutes = [
-
+  {
+    path: '/project',
+    component: Layout,
+    meta: { title: '项目属性', icon: 'el-icon-receiving', auth: '8-1' },
+    children: [
+      {
+        path: '/stage',
+        component: () => import('@/views/icons/index'),
+        name: 'stage',
+        meta: { title: '项目类型', icon: 'documentation', auth: '8-1' }
+      },
+      {
+        path: '/stage',
+        component: () => import('@/views/icons/index'),
+        name: 'stage',
+        meta: { title: '项目阶段', icon: 'documentation', auth: '9-1' }
+      },
+      {
+        path: '/stage',
+        component: () => import('@/views/icons/index'),
+        name: 'stage',
+        meta: { title: '难易程度', icon: 'documentation', auth: '10-1' }
+      },
+      {
+        path: '/stage',
+        component: () => import('@/views/icons/index'),
+        name: 'stage',
+        meta: { title: '附件类型', icon: 'documentation', auth: '12-1' }
+      },
+      {
+        path: '/stage',
+        component: () => import('@/views/icons/index'),
+        name: 'stage',
+        meta: { title: '备注类型', icon: 'documentation', auth: '13-1' }
+      },
+    ]
+  },
   {
     path: '/icon',
     component: Layout,
@@ -294,47 +294,12 @@ export const asyncRoutes = [
       }
     ]
   },
+
   {
     path: '/pdf/download',
     component: () => import('@/views/pdf/download'),
-    hidden: true
-  },
-
-  {
-    path: '/theme',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/theme/index'),
-        name: 'Theme',
-        meta: { title: 'Theme', icon: 'theme' }
-      }
-    ]
-  },
-
-  {
-    path: '/clipboard',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/clipboard/index'),
-        name: 'ClipboardDemo',
-        meta: { title: 'Clipboard', icon: 'clipboard' }
-      }
-    ]
-  },
-
-  {
-    path: 'external-link',
-    component: Layout,
-    children: [
-      {
-        path: 'https://github.com/PanJiaChen/vue-element-admin',
-        meta: { title: 'External Link', icon: 'link' }
-      }
-    ]
+    hidden: true,
+    // meta: { auth: '115-1' }
   },
 
   // 404 page must be placed at the end !!!

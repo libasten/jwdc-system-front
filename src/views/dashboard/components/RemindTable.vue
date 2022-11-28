@@ -75,38 +75,38 @@ export default {
       this.listLoading = true;
       this.list = [];
       //#region 测试提醒列表
-      for (let i = 0; i < 20; i++) {
-        const element = {
-          typeId: '1',
-          id: i,
-          mc: '测试名称 ' + i, //名称
-          date: '2022年10月3日',
-          expire: i + '天',
-        }
-        this.list.push(element)
-      }
-      this.total = this.list.length;
-      this.listLoading = false;
+      // for (let i = 0; i < 20; i++) {
+      //   const element = {
+      //     typeId: '1',
+      //     id: i,
+      //     mc: '测试名称 ' + i, //名称
+      //     date: '2022年10月3日',
+      //     expire: i + '天',
+      //   }
+      //   this.list.push(element)
+      // }
+      // this.total = this.list.length;
+      // this.listLoading = false;
       //#endregion
-      // getRemindList().then((res) => {
-      //   this.total = res.data.length;
-      //   res.data.forEach(ele => {
-      //     const element = {
-      //       typeId: ele.typeId,
-      //       id: ele.id,
-      //       mc: ele.remind, //名称
-      //       date: ele.date,
-      //       expire: ele.expireFormat
-      //     };
-      //     this.list.push(element);
-      //   });
-      //   this.listLoading = false;
-      // }).catch((err) => {
-      //   this.$message({
-      //     message: '错误信息：' + err,
-      //     type: 'error'
-      //   });
-      // });
+      getRemindList().then((res) => {
+        this.total = res.data.length;
+        res.data.forEach(ele => {
+          const element = {
+            typeId: ele.typeId,
+            id: ele.id,
+            mc: ele.remind, //名称
+            date: ele.date,
+            expire: ele.expireFormat
+          };
+          this.list.push(element);
+        });
+        this.listLoading = false;
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        });
+      });
     },
     closeRemindItem(data) {
       const idx = this.list.findIndex(x => (x.typeId === data.typeId && x.id === data.id));

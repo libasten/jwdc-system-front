@@ -76,6 +76,7 @@ export default {
 <style lang="scss" scoped>
 .dashboard-container {
   .section-title {
+    font-size: 18px;
     border-left: 4px solid #2479c9;
     padding-left: 5px;
     margin-bottom: 10px;

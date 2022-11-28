@@ -25,15 +25,18 @@ export function checkAuth(data) {
   if (data && data.length > 0) {
     const auArray = data.split('-')
     const authorize = store.getters && store.getters.authorize
-    const aItem = authorize.find(x => x.id === auArray[0]).authorize.find(y => y.id === auArray[1])
-    if (aItem === undefined) {
-      console.error("authorize ===> " + data + " <=== not exist !")
-      return false
-    }
-    if (aItem.value === '1') {
-      return true;
+    const aItem = authorize.find(x => x.id === auArray[0])
+    if (aItem !== undefined) {
+      const authInfo = aItem.authorize.find(y => y.id === auArray[1])
+      if (authInfo.value === '1') {
+        return true;
+      }
+      else {
+        return false;
+      }
     }
     else {
+      console.error("Can not find ===> " + data + " <=== in authorize !")
       return false;
     }
   } else {
