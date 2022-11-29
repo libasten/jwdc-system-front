@@ -94,33 +94,33 @@ export const asyncRoutes = [
     meta: { title: '项目属性', icon: 'el-icon-receiving', auth: '8-1' },
     children: [
       {
-        path: '/stage',
+        path: 'type',
         component: () => import('@/views/icons/index'),
-        name: 'stage',
+        name: 'Type',
         meta: { title: '项目类型', icon: 'documentation', auth: '8-1' }
       },
       {
-        path: '/stage',
-        component: () => import('@/views/icons/index'),
+        path: 'stage',
+        component: () => import('@/views/project/project-stage'),
         name: 'stage',
         meta: { title: '项目阶段', icon: 'documentation', auth: '9-1' }
       },
       {
-        path: '/stage',
+        path: 'importance',
         component: () => import('@/views/icons/index'),
-        name: 'stage',
+        name: 'Importance',
         meta: { title: '难易程度', icon: 'documentation', auth: '10-1' }
       },
       {
-        path: '/stage',
+        path: 'archiveType',
         component: () => import('@/views/icons/index'),
-        name: 'stage',
+        name: 'ArchiveType',
         meta: { title: '附件类型', icon: 'documentation', auth: '12-1' }
       },
       {
-        path: '/stage',
+        path: 'noteType',
         component: () => import('@/views/icons/index'),
-        name: 'stage',
+        name: 'NoteType',
         meta: { title: '备注类型', icon: 'documentation', auth: '13-1' }
       },
     ]
@@ -299,7 +299,6 @@ export const asyncRoutes = [
     path: '/pdf/download',
     component: () => import('@/views/pdf/download'),
     hidden: true,
-    // meta: { auth: '115-1' }
   },
 
   // 404 page must be placed at the end !!!

@@ -30,7 +30,7 @@
       <div style="position:relative">
         <div class="tips">
           <span>请注意键盘大小写 ！</span>
-          <!-- <span>测试： 18900658032  /  1985 </span> -->
+          <!-- <span>测试： 18900658032  /  1985 -- 13913004242 / gk110110</span> -->
         </div>
       </div>
     </el-form>
@@ -59,8 +59,8 @@ export default {
     }
     return {
       loginForm: {
-        username: 'jwdcadmin',
-        password: 'jwdcadmin'
+        username: '13913004242',
+        password: 'gk110110'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
