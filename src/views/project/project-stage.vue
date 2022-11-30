@@ -2,14 +2,14 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-first-aid-kit" @click="$router.push('/project/create')">新建</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="createStage">新建</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editStage">编辑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="$router.push('/project/create')">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="$router.push('/project/create')">删除</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteStage">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="singleTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" :cell-style="columnStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" :cell-style="columnStyle">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -34,36 +34,86 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
+    <el-dialog title="项目阶段" :visible.sync="dialogVisible" width="50%">
+      <el-form ref="form" :model="postForm" label-width="80px">
+        <el-form-item label="id" v-if="false">
+          <el-input v-model="postForm.id"></el-input>
+        </el-form-item>
+        <el-form-item label="名称">
+          <el-input v-model="postForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="排序">
+          <el-input-number v-model="postForm.order" :min="1" :max="100" :step="1" label="排序"></el-input-number>
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input v-model="postForm.description"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submit">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 
 import { fetchProjectStage, editProjectStage, createProjectStage, delProjectStage } from '@/api/project';
-
+import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
 export default {
-  name: 'ProjectList',
+  name: 'ProjectStage',
   components: {},
   data() {
     return {
       list: [],
       listLoading: true,
-      pageSize: 15,
+      pageSize: 10,
       currentPage: 1,
       total: 0,
-      currentRow: null
+      currentRow: null,
+      dialogVisible: false,
+      postForm: {
+        id: '',
+        name: '',
+        order: '',
+        description: ''
+      }
     };
   },
   created() {
     this.getList();
   },
   methods: {
+    submit() {
+      // 新建
+      if (this.postForm.id === '') {
+        createProjectStage(this.postForm).then((res) => {
+          this.$message.success('新建成功！')
+          this.list.unshift(res.data);
+          this.total++
+          this.dialogVisible = false
+        }).catch((err) => {
+          this.$message.error('新建失败：' + err)
+        })
+      }
+      // 编辑更新
+      else {
+        editProjectStage(this.postForm).then((res) => {
+          this.$message.success('更新成功！')
+          this.dialogVisible = false
+        }).catch((err) => {
+          this.$message.error('更新失败：' + err)
+        })
+      }
+    },
+    // 选中行
     handleCurrentChange(val) {
       this.currentRow = val;
     },
-    // 取消选中
+    // 取消选中行
     cancelSelected() {
-      this.$refs.singleTable.setCurrentRow();
+      this.$refs.vTable.setCurrentRow();
     },
     // 每页显示数目变动
     handleSizeChange(val) {
@@ -89,16 +139,29 @@ export default {
         });
       });
     },
-    // 删除项目
-    deleteProject(id) {
+    createStage() {
+      this.postForm = {
+        id: '',
+        name: '',
+        order: '',
+        description: ''
+      }
+      this.dialogVisible = true
+    },
+    editStage() {
+      this.postForm = this.currentRow
+      this.dialogVisible = true
+    },
+    deleteStage() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
         .then(() => {
-          deletePrj(id).then(() => {
-            this.list.splice(id, 1);
+          delProjectStage(this.currentRow).then((res) => {
+            const idx = this.list.findIndex(a => a.id === this.currentRow.id)
+            this.list.splice(idx, 1);
             this.total = this.list.length;
             this.$message({
               type: 'success',
@@ -106,43 +169,20 @@ export default {
             });
           });
         })
-        .catch(() => {
+        .catch((err) => {
           this.$message({
             type: 'info',
             message: '已取消删除',
           });
         });
     },
-    columnStyle({ row, column, rowIndex, columnIndex }) {
-      if (columnIndex === 0) {
-        return 'padding-left:20px;align:left;';
-      }
-    },
-    heaerCellStyle() {
-      return { color: '#444', fontSize: '16px', backgroundColor: '#F3F6FC' }
-    }
+    heaerCellStyle,
+    columnStyle
   },
 };
 </script>
 
 <style scoped>
-.top-btns {
-  margin-bottom: 10px;
-}
 </style>
 <style lang="scss">
-.table-view {
-  .el-table {
-    width: 100%;
-    .el-table__body tr.current-row > td {
-      background-color: #218be8;
-      color: #eee;
-    }
-    .cell {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-}
 </style>

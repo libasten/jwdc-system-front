@@ -189,3 +189,25 @@ aside {
 .multiselect--active {
   z-index: 1000 !important;
 }
+
+// 自定义的全局样式
+.top-btns {
+  margin-bottom: 10px;
+}
+
+.table-view {
+  .el-table {
+    width: 100%;
+
+    .el-table__body tr.current-row>td {
+      background-color: #218be8;
+      color: #eee;
+    }
+
+    .cell {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
