@@ -95,7 +95,7 @@ export const asyncRoutes = [
     children: [
       {
         path: 'type',
-        component: () => import('@/views/icons/index'),
+        component: () => import('@/views/project/project-type'),
         name: 'Type',
         meta: { title: '项目类型', icon: 'documentation', auth: '8-1' }
       },

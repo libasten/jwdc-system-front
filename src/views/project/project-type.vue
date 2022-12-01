@@ -2,10 +2,10 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="createStage">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editStage">编辑</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="createType">新建</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editType">编辑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteStage">删除</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteType">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
@@ -15,17 +15,17 @@
             <span>{{ row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="40%" label="阶段名称" header-align="center" show-overflow-tooltip>
+        <el-table-column min-width="25%" label="类型名称" header-align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="25%" label="排序" align="center" show-overflow-tooltip>
+        <el-table-column min-width="65%" label="项目阶段" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
-            <span>{{ row.order }}</span>
+            <span>{{ row.projectStageNames }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="35%" label="描述" align="center">
+        <el-table-column min-width="10%" label="描述" align="center">
           <template slot-scope="{ row }">
             <span>{{ row.description }}</span>
           </template>
@@ -34,7 +34,7 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="项目阶段" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%">
+    <el-dialog title="项目类型" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px">
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="postForm.id"></el-input>
@@ -42,11 +42,10 @@
         <el-form-item label="名称" prop="name">
           <el-input v-model="postForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="排序" prop="order">
-          <el-input-number v-model="postForm.order" :min="1" :max="100" :step="1" label="排序" style="width:100%"></el-input-number>
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="postForm.description"></el-input>
+        <el-form-item label="包含阶段" prop="stage">
+          <el-checkbox-group v-model="postForm.projectStageIds">
+            <el-checkbox v-for="(item ,idx) in projectStage" :label="item.id" :name="item.name" :key="idx" border>{{item.name}}</el-checkbox>
+          </el-checkbox-group>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -59,10 +58,10 @@
 
 <script>
 
-import { fetchProjectStage, editProjectStage, createProjectStage, delProjectStage } from '@/api/project';
+import { fetchProjectType, editProjectType, createProjectType, delProjectType, fetchProjectStage } from '@/api/project';
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
 export default {
-  name: 'ProjectStage',
+  name: 'ProjectType',
   components: {},
   data() {
     return {
@@ -73,15 +72,17 @@ export default {
       total: 0,
       currentRow: null,
       dialogVisible: false,
+      projectStage: [],
+
       postForm: {
         id: '',
         name: '',
-        order: '',
+        projectStageIds: [],
+        projectStageNames: '',
         description: ''
       },
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-        order: [{ required: true, message: '请输入排序', trigger: 'blur' }],
       }
     };
   },
@@ -94,7 +95,7 @@ export default {
         if (valid) {
           // 新建
           if (this.postForm.id === '') {
-            createProjectStage(this.postForm).then((res) => {
+            createProjectType(this.postForm).then((res) => {
               this.$message.success('新建成功！')
               this.list.unshift(res.data);
               this.total++
@@ -105,7 +106,7 @@ export default {
           }
           // 编辑更新
           else {
-            editProjectStage(this.postForm).then((res) => {
+            editProjectType(this.postForm).then((res) => {
               this.$message.success('更新成功！')
               this.dialogVisible = false
             }).catch((err) => {
@@ -127,7 +128,7 @@ export default {
     getList() {
       this.listLoading = true;
       this.list = [];
-      fetchProjectStage().then((res) => {
+      fetchProjectType().then((res) => {
         this.total = res.data.length
         this.list = res.data
         this.listLoading = false
@@ -138,33 +139,49 @@ export default {
         });
       });
     },
-    createStage() {
-      this.postForm = {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      }
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.dialogVisible = true
+    createType() {
+      fetchProjectStage().then((res) => {
+        this.projectStage = res.data
+        if (this.$refs.postForm !== undefined) {
+          this.$refs.postForm.resetFields()
+        }
+        this.dialogVisible = true
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        });
+      });
     },
-    editStage() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.postForm = this.currentRow
-      this.dialogVisible = true
+    editType() {
+      fetchProjectStage().then((res) => {
+        this.projectStage = res.data
+        if (this.$refs.postForm !== undefined) {
+          this.$refs.postForm.clearValidate()
+        }
+        this.postForm = this.currentRow
+        console.log(this.currentRow.projectStageIds)
+        this.postForm.projectStageIds = [1, 2, 3, 11, 5, 7, 8]
+        const aTemp = '[' + this.currentRow.projectStageIds + ']'
+        // this.postForm.projectStageIds = aTemp
+        // this.postForm.projectStageIds = '[' + this.currentRow.projectStageIds + ']'
+        console.log(this.postForm.projectStageIds)
+        this.dialogVisible = true
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        });
+      });
     },
-    deleteStage() {
+    deleteType() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
         .then(() => {
-          delProjectStage(this.currentRow).then((res) => {
+          delProjectType(this.currentRow).then((res) => {
             const idx = this.list.findIndex(a => a.id === this.currentRow.id)
             this.list.splice(idx, 1);
             this.total = this.list.length;
