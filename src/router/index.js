@@ -107,19 +107,19 @@ export const asyncRoutes = [
       },
       {
         path: 'importance',
-        component: () => import('@/views/icons/index'),
+        component: () => import('@/views/project/project-importance'),
         name: 'Importance',
         meta: { title: '难易程度', icon: 'documentation', auth: '10-1' }
       },
       {
         path: 'archiveType',
-        component: () => import('@/views/icons/index'),
+        component: () => import('@/views/project/project-archiveType'),
         name: 'ArchiveType',
         meta: { title: '附件类型', icon: 'documentation', auth: '12-1' }
       },
       {
         path: 'noteType',
-        component: () => import('@/views/icons/index'),
+        component: () => import('@/views/project/project-noteType'),
         name: 'NoteType',
         meta: { title: '备注类型', icon: 'documentation', auth: '13-1' }
       },
