@@ -9,8 +9,8 @@
       </el-button-group>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" :cell-style="columnStyle">
-        <el-table-column label="id" v-if="false">
+      <el-table ref="vTable" v-loading="listLoading" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" :cell-style="columnStyle" @current-change="handleCurrentChange">
+        <el-table-column v-if="false" label="id">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
           </template>
@@ -34,18 +34,21 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="项目类型" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%">
+    <el-dialog title="项目类型" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%" class="project-stage-form-div">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px">
-        <el-form-item label="id" v-if="false" prop="id">
-          <el-input v-model="postForm.id"></el-input>
+        <el-form-item v-if="false" label="id" prop="id">
+          <el-input v-model="postForm.id" />
         </el-form-item>
         <el-form-item label="名称" prop="name">
-          <el-input v-model="postForm.name"></el-input>
+          <el-input v-model="postForm.name" />
         </el-form-item>
-        <el-form-item label="包含阶段" prop="stage">
+        <el-form-item label="包含阶段" prop="projectStageIds">
           <el-checkbox-group v-model="postForm.projectStageIds">
-            <el-checkbox v-for="(item ,idx) in projectStage" :label="item.id" :name="item.name" :key="idx" border>{{item.name}}</el-checkbox>
+            <el-checkbox v-for="(item ,idx) in projectStage" :key="idx" :label="item.id" :name="item.name" border>{{ item.name }}</el-checkbox>
           </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="描述说明" prop="description">
+          <el-input v-model="postForm.description" />
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -58,7 +61,7 @@
 
 <script>
 
-import { fetchProjectType, editProjectType, createProjectType, delProjectType, fetchProjectStage } from '@/api/project';
+import { fetchProjectType, editProjectType, createProjectType, delProjectType, fetchProjectStage } from '@/api/project'
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
 export default {
   name: 'ProjectType',
@@ -73,7 +76,6 @@ export default {
       currentRow: null,
       dialogVisible: false,
       projectStage: [],
-
       postForm: {
         id: '',
         name: '',
@@ -83,34 +85,51 @@ export default {
       },
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        projectStageIds: [
+          { type: 'array', required: true, message: '请至少选择一个阶段', trigger: 'change' }
+        ]
       }
-    };
+    }
   },
   created() {
-    this.getList();
+    this.getList()
   },
   methods: {
     submit() {
-      this.$refs.postForm.validate((valid) => {
+      const that = this
+      that.$refs.postForm.validate((valid) => {
         if (valid) {
+          // 组织入参，因为后台的projectStageIds是一个长得像数组的字符串，所以要特别处理
+          let pStageIds = ''
+          that.postForm.projectStageIds.forEach(e => {
+            pStageIds += e + ','
+          })
+          const pa = {
+            id: that.postForm.id,
+            name: that.postForm.name,
+            description: that.postForm.description,
+            projectStageIds: pStageIds
+          }
           // 新建
-          if (this.postForm.id === '') {
-            createProjectType(this.postForm).then((res) => {
-              this.$message.success('新建成功！')
-              this.list.unshift(res.data);
-              this.total++
-              this.dialogVisible = false
+          if (that.postForm.id === '') {
+            createProjectType(pa).then((res) => {
+              that.$message.success('新建成功！')
+              that.list.unshift(res.data)
+              that.total++
+              that.dialogVisible = false
             }).catch((err) => {
-              this.$message.error('新建失败：' + err)
+              that.$message.error('新建失败：' + err)
             })
           }
           // 编辑更新
           else {
-            editProjectType(this.postForm).then((res) => {
-              this.$message.success('更新成功！')
-              this.dialogVisible = false
+            editProjectType(pa).then((res) => {
+              that.$message.success('更新成功！')
+              const idxTem = that.list.findIndex(x => x.id === res.data.id)
+              that.list[idxTem] = res.data
+              that.dialogVisible = false
             }).catch((err) => {
-              this.$message.error('更新失败：' + err)
+              that.$message.error('更新失败：' + err)
             })
           }
         }
@@ -118,16 +137,16 @@ export default {
     },
     // 选中行
     handleCurrentChange(val) {
-      this.currentRow = val;
+      this.currentRow = val
     },
     // 取消选中行
     cancelSelected() {
-      this.$refs.vTable.setCurrentRow();
+      this.$refs.vTable.setCurrentRow()
     },
     // 获取数据列表
     getList() {
-      this.listLoading = true;
-      this.list = [];
+      this.listLoading = true
+      this.list = []
       fetchProjectType().then((res) => {
         this.total = res.data.length
         this.list = res.data
@@ -136,13 +155,20 @@ export default {
         this.$message({
           message: '错误信息：' + err,
           type: 'error'
-        });
-      });
+        })
+      })
     },
     createType() {
       fetchProjectStage().then((res) => {
         this.projectStage = res.data
         if (this.$refs.postForm !== undefined) {
+          this.postForm = {
+            id: '',
+            name: '',
+            projectStageIds: [],
+            projectStageNames: '',
+            description: ''
+          }
           this.$refs.postForm.resetFields()
         }
         this.dialogVisible = true
@@ -150,53 +176,57 @@ export default {
         this.$message({
           message: '错误信息：' + err,
           type: 'error'
-        });
-      });
+        })
+      })
     },
     editType() {
+      const that = this
       fetchProjectStage().then((res) => {
-        this.projectStage = res.data
-        if (this.$refs.postForm !== undefined) {
-          this.$refs.postForm.clearValidate()
+        that.projectStage = res.data
+        if (that.$refs.postForm !== undefined) {
+          that.$refs.postForm.clearValidate()
         }
-        this.postForm = this.currentRow
-        console.log(this.currentRow.projectStageIds)
-        this.postForm.projectStageIds = [1, 2, 3, 11, 5, 7, 8]
-        const aTemp = '[' + this.currentRow.projectStageIds + ']'
-        // this.postForm.projectStageIds = aTemp
-        // this.postForm.projectStageIds = '[' + this.currentRow.projectStageIds + ']'
-        console.log(this.postForm.projectStageIds)
-        this.dialogVisible = true
+        const atemp = that.currentRow.projectStageIds.split(',')
+        const btemp = []
+        atemp.forEach(element => {
+          btemp.push(Number(element))
+        })
+        that.postForm.id = that.currentRow.id
+        that.postForm.name = that.currentRow.name
+        that.postForm.projectStageIds = btemp
+        that.postForm.projectStageNames = that.currentRow.projectStageNames
+        that.postForm.description = that.currentRow.description
+        that.dialogVisible = true
       }).catch((err) => {
-        this.$message({
+        that.$message({
           message: '错误信息：' + err,
           type: 'error'
-        });
-      });
+        })
+      })
     },
     deleteType() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        type: 'warning',
+        type: 'warning'
       })
         .then(() => {
           delProjectType(this.currentRow).then((res) => {
             const idx = this.list.findIndex(a => a.id === this.currentRow.id)
-            this.list.splice(idx, 1);
-            this.total = this.list.length;
+            this.list.splice(idx, 1)
+            this.total = this.list.length
             this.$message({
               type: 'success',
-              message: '删除成功!',
-            });
-          });
+              message: '删除成功!'
+            })
+          })
         })
         .catch((err) => {
           this.$message({
             type: 'info',
-            message: '已取消删除',
-          });
-        });
+            message: '已取消删除'
+          })
+        })
     },
     // 每页显示数目变动
     handleSizeChange(val) {
@@ -208,11 +238,18 @@ export default {
     },
     heaerCellStyle,
     columnStyle
-  },
-};
+  }
+}
 </script>
 
 <style scoped>
 </style>
 <style lang="scss">
+.project-stage-form-div {
+  .el-checkbox.is-bordered.el-checkbox--medium {
+    min-width: 225px;
+    margin-bottom: 10px;
+    margin-left: 0px;
+  }
+}
 </style>
