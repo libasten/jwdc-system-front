@@ -126,6 +126,25 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/organization',
+    component: Layout,
+    meta: { title: '组织管理', icon: 'el-icon-office-building', auth: '8-1' },
+    children: [
+      {
+        path: 'staff',
+        component: () => import('@/views/organization/staff'),
+        name: 'Staff',
+        meta: { title: '员工管理', icon: 'documentation', auth: '8-1' }
+      },
+      {
+        path: 'department',
+        component: () => import('@/views/organization/staff'),
+        name: 'Department',
+        meta: { title: '部门管理', icon: 'documentation', auth: '8-1' }
+      },
+    ]
+  },
+  {
     path: '/icon',
     component: Layout,
     children: [
