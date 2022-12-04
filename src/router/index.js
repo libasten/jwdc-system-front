@@ -137,8 +137,14 @@ export const asyncRoutes = [
         meta: { title: '员工管理', icon: 'documentation', auth: '8-1' }
       },
       {
+        path: 'staffType',
+        component: () => import('@/views/organization/staffType'),
+        name: 'Separtment',
+        meta: { title: '员工类型', icon: 'documentation', auth: '8-1' }
+      },
+      {
         path: 'department',
-        component: () => import('@/views/organization/staff'),
+        component: () => import('@/views/organization/department'),
         name: 'Department',
         meta: { title: '部门管理', icon: 'documentation', auth: '8-1' }
       },

@@ -33,68 +33,68 @@ export function delStaff(data) {
 }
 //#endregion
 
-//#region 项目类型
-// 项目类型列表
-export function fetchProjectType() {
+//#region 员工类型
+// 员工类型列表
+export function fetchStaffType() {
   return request({
-    url: '/Projects/GetProjectTypes',
+    url: '/Staffs/GetStaffTypes',
     method: 'get',
   })
 }
-// 新增项目类型
-export function createProjectType(pa) {
+// 新增员工类型
+export function createStaffType(pa) {
   return request({
-    url: '/Projects/CreateProjectType',
+    url: '/Staffs/CreateStaffType',
     method: 'post',
     params: pa,
   })
 }
-// 编辑项目类型
-export function editProjectType(pa) {
+// 编辑员工类型
+export function editStaffType(pa) {
   return request({
-    url: '/Projects/EditProjectType',
+    url: '/Staffs/EditStaffType',
     method: 'post',
     params: pa,
   })
 }
-// 删除项目类型
-export function delProjectType(data) {
+// 删除员工类型
+export function delStaffType(data) {
   return request({
-    url: '/Projects/DeleteProjectType',
+    url: '/Staffs/DeleteStaffType',
     method: 'delete',
     params: { id: data.id }
   })
 }
 //#endregion
 
-//#region 项目难易程度
-// 项目难易程度列表
-export function fetchProjectImportance() {
+//#region 部门管理
+// 部门列表
+export function fetchDepartment() {
   return request({
-    url: '/Projects/GetProjectImportances',
+    url: '/Departments/GetDepartments',
     method: 'get',
   })
 }
-// 新增项目难易程度
-export function createProjectImportance(pa) {
+// 新增部门
+export function createDepartment(pa) {
   return request({
-    url: '/Projects/CreateProjectImportance',
+    url: '/Departments/CreateDepartment',
     method: 'post',
     params: pa,
   })
 }
-// 编辑项目难易程度
-export function editProjectImportance(pa) {
+// 编辑部门
+export function editDepartment(pa) {
   return request({
-    url: '/Projects/EditProjectImportance',
+    url: '/Departments/EditDepartment',
     method: 'post',
     params: pa,
   })
 }
-// 删除项目难易程度
-export function delProjectImportance(data) {
+// 删除部门
+export function delDepartment(data) {
   return request({
-    url: '/Projects/DeleteProjectImportance',
+    url: '/Departments/DeleteDepartment',
     method: 'delete',
     params: { id: data.id }
   })
