@@ -1,12 +1,12 @@
 <template>
-<!-- 员工管理 -->
+  <!-- 员工管理 -->
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="createType">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editType">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-picture" @click="editType">附件</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-news" @click="deleteType">离职</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="createStaff">新建</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editStaff">编辑</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-picture" @click="editStaff">附件</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-news" @click="deleteStaff">离职</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
       </el-button-group>
     </div>
@@ -27,7 +27,7 @@
             <span>{{ row.departmentName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="25%" label="职务" align="center" show-overflow-tooltip>
+        <el-table-column min-width="20%" label="职务" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.post }}</span>
           </template>
@@ -42,7 +42,7 @@
             <span>{{ row.roleNames }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="入职时间" align="center" show-overflow-tooltip>
+        <el-table-column min-width="15%" label="入职时间" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.entryTimeFormat }}</span>
           </template>
@@ -51,22 +51,109 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="项目类型" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%" class="project-stage-form-div">
-      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px">
+    <el-dialog title="员工信息" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%" class="staff-form-div">
+      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="90px">
         <el-form-item v-if="false" label="id" prop="id">
           <el-input v-model="postForm.id" />
         </el-form-item>
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="postForm.name" />
-        </el-form-item>
-        <el-form-item label="包含阶段" prop="projectStageIds">
-          <el-checkbox-group v-model="postForm.projectStageIds">
-            <el-checkbox v-for="(item ,idx) in projectStage" :key="idx" :label="item.id" :name="item.name" border>{{ item.name }}</el-checkbox>
-          </el-checkbox-group>
-        </el-form-item>
-        <el-form-item label="描述说明" prop="description">
-          <el-input v-model="postForm.description" />
-        </el-form-item>
+        <el-row :gutter="10">
+          <el-col :md="12">
+            <el-form-item label="姓名" prop="name">
+              <el-input v-model="postForm.name" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="性别" prop="sex">
+              <el-input v-model="postForm.sex" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="手机" prop="phone">
+              <el-input v-model="postForm.phone" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="密码" prop="password">
+              <el-input v-model="postForm.password" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="身份证号" prop="idNum">
+              <el-input v-model="postForm.idNum" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="邮箱" prop="email">
+              <el-input v-model="postForm.email" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="部门" prop="departmentId">
+              <el-select v-model="postForm.departmentId" placeholder="请选择">
+                <el-option v-for="item in departments" :key="item.id" :label="item.text" :value="item.id" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="员工类型" prop="staffTypeId">
+              <el-select v-model="postForm.staffTypeId" placeholder="请选择">
+                <el-option v-for="item in staffTypes" :key="item.id" :label="item.text" :value="item.id" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :md="24">
+            <el-form-item label="角色" prop="roleId">
+              <el-select v-model="postForm.roleIds" placeholder="请选择">
+                <el-option v-for="item in roles" :key="item.id" :label="item.text" :value="item.id" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="职务" prop="post">
+              <el-input v-model="postForm.post" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="生日" prop="birthday">
+              <el-date-picker v-model="postForm.birthday" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="毕业院校" prop="college">
+              <el-input v-model="postForm.college" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="专业" prop="major">
+              <el-input v-model="postForm.major" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="毕业时间" prop="graduation">
+              <el-date-picker v-model="postForm.graduation" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="入职日期" prop="emergencyPeople">
+              <el-date-picker v-model="postForm.emergencyPeople" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="紧急联系人" prop="emergencyPeople">
+              <el-input v-model="postForm.emergencyPeople" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="联系人电话" prop="emergencyPhone">
+              <el-input v-model="postForm.emergencyPhone" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="12">
+            <el-form-item label="联系人关系" prop="emergencyPeople">
+              <el-input v-model="postForm.emergencyPeople" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
@@ -78,7 +165,7 @@
 
 <script>
 
-import { fetchStaff, editStaff, createStaff, delStaff } from '@/api/organization'
+import { fetchStaff, editStaff, createStaff, delStaff, getStaffEnum } from '@/api/organization'
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
 export default {
   name: 'Staff',
@@ -91,20 +178,40 @@ export default {
       currentPage: 1,
       total: 0,
       currentRow: null,
+      departments: [],
+      staffTypes: [],
+      roles: [],
       dialogVisible: false,
-      projectStage: [],
       postForm: {
         id: '',
         name: '',
-        projectStageIds: [],
-        projectStageNames: '',
-        description: ''
+        sex: '',
+        birthday: '',
+        password: '',
+        phone: '',
+        email: '',
+        idNum: '',
+        college: '',
+        major: '',
+        graduation: '',
+        departmentId: '',
+        staffTypeId: '',
+        roleIds: [],
+        post: '',
+        entryTime: '',
+        emergencyPeople: '',
+        emergencyRelationship: '',
+        emergencyPhone: '',
       },
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-        projectStageIds: [
-          { type: 'array', required: true, message: '请至少选择一个阶段', trigger: 'change' }
-        ]
+        phone: [{ required: true, message: '请输入电话', trigger: 'blur' }],
+        email: [{ required: true, message: '请输入电邮', trigger: 'blur' }],
+        idNum: [{ required: true, message: '请输入身份证号', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+        staffTypeId: [{ required: true, message: '请至少选择一个类型', trigger: 'change' }],
+        departmentId: [{ required: true, message: '请至少选择一个类型', trigger: 'change' }],
+        roleId: [{ type: 'array', required: true, message: '请至少选择一个角色', trigger: 'change' }],
       }
     }
   },
@@ -175,28 +282,28 @@ export default {
         })
       })
     },
-    createType() {
-      fetchProjectStage().then((res) => {
-        this.projectStage = res.data
-        if (this.$refs.postForm !== undefined) {
-          this.postForm = {
-            id: '',
-            name: '',
-            projectStageIds: [],
-            projectStageNames: '',
-            description: ''
+    createStaff() {
+      this.$nextTick(() => {
+        getStaffEnum().then((res) => {
+          console.log(res)
+          console.log(this.$refs.postForm)
+          if (this.$refs.postForm !== undefined) {
+            this.$refs.postForm.resetFields()
           }
-          this.$refs.postForm.resetFields()
-        }
-        this.dialogVisible = true
-      }).catch((err) => {
-        this.$message({
-          message: '错误信息：' + err,
-          type: 'error'
+          this.roles = res.data.roles
+          this.departments = res.data.departments
+          this.staffTypes = res.data.staffTypes
+          this.staffTypeId = 0
+          this.dialogVisible = true
+        }).catch((err) => {
+          this.$message({
+            message: '错误信息：' + err,
+            type: 'error'
+          })
         })
       })
     },
-    editType() {
+    editStaff() {
       const that = this
       fetchProjectStage().then((res) => {
         that.projectStage = res.data
@@ -221,7 +328,7 @@ export default {
         })
       })
     },
-    deleteType() {
+    deleteStaff() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -262,11 +369,23 @@ export default {
 <style scoped>
 </style>
 <style lang="scss">
-.project-stage-form-div {
+.staff-form-div {
   .el-checkbox.is-bordered.el-checkbox--medium {
     min-width: 225px;
     margin-bottom: 10px;
     margin-left: 0px;
+  }
+  .el-form-item {
+    margin-bottom: 12px;
+  }
+  .el-form-item__error {
+    padding-top: 0px;
+  }
+  .el-date-editor {
+    width: 100%;
+  }
+  .el-select--medium {
+    width: 100%;
   }
 }
 </style>

@@ -31,6 +31,13 @@ export function delStaff(data) {
     params: { id: data.id }
   })
 }
+// 获取新建员工时候的参数信息
+export function getStaffEnum() {
+  return request({
+    url: '/Staffs/NewStaff',
+    method: 'get',
+  })
+}
 //#endregion
 
 //#region 员工类型

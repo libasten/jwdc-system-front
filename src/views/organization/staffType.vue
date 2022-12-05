@@ -16,7 +16,7 @@
             <span>{{ row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="40%" label="部门名称" header-align="center" show-overflow-tooltip>
+        <el-table-column min-width="40%" label="员工类型" header-align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.name }}</span>
           </template>
@@ -30,7 +30,7 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="组织部门" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%">
+    <el-dialog title="员工类型" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px">
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="postForm.id"></el-input>
