@@ -62,7 +62,8 @@
 <script>
 
 import { fetchProjectType, editProjectType, createProjectType, delProjectType, fetchProjectStage } from '@/api/project'
-import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import { heaerCellStyle, columnStyle, array2myString, myString2Array } from '@/utils/commonFunction'
+import { deepClone } from '@/utils/index'
 export default {
   name: 'ProjectType',
   components: {},
@@ -99,17 +100,8 @@ export default {
       const that = this
       that.$refs.postForm.validate((valid) => {
         if (valid) {
-          // 组织入参，因为后台的projectStageIds是一个长得像数组的字符串，所以要特别处理
-          let pStageIds = ''
-          that.postForm.projectStageIds.forEach(e => {
-            pStageIds += e + ','
-          })
-          const pa = {
-            id: that.postForm.id,
-            name: that.postForm.name,
-            description: that.postForm.description,
-            projectStageIds: pStageIds
-          }
+          let pa = deepClone(that.postForm)
+          pa.projectStageIds = array2myString(pa.projectStageIds)
           // 新建
           if (that.postForm.id === '') {
             createProjectType(pa).then((res) => {
@@ -162,13 +154,9 @@ export default {
       fetchProjectStage().then((res) => {
         this.projectStage = res.data
         if (this.$refs.postForm !== undefined) {
-          this.postForm = {
-            id: '',
-            name: '',
-            projectStageIds: [],
-            projectStageNames: '',
-            description: ''
-          }
+          // 这个方法用于重置data属性中的值。
+          Object.assign(this.$data.postForm, this.$options.data().postForm)
+          // 清空校验信息
           this.$refs.postForm.resetFields()
         }
         this.dialogVisible = true
@@ -186,16 +174,8 @@ export default {
         if (that.$refs.postForm !== undefined) {
           that.$refs.postForm.clearValidate()
         }
-        const atemp = that.currentRow.projectStageIds.split(',')
-        const btemp = []
-        atemp.forEach(element => {
-          btemp.push(Number(element))
-        })
-        that.postForm.id = that.currentRow.id
-        that.postForm.name = that.currentRow.name
-        that.postForm.projectStageIds = btemp
-        that.postForm.projectStageNames = that.currentRow.projectStageNames
-        that.postForm.description = that.currentRow.description
+        that.postForm = deepClone(that.currentRow)
+        that.postForm.projectStageIds = myString2Array(that.postForm.projectStageIds)
         that.dialogVisible = true
       }).catch((err) => {
         that.$message({

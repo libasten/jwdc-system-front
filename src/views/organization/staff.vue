@@ -68,8 +68,8 @@
             </el-form-item>
           </el-col>
           <el-col :md="12">
-            <el-form-item label="手机" prop="phone">
-              <el-input v-model="postForm.phone" />
+            <el-form-item label="手机" prop="telephone">
+              <el-input v-model="postForm.telephone" />
             </el-form-item>
           </el-col>
           <el-col :md="12">
@@ -102,8 +102,8 @@
             </el-form-item>
           </el-col>
           <el-col :md="24">
-            <el-form-item label="角色" prop="roleId">
-              <el-select v-model="postForm.roleIds" placeholder="请选择">
+            <el-form-item label="角色" prop="roleIds">
+              <el-select v-model="postForm.roleIds" multiple placeholder="请选择">
                 <el-option v-for="item in roles" :key="item.id" :label="item.text" :value="item.id" />
               </el-select>
             </el-form-item>
@@ -124,7 +124,7 @@
             </el-form-item>
           </el-col>
           <el-col :md="12">
-            <el-form-item label="专业" prop="major">
+            <el-form-item label="专业名称" prop="major">
               <el-input v-model="postForm.major" />
             </el-form-item>
           </el-col>
@@ -149,8 +149,8 @@
             </el-form-item>
           </el-col>
           <el-col :md="12">
-            <el-form-item label="联系人关系" prop="emergencyPeople">
-              <el-input v-model="postForm.emergencyPeople" />
+            <el-form-item label="联系人关系" prop="emergencyRelationship">
+              <el-input v-model="postForm.emergencyRelationship" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -165,8 +165,9 @@
 
 <script>
 
-import { fetchStaff, editStaff, createStaff, delStaff, getStaffEnum } from '@/api/organization'
-import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import { fetchStaffs, editStaff, createStaff, delStaff, getStaffEnum, getStaff } from '@/api/organization'
+import { heaerCellStyle, columnStyle, myString2Array, array2myString } from '@/utils/commonFunction'
+import { deepClone } from '@/utils/index'
 export default {
   name: 'Staff',
   components: {},
@@ -205,13 +206,12 @@ export default {
       },
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-        phone: [{ required: true, message: '请输入电话', trigger: 'blur' }],
-        email: [{ required: true, message: '请输入电邮', trigger: 'blur' }],
+        telephone: [{ required: true, message: '请输入电话', trigger: 'blur' }],
         idNum: [{ required: true, message: '请输入身份证号', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
         staffTypeId: [{ required: true, message: '请至少选择一个类型', trigger: 'change' }],
         departmentId: [{ required: true, message: '请至少选择一个类型', trigger: 'change' }],
-        roleId: [{ type: 'array', required: true, message: '请至少选择一个角色', trigger: 'change' }],
+        roleIds: [{ type: 'array', required: true, message: '请至少选择一个角色', trigger: 'change' }],
       }
     }
   },
@@ -223,17 +223,9 @@ export default {
       const that = this
       that.$refs.postForm.validate((valid) => {
         if (valid) {
-          // 组织入参，因为后台的projectStageIds是一个长得像数组的字符串，所以要特别处理
-          let pStageIds = ''
-          that.postForm.projectStageIds.forEach(e => {
-            pStageIds += e + ','
-          })
-          const pa = {
-            id: that.postForm.id,
-            name: that.postForm.name,
-            description: that.postForm.description,
-            projectStageIds: pStageIds
-          }
+          let pa = deepClone(this.postForm);
+          pa.roleIds = array2myString(pa.roleIds)
+          pa.phone = pa.telephone
           // 新建
           if (that.postForm.id === '') {
             createStaff(pa).then((res) => {
@@ -271,7 +263,7 @@ export default {
     getList() {
       this.listLoading = true
       this.list = []
-      fetchStaff().then((res) => {
+      fetchStaffs().then((res) => {
         this.total = res.data.length
         this.list = res.data
         this.listLoading = false
@@ -283,43 +275,32 @@ export default {
       })
     },
     createStaff() {
-      this.$nextTick(() => {
-        getStaffEnum().then((res) => {
-          console.log(res)
-          console.log(this.$refs.postForm)
-          if (this.$refs.postForm !== undefined) {
-            this.$refs.postForm.resetFields()
-          }
-          this.roles = res.data.roles
-          this.departments = res.data.departments
-          this.staffTypes = res.data.staffTypes
-          this.staffTypeId = 0
-          this.dialogVisible = true
-        }).catch((err) => {
-          this.$message({
-            message: '错误信息：' + err,
-            type: 'error'
-          })
+      getStaffEnum().then((res) => {
+        if (this.$refs.postForm !== undefined) {
+          this.$refs.postForm.resetFields()
+        }
+        this.roles = res.data.roles
+        this.departments = res.data.departments
+        this.staffTypes = res.data.staffTypes
+        this.dialogVisible = true
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
         })
       })
     },
     editStaff() {
       const that = this
-      fetchProjectStage().then((res) => {
-        that.projectStage = res.data
+      getStaff(that.currentRow.id).then((res) => {
         if (that.$refs.postForm !== undefined) {
           that.$refs.postForm.clearValidate()
         }
-        const atemp = that.currentRow.projectStageIds.split(',')
-        const btemp = []
-        atemp.forEach(element => {
-          btemp.push(Number(element))
-        })
-        that.postForm.id = that.currentRow.id
-        that.postForm.name = that.currentRow.name
-        that.postForm.projectStageIds = btemp
-        that.postForm.projectStageNames = that.currentRow.projectStageNames
-        that.postForm.description = that.currentRow.description
+        that.departments = res.data.departments
+        that.staffTypes = res.data.staffTypes
+        that.roles = res.data.roles
+        that.postForm = deepClone(res.data.staff)
+        that.postForm.roleIds = myString2Array(that.postForm.roleIds)
         that.dialogVisible = true
       }).catch((err) => {
         that.$message({

@@ -1,12 +1,21 @@
 import request from '@/utils/request'
 //#region 员工管理
-// 获取目员工
-export function fetchStaff() {
+// 获取员工列表
+export function fetchStaffs() {
   return request({
     url: '/Staffs/GetStaffs',
     method: 'get',
   })
 }
+
+// 获取单个员工
+export function getStaff(id) {
+  return request({
+    url: '/Staffs/GetStaff?id=' + id,
+    method: 'get',
+  })
+}
+
 // 新增员工
 export function createStaff(pa) {
   return request({
