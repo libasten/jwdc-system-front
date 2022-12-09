@@ -3,11 +3,10 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="createStaff">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editStaff">编辑</el-button>
+        <el-button type="primary" size="small" icon="el-icon-d-arrow-left" @click="backStaff">恢复</el-button>
+        <el-button type="primary" size="small" icon="el-icon-edit" @click="editStaff">查看</el-button>
         <!-- <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-picture" @click="editStaff">附件</el-button> -->
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-news" @click="leaveStaff">离职</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
+        <el-button type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
@@ -51,7 +50,7 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="员工信息" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%" class="staff-form-div">
+    <el-dialog title="已离职员工信息" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%" class="staff-form-div">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-width="90px">
         <el-form-item v-if="false" label="id" prop="id">
           <el-input v-model="postForm.id" />
@@ -165,11 +164,11 @@
 
 <script>
 
-import { fetchStaffs, editStaff, createStaff, resignStaff, getStaffEnum, getStaff } from '@/api/organization'
+import { delStaff, getStaffEnum, getStaff, fetchLeaveStaffs, resumeStaff } from '@/api/organization'
 import { heaerCellStyle, columnStyle, myString2Array, array2myString } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 export default {
-  name: 'Staff',
+  name: 'StaffLeave',
   components: {},
   data() {
     return {
@@ -263,7 +262,7 @@ export default {
     getList() {
       this.listLoading = true
       this.list = []
-      fetchStaffs().then((res) => {
+      fetchLeaveStaffs().then((res) => {
         this.total = res.data.length
         this.list = res.data
         this.listLoading = false
@@ -309,21 +308,21 @@ export default {
         })
       })
     },
-    // 设置离职
-    leaveStaff() {
-      this.$confirm('是否确定设置离职状态?', '提示', {
+    // 恢复员工
+    backStaff() {
+      this.$confirm('将要恢复员工, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       })
         .then(() => {
-          resignStaff(this.currentRow).then((res) => {
+          resumeStaff(this.currentRow).then((res) => {
             const idx = this.list.findIndex(a => a.id === this.currentRow.id)
             this.list.splice(idx, 1)
             this.total = this.list.length
             this.$message({
               type: 'success',
-              message: '设置离职成功!'
+              message: '恢复成功!'
             })
           })
         })
@@ -331,6 +330,31 @@ export default {
           this.$message({
             type: 'info',
             message: '已取消！'
+          })
+        })
+    },
+    // 删除员工
+    deleteStaff() {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          delStaff(this.currentRow).then((res) => {
+            const idx = this.list.findIndex(a => a.id === this.currentRow.id)
+            this.list.splice(idx, 1)
+            this.total = this.list.length
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          })
+        })
+        .catch((err) => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
           })
         })
     },

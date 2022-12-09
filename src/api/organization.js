@@ -32,14 +32,7 @@ export function editStaff(pa) {
     params: pa,
   })
 }
-// 员工离职
-export function delStaff(data) {
-  return request({
-    url: '/Staffs/DeleteStaff',
-    method: 'delete',
-    params: { id: data.id }
-  })
-}
+
 // 获取新建员工时候的参数信息
 export function getStaffEnum() {
   return request({
@@ -47,6 +40,16 @@ export function getStaffEnum() {
     method: 'get',
   })
 }
+
+// 离职员工
+export function resignStaff(data) {
+  return request({
+    url: '/Staffs/EditStaffStatus',
+    method: 'post',
+    params: { id: data.id, status: 0 }
+  })
+}
+
 //#endregion
 
 //#region 员工类型
@@ -117,34 +120,27 @@ export function delDepartment(data) {
 }
 //#endregion
 
-//#region 项目附件类型
-// 项目附件类型列表
-export function fetchProjectArchiveType() {
+//#region 离职员工管理
+// 获取离职员工列表
+export function fetchLeaveStaffs() {
   return request({
-    url: '/Projects/GetProjectArchiveTypes',
+    url: '/Staffs/GetLeaveStaffs',
     method: 'get',
   })
 }
-// 新增项目附件类型
-export function createProjectArchiveType(pa) {
+// 恢复员工
+export function resumeStaff(data) {
   return request({
-    url: '/Projects/CreateProjectArchiveType',
+    url: '/Staffs/EditStaffStatus',
     method: 'post',
-    params: pa,
+    params: { id: data.id, status: 1 }
   })
 }
-// 编辑项目附件类型
-export function editProjectArchiveType(pa) {
+
+// 删除员工
+export function delStaff(data) {
   return request({
-    url: '/Projects/EditProjectArchiveType',
-    method: 'post',
-    params: pa,
-  })
-}
-// 删除项目附件类型
-export function delProjectArchiveType(data) {
-  return request({
-    url: '/Projects/DeleteProjectArchiveType',
+    url: '/Staffs/DeleteStaff',
     method: 'delete',
     params: { id: data.id }
   })
