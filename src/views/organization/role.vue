@@ -1,0 +1,220 @@
+<template>
+  <!-- 角色管理 -->
+  <div class="app-container">
+    <div class="top-btns">
+      <el-button-group>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="createRole">新建</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editRole">编辑</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-unlock" @click="showAuthorize">授权</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-news" @click="deleteRole">删除</el-button>
+      </el-button-group>
+    </div>
+    <div class="table-view">
+      <el-table ref="vTable" v-loading="listLoading" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" :cell-style="columnStyle" @current-change="handleCurrentChange">
+        <el-table-column v-if="false" label="id">
+          <template slot-scope="{ row }">
+            <span>{{ row.id }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="25%" label="名称" header-align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
+            <span>{{ row.name }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="75%" label="描述" header-align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
+            <span>{{ row.description }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div style="height:20px;width:100%;" />
+    <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
+    <el-dialog title="角色信息" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%" class="staff-form-div">
+      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="90px">
+        <el-form-item v-if="false" label="id" prop="id">
+          <el-input v-model="postForm.id" />
+        </el-form-item>
+        <el-row :gutter="10">
+          <el-col :md="24">
+            <el-form-item label="名称" prop="name">
+              <el-input v-model="postForm.name" />
+            </el-form-item>
+          </el-col>
+          <el-col :md="24">
+            <el-form-item label="描述" prop="description">
+              <el-input v-model="postForm.description" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submit">确 定</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+
+import { fetchRoles, editRole, createRole, delRole, getStaffEnum, getStaff } from '@/api/organization'
+import { heaerCellStyle, columnStyle, myString2Array, array2myString } from '@/utils/commonFunction'
+import { deepClone } from '@/utils/index'
+export default {
+  name: 'Staff',
+  components: {},
+  data() {
+    return {
+      list: [],
+      listLoading: true,
+      pageSize: 10,
+      currentPage: 1,
+      total: 0,
+      currentRow: null,
+      dialogVisible: false,
+      postForm: {
+        id: '',
+        name: '',
+        description: '',
+      },
+      rules: {
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+      }
+    }
+  },
+  created() {
+    this.getList()
+  },
+  methods: {
+    submit() {
+      const that = this
+      that.$refs.postForm.validate((valid) => {
+        if (valid) {
+          let pa = deepClone(this.postForm);
+          // 新建
+          if (that.postForm.id === '') {
+            createRole(pa).then((res) => {
+              that.$message.success('新建成功！')
+              that.list.unshift(res.data)
+              that.total++
+              that.dialogVisible = false
+            }).catch((err) => {
+              that.$message.error('新建失败：' + err)
+            })
+          }
+          // 编辑更新
+          else {
+            editRole(pa).then((res) => {
+              that.$message.success('更新成功！')
+              const idxTem = that.list.findIndex(x => x.id === res.data.id)
+              that.list[idxTem] = res.data
+              that.dialogVisible = false
+            }).catch((err) => {
+              that.$message.error('更新失败：' + err)
+            })
+          }
+        }
+      })
+    },
+    // 获取数据列表
+    getList() {
+      this.listLoading = true
+      this.list = []
+      fetchRoles().then((res) => {
+        this.total = res.data.length
+        this.list = res.data
+        this.listLoading = false
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        })
+      })
+    },
+    createRole() {
+      if (this.$refs.postForm !== undefined) {
+        this.$refs.postForm.resetFields()
+      }
+      this.postForm = this.$options.data().postForm
+      this.dialogVisible = true
+    },
+    editRole() {
+      if (this.$refs.postForm !== undefined) {
+        this.$refs.postForm.clearValidate()
+      }
+      this.postForm = this.currentRow
+      this.dialogVisible = true
+    },
+    deleteRole() {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      })
+        .then(() => {
+          delRole(this.currentRow).then((res) => {
+            const idx = this.list.findIndex(a => a.id === this.currentRow.id)
+            this.list.splice(idx, 1);
+            this.total = this.list.length;
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+            });
+          });
+        })
+        .catch((err) => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除',
+          });
+        });
+    },
+    // 显示授权窗体
+    showAuthorize() { },
+    // 选中行
+    handleCurrentChange(val) {
+      this.currentRow = val
+    },
+    // 取消选中行
+    cancelSelected() {
+      this.$refs.vTable.setCurrentRow()
+    },
+    // 每页显示数目变动
+    handleSizeChange(val) {
+      this.pageSize = val
+    },
+    // 切换页码
+    handleCurrentPageChange(val) {
+      this.currentPage = val
+    },
+    heaerCellStyle,
+    columnStyle
+  }
+}
+</script>
+
+<style scoped>
+</style>
+<style lang="scss">
+.staff-form-div {
+  .el-checkbox.is-bordered.el-checkbox--medium {
+    min-width: 225px;
+    margin-bottom: 10px;
+    margin-left: 0px;
+  }
+  .el-form-item {
+    margin-bottom: 12px;
+  }
+  .el-form-item__error {
+    padding-top: 0px;
+  }
+  .el-date-editor {
+    width: 100%;
+  }
+  .el-select--medium {
+    width: 100%;
+  }
+}
+</style>

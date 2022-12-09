@@ -134,19 +134,31 @@ export const asyncRoutes = [
         path: 'staff',
         component: () => import('@/views/organization/staff'),
         name: 'Staff',
-        meta: { title: '员工管理', icon: 'documentation', auth: '8-1' }
+        meta: { title: '员工管理', icon: 'documentation' }
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/organization/role'),
+        name: 'Role',
+        meta: { title: '角色管理', icon: 'documentation', auth: '22-1' }
       },
       {
         path: 'staffType',
         component: () => import('@/views/organization/staffType'),
         name: 'Separtment',
-        meta: { title: '员工类型', icon: 'documentation', auth: '8-1' }
+        meta: { title: '员工类型', icon: 'documentation', auth: '5-1' }
       },
       {
         path: 'department',
         component: () => import('@/views/organization/department'),
         name: 'Department',
-        meta: { title: '部门管理', icon: 'documentation', auth: '8-1' }
+        meta: { title: '部门管理', icon: 'documentation', auth: '3-1' }
+      },
+      {
+        path: 'staffLeave',
+        component: () => import('@/views/organization/staff-leave'),
+        name: 'StaffLeave',
+        meta: { title: '离职员工', icon: 'documentation', auth: '24-1' }
       },
     ]
   },

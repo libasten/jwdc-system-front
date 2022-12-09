@@ -3,10 +3,10 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="createStage">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editStage">编辑</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="createDepartment">新建</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editDepartment">编辑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteStage">删除</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteDepartment">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
@@ -129,26 +129,21 @@ export default {
         });
       });
     },
-    createStage() {
-      this.postForm = {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      }
+    createDepartment() {
       if (this.$refs.postForm !== undefined) {
         this.$refs.postForm.clearValidate()
       }
+      this.postForm = this.$options.data().postForm
       this.dialogVisible = true
     },
-    editStage() {
+    editDepartment() {
       if (this.$refs.postForm !== undefined) {
         this.$refs.postForm.clearValidate()
       }
       this.postForm = this.currentRow
       this.dialogVisible = true
     },
-    deleteStage() {
+    deleteDepartment() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

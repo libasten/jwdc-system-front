@@ -148,33 +148,33 @@ export function delStaff(data) {
 //#endregion
 
 //#region 项目备注类型
-// 项目附件备注列表
-export function fetchProjectNoteType() {
+// 获取角色列表
+export function fetchRoles() {
   return request({
-    url: '/Projects/GetProjectNoteTypes',
+    url: '/Roles/GetRoles',
     method: 'get',
   })
 }
-// 新增项目附件类型
-export function createProjectNoteType(pa) {
+// 新增角色
+export function createRole(pa) {
   return request({
-    url: '/Projects/CreateProjectNoteType',
+    url: '/Roles/CreateRole',
     method: 'post',
     params: pa,
   })
 }
 // 编辑项目附件类型
-export function editProjectNoteType(pa) {
+export function editRole(pa) {
   return request({
-    url: '/Projects/EditProjectNoteType',
+    url: '/Roles/EditRole',
     method: 'post',
     params: pa,
   })
 }
 // 删除项目附件类型
-export function delProjectNoteType(data) {
+export function delRole(data) {
   return request({
-    url: '/Projects/DeleteProjectNoteType',
+    url: '/Roles/DeleteRole',
     method: 'delete',
     params: { id: data.id }
   })

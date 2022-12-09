@@ -132,15 +132,10 @@ export default {
       });
     },
     createArchiveType() {
-      this.postForm = {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      }
       if (this.$refs.postForm !== undefined) {
         this.$refs.postForm.clearValidate()
       }
+      this.postForm = this.$options.data().postForm
       this.dialogVisible = true
     },
     editArchiveType() {
