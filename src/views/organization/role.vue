@@ -54,12 +54,30 @@
         <el-button type="primary" @click="submit">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 授权弹窗 -->
+    <el-dialog :title="authorizeDialogTitle" :visible.sync="dialogVisibleAuthorize" :close-on-click-modal="false" width="50%" class="authorize-form-div">
+      <el-form ref="authorizeForm" :model="authorizeForm" :rules="rules" label-width="90px">
+        <div v-for="(authItem ,index) in authorizeList" :key="index" class="authorizeItemLine">
+          <span class="auth-idx">{{authItem.id}}.</span>
+          <span class="auth-name">{{authItem.name}}</span>
+          <el-checkbox-group v-model="authorizeValueList[index]" class="chkbox-goroup">
+            <el-checkbox v-for="(item,idx) in authItem.authorize" :key="idx" :label="item.id">{{item.name}}</el-checkbox>
+          </el-checkbox-group>
+        </div>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleAuthorize = false">取 消</el-button>
+        <el-button @click="checkAllAuthorize">全 选</el-button>
+        <el-button @click="clearAllAuthorize">清 空</el-button>
+        <el-button type="primary" @click="submitAuthorize">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 
-import { fetchRoles, editRole, createRole, delRole, getStaffEnum, getStaff } from '@/api/organization'
+import { fetchRoles, editRole, createRole, delRole, fetchAuthorize, editAuthorize } from '@/api/organization'
 import { heaerCellStyle, columnStyle, myString2Array, array2myString } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 export default {
@@ -74,13 +92,27 @@ export default {
       total: 0,
       currentRow: null,
       dialogVisible: false,
+      dialogVisibleAuthorize: false,
       postForm: {
         id: '',
         name: '',
         description: '',
       },
+      authorizeForm: {},
+      authorizeList: [],
+      authorizeValueList: [],
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+      }
+    }
+  },
+  computed: {
+    authorizeDialogTitle: function () {
+      if (this.currentRow != null) {
+        return this.currentRow.name + ' - 角色授权信息'
+      }
+      else {
+        return '角色授权信息'
       }
     }
   },
@@ -172,7 +204,79 @@ export default {
         });
     },
     // 显示授权窗体
-    showAuthorize() { },
+    showAuthorize() {
+      fetchAuthorize(this.currentRow.id).then((res) => {
+        this.authorizeList = []
+        this.authorizeValueList = []
+        res.data.forEach(element => {
+          let authorizeInfo = []
+          let authorizeSingleValueList = []
+          for (let key in element.authorize) {
+            const eAuth = element.authorize[key]
+            authorizeInfo.push({ id: eAuth.id, name: eAuth.name, value: eAuth.value })
+            if (eAuth.value === "1") {
+              authorizeSingleValueList.push(eAuth.id)
+            }
+          }
+          this.authorizeList.push({ id: element.id, name: element.name, authorize: authorizeInfo })
+          this.authorizeValueList.push(authorizeSingleValueList)
+        });
+        this.dialogVisibleAuthorize = true
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        })
+      })
+    },
+    // 提交授权变动信息
+    submitAuthorize() {
+      let strParam = ''
+      let idx = 0;
+      this.authorizeValueList.forEach(sArray => {
+        let strTemp = ''
+        idx = idx + 1
+        if (sArray.length > 0) {
+          strTemp += idx + ':'
+          sArray.forEach(item => {
+            strTemp += item + ','
+          })
+          strTemp = strTemp.substring(0, strTemp.length - 1)
+          strParam += strTemp + ';'
+        }
+      })
+      const pa = {
+        roleId: this.currentRow.id,
+        resource: strParam
+      }
+      editAuthorize(pa).then(res => {
+        this.$message.success('授权成功！')
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        })
+      })
+    },
+    // 清空全选
+    checkAllAuthorize() {
+      this.authorizeValueList = []
+      this.authorizeList.forEach(e => {
+        let tempArray = []
+        e.authorize.forEach(item => {
+          tempArray.push(item.id)
+        })
+        this.authorizeValueList.push(tempArray)
+      })
+    },
+    // 清空全选
+    clearAllAuthorize() {
+      this.authorizeValueList = []
+      this.authorizeList.forEach(e => {
+        let tempArray = []
+        this.authorizeValueList.push(tempArray)
+      })
+    },
     // 选中行
     handleCurrentChange(val) {
       this.currentRow = val
@@ -215,6 +319,26 @@ export default {
   }
   .el-select--medium {
     width: 100%;
+  }
+}
+.authorize-form-div {
+  .el-dialog__body {
+    max-height: 400px;
+    overflow-y: auto;
+    .authorizeItemLine {
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+      .auth-name {
+        display: inline-block;
+        width: 110px;
+        text-align: right;
+        margin-right: 25px;
+      }
+      .chkbox-goroup {
+        display: inline-block;
+      }
+    }
   }
 }
 </style>

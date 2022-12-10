@@ -147,7 +147,7 @@ export function delStaff(data) {
 }
 //#endregion
 
-//#region 项目备注类型
+//#region 项目角色
 // 获取角色列表
 export function fetchRoles() {
   return request({
@@ -163,7 +163,7 @@ export function createRole(pa) {
     params: pa,
   })
 }
-// 编辑项目附件类型
+// 编辑角色
 export function editRole(pa) {
   return request({
     url: '/Roles/EditRole',
@@ -171,7 +171,7 @@ export function editRole(pa) {
     params: pa,
   })
 }
-// 删除项目附件类型
+// 删除角色
 export function delRole(data) {
   return request({
     url: '/Roles/DeleteRole',
@@ -179,4 +179,23 @@ export function delRole(data) {
     params: { id: data.id }
   })
 }
+//#endregion
+
+//#region 授权
+// 获取角色列表
+export function fetchAuthorize(id) {
+  return request({
+    url: '/Roles/GetRoleResource?roleId=' + id,
+    method: 'get',
+  })
+}
+// 编辑授权
+export function editAuthorize(pa) {
+  return request({
+    url: '/Roles/EditRoleResource',
+    method: 'post',
+    params: pa,
+  })
+}
+
 //#endregion
