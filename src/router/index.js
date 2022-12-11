@@ -91,6 +91,19 @@ export const asyncRoutes = [
   {
     path: '/project',
     component: Layout,
+    meta: { title: '项目管理', icon: 'el-icon-suitcase' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/project/project-list'),
+        name: 'List',
+        meta: { title: '项目管理', icon: 'el-icon-suitcase-1'}
+      },
+    ]
+  },
+  {
+    path: '/project',
+    component: Layout,
     meta: { title: '项目属性', icon: 'el-icon-receiving', auth: '8-1' },
     children: [
       {

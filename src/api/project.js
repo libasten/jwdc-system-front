@@ -1,4 +1,13 @@
 import request from '@/utils/request'
+//#region 项目管理
+export function fetchProjectList() {
+  return request({
+    url: '/Projects/GetProjects',
+    method: 'get',
+  })
+}
+//#endregion
+
 //#region 项目阶段
 // 项目阶段列表
 export function fetchProjectStage() {
