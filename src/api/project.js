@@ -1,9 +1,18 @@
 import request from '@/utils/request'
 //#region 项目管理
+// 获取项目列表（不分页，备用）
 export function fetchProjectList() {
   return request({
     url: '/Projects/GetProjects',
     method: 'get',
+  })
+}
+// 获取项目列表（后台分页）
+export function fetchProjectListPaged(pa) {
+  return request({
+    url: '/Projects/GetProjects',
+    method: 'get',
+    params: pa
   })
 }
 //#endregion

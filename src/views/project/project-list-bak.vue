@@ -1,5 +1,5 @@
 <template>
-  <!-- 项目列表-后台分页 -->
+  <!-- 项目列表 -->
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
@@ -12,25 +12,8 @@
         <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteImportance">删除</el-button>
       </el-button-group>
     </div>
-    <div class="query-box">
-      <el-divider content-position="center"><span>项目筛选</span></el-divider>
-      <el-form :inline="true">
-        <el-form-item label="筛选类别">
-          <el-select v-model="searchType" placeholder="筛选类型">
-            <el-option v-for="(item,idx) in searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="筛选过滤关键字" style="margin-left:20px;">
-          <el-input v-model="keyword" placeholder="请输入关键字" @clear="clearKW" clearable style="width:500px;"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="doQuery">查询</el-button>
-        </el-form-item>
-      </el-form>
-      <el-divider class="bottom-divider"><span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{keyword}} ”</span>的筛选结果</span></el-divider>
-    </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" @filter-change="handleFilterChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -41,7 +24,7 @@
             <span>{{ row.code }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="20%" label="类型" align="center" show-overflow-tooltip>
+        <el-table-column min-width="20%" label="类型" align="center" show-overflow-tooltip :filters="filterPrjTypeList" :filter-multiple="false" column-key="ckPrjType">
           <template slot-scope="{ row }">
             <span>{{ row.projectTypeName }}</span>
           </template>
@@ -56,12 +39,12 @@
             <span>{{ row.progressName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="部门" align="center">
+        <el-table-column min-width="10%" label="部门" align="center" :filters="filterDepartmentList" :filter-multiple="false" column-key="ckDepartment">
           <template slot-scope="{ row }">
             <span>{{ row.departmentName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="负责人" align="center">
+        <el-table-column min-width="10%" label="负责人" align="center" :filters="filterManagerList" :filter-multiple="false" column-key="ckManager">
           <template slot-scope="{ row }">
             <span>{{ row.manager }}</span>
           </template>
@@ -92,8 +75,9 @@
 
 <script>
 
-import { fetchProjectListPaged, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
+import { fetchProjectList, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import { deepClone } from '@/utils/index'
 export default {
   name: 'ProjectList',
   components: {},
@@ -106,12 +90,10 @@ export default {
       currentPage: 1,
       total: 0,
       currentRow: null,
-      searchType: 0,
-      searchTypeOpts: [{ text: '项目类型', value: 0 }, { text: '部门', value: 1 }, { text: '负责人', value: 2 }],
-      searchValue: '',
-      keyword: '',
-      showQueryTip: false,
       dialogVisible: false,
+      filterPrjTypeList: [],
+      filterDepartmentList: [],
+      filterManagerList: [],
       postForm: {
         id: '',
         name: '',
@@ -120,13 +102,8 @@ export default {
       },
     };
   },
-  computed: {
-    queryTypeTip() {
-      return this.searchTypeOpts[this.searchType].text
-    },
-  },
   created() {
-    this.getList(1, this.pageSize);
+    this.getList();
   },
   methods: {
     submit() {
@@ -156,15 +133,29 @@ export default {
       })
     },
     // 获取数据列表
-    getList(cPage, pSize) {
+    getList() {
       let that = this
-      that.listLoading = true
-      that.list = []
-      const param = { skpCount: (cPage - 1) * this.pageSize, maxCount: pSize }
-      fetchProjectListPaged(param).then((res) => {
-        that.total = res.data.totalCount
-        that.list = res.data.items
+      that.listLoading = true;
+      that.list = [];
+      fetchProjectList().then((res) => {
+        that.total = res.data.length
+        that.list = res.data
         that.listLoading = false
+        // 做类型、部门、负责人筛选的数组，给el-table用
+        that.filterDepartmentList = []
+        that.filterPrjTypeList = []
+        that.filtermanagerList = []
+        that.list.forEach(e => {
+          if (that.filterDepartmentList.findIndex(d => d.value === e.departmentName) === -1) {
+            that.filterDepartmentList.push({ text: e.departmentName, value: e.departmentName })
+          }
+          if (that.filterPrjTypeList.findIndex(d => d.value === e.projectTypeName) === -1) {
+            that.filterPrjTypeList.push({ text: e.projectTypeName, value: e.projectTypeName })
+          }
+          if (that.filterManagerList.findIndex(d => d.value === e.manager) === -1) {
+            that.filterManagerList.push({ text: e.manager, value: e.manager })
+          }
+        })
       }).catch((err) => {
         that.$message({
           message: '错误信息：' + err,
@@ -172,14 +163,27 @@ export default {
         });
       });
     },
-    doQuery() {
-      this.showQueryTip = true;
+
+    handleFilterChange(filters) {
+      let originList = deepClone(this.list)
+      if (filters.ckPrjType) {
+        let temp = this.list.filter(x => x.projectTypeName === filters.ckPrjType[0])
+        this.list = temp
+      }
+      if (filters.ckDepartment) {
+        let temp = this.list.filter(x => x.departmentName === filters.ckDepartment[0])
+        this.list = temp
+      }
+      if (filters.ckManager) {
+        let temp = this.list.filter(x => x.manager === filters.ckManager[0])
+        this.list = temp
+      }
+      if (filters.length === 0) {
+        this.list = originList
+      }
+      this.total = this.list.length
     },
-    // 清空关键字
-    clearKW() {
-      this.getList(1, this.pageSize);
-      this.showQueryTip = false;
-    },
+
     createImportance() {
       this.postForm = {
         id: '',
@@ -233,13 +237,11 @@ export default {
     },
     // 每页显示数目变动
     handleSizeChange(val) {
-      this.pageSize = val;
-      this.getList(this.currentPage, this.pageSize);
+      this.pageSize = val
     },
-    // 切换页码-后台分页
+    // 切换页码
     handleCurrentPageChange(val) {
-      this.currentPage = val;
-      this.getList(this.currentPage, this.pageSize);
+      this.currentPage = val
     },
     heaerCellStyle,
     columnStyle
@@ -247,20 +249,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.query-box {
-  margin-top: 20px;
-  .bottom-divider {
-    margin-top: 0px;
-    margin-bottom: 30px;
-  }
-}
-.keyword-span {
-  font-size: 1.1rem;
-  margin: 0 8px;
-  font-weight: 700;
-  color: #2264f3;
-}
+<style scoped>
 </style>
 <style lang="scss">
 </style>
