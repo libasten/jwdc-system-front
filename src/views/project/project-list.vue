@@ -1,5 +1,5 @@
 <template>
-<!-- 项目列表 -->
+  <!-- 项目列表 -->
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
@@ -10,10 +10,10 @@
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click="editImportance">分享</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
         <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteImportance">删除</el-button>
-      </el-button-group>  
+      </el-button-group>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" @filter-change="handleFilterChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -24,27 +24,27 @@
             <span>{{ row.code }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="20%" label="类型" align="center"  show-overflow-tooltip>
+        <el-table-column min-width="20%" label="类型" align="center" show-overflow-tooltip :filters="filterPrjTypeList" :filter-multiple="false" column-key="ckPrjType">
           <template slot-scope="{ row }">
             <span>{{ row.projectTypeName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="35%" label="名称" align="center"  show-overflow-tooltip>
+        <el-table-column min-width="35%" label="名称" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="15%" label="进度" align="center"  show-overflow-tooltip>
+        <el-table-column min-width="15%" label="进度" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.progressName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="部门" align="center">
+        <el-table-column min-width="10%" label="部门" align="center" :filters="filterDepartmentList" :filter-multiple="false" column-key="ckDepartment">
           <template slot-scope="{ row }">
             <span>{{ row.departmentName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="负责人" align="center">
+        <el-table-column min-width="10%" label="负责人" align="center" :filters="filterManagerList" :filter-multiple="false" column-key="ckManager">
           <template slot-scope="{ row }">
             <span>{{ row.manager }}</span>
           </template>
@@ -77,11 +77,13 @@
 
 import { fetchProjectList, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import { deepClone } from '@/utils/index'
 export default {
   name: 'ProjectList',
   components: {},
   data() {
     return {
+      rules: [],
       list: [],
       listLoading: true,
       pageSize: 10,
@@ -89,6 +91,9 @@ export default {
       total: 0,
       currentRow: null,
       dialogVisible: false,
+      filterPrjTypeList: [],
+      filterDepartmentList: [],
+      filterManagerList: [],
       postForm: {
         id: '',
         name: '',
@@ -129,19 +134,56 @@ export default {
     },
     // 获取数据列表
     getList() {
-      this.listLoading = true;
-      this.list = [];
+      let that = this
+      that.listLoading = true;
+      that.list = [];
       fetchProjectList().then((res) => {
-        this.total = res.data.length
-        this.list = res.data
-        this.listLoading = false
+        that.total = res.data.length
+        that.list = res.data
+        that.listLoading = false
+        // 做类型、部门、负责人筛选的数组，给el-table用
+        that.filterDepartmentList = []
+        that.filterPrjTypeList = []
+        that.filtermanagerList = []
+        that.list.forEach(e => {
+          if (that.filterDepartmentList.findIndex(d => d.value === e.departmentName) === -1) {
+            that.filterDepartmentList.push({ text: e.departmentName, value: e.departmentName })
+          }
+          if (that.filterPrjTypeList.findIndex(d => d.value === e.projectTypeName) === -1) {
+            that.filterPrjTypeList.push({ text: e.projectTypeName, value: e.projectTypeName })
+          }
+          if (that.filterManagerList.findIndex(d => d.value === e.manager) === -1) {
+            that.filterManagerList.push({ text: e.manager, value: e.manager })
+          }
+        })
       }).catch((err) => {
-        this.$message({
+        that.$message({
           message: '错误信息：' + err,
           type: 'error'
         });
       });
     },
+
+    handleFilterChange(filters) {
+      let originList = deepClone(this.list)
+      if (filters.ckPrjType) {
+        let temp = this.list.filter(x => x.projectTypeName === filters.ckPrjType[0])
+        this.list = temp
+      }
+      if (filters.ckDepartment) {
+        let temp = this.list.filter(x => x.departmentName === filters.ckDepartment[0])
+        this.list = temp
+      }
+      if (filters.ckManager) {
+        let temp = this.list.filter(x => x.manager === filters.ckManager[0])
+        this.list = temp
+      }
+      if (filters.length === 0) {
+        this.list = originList
+      }
+      this.total = this.list.length
+    },
+
     createImportance() {
       this.postForm = {
         id: '',
