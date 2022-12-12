@@ -14,20 +14,20 @@
     </div>
     <div class="query-box">
       <el-divider content-position="center"><span>项目筛选</span></el-divider>
-      <el-form :inline="true">
+      <el-form :inline="true" :model="searchForm" ref="searchForm">
         <el-form-item label="筛选类别">
-          <el-select v-model="searchType" placeholder="筛选类型">
-            <el-option v-for="(item,idx) in searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
+          <el-select v-model="searchForm.searchType" placeholder="筛选类型">
+            <el-option v-for="(item,idx) in searchForm.searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="筛选过滤关键字" style="margin-left:20px;">
-          <el-input v-model="keyword" placeholder="请输入关键字" @clear="clearKW" clearable style="width:500px;"></el-input>
+        <el-form-item label="筛选过滤关键字" prop="keyword" style="margin-left:20px;">
+          <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable style="width:500px;"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="doSearch">查询</el-button>
+          <el-button type="primary" @click="doSearch(1, pageSize)">查询</el-button>
         </el-form-item>
       </el-form>
-      <el-divider class="bottom-divider"><span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{keyword}} ”</span>的筛选结果</span></el-divider>
+      <el-divider class="bottom-divider"><span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{searchForm.keyword}} ”</span>的筛选结果</span></el-divider>
     </div>
     <div class="table-view">
       <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
@@ -99,17 +99,25 @@ export default {
   components: {},
   data() {
     return {
-      rules: [],
+      rules: {},
       list: [],
       listLoading: true,
       pageSize: 10,
       currentPage: 1,
       total: 0,
       currentRow: null,
-      searchType: 0,
-      searchTypeOpts: [{ text: '项目类型', value: 0 }, { text: '部门', value: 1 }, { text: '负责人', value: 2 }],
-      searchValue: '',
-      keyword: '',
+      searchForm: {
+        searchType: 1,
+        keyword: '',
+        // value为0的时候，返回全部，无需关键字，在getList方法中使用。
+        searchTypeOpts: [
+          { text: '项目类型', value: 1 },
+          { text: '项目名称', value: 3 },
+          { text: '承担部门', value: 2 },
+          { text: '项目负责', value: 4 },
+          { text: '市场负责', value: 5 },
+          { text: '技术负责', value: 6 },],
+      },
       showQueryTip: false,
       dialogVisible: false,
       postForm: {
@@ -122,45 +130,46 @@ export default {
   },
   computed: {
     queryTypeTip() {
-      return this.searchTypeOpts[this.searchType].text
+      return this.searchForm.searchTypeOpts.find(a => a.value === this.searchForm.searchType).text
     },
   },
   created() {
+    console.log(this.$router)
     this.getList(1, this.pageSize);
   },
   methods: {
     submit() {
-      this.$refs.postForm.validate((valid) => {
-        if (valid) {
-          // 新建
-          if (this.postForm.id === '') {
-            createProjectImportance(this.postForm).then((res) => {
-              this.$message.success('新建成功！')
-              this.list.unshift(res.data);
-              this.total++
-              this.dialogVisible = false
-            }).catch((err) => {
-              this.$message.error('新建失败：' + err)
-            })
-          }
-          // 编辑更新
-          else {
-            editProjectImportance(this.postForm).then((res) => {
-              this.$message.success('更新成功！')
-              this.dialogVisible = false
-            }).catch((err) => {
-              this.$message.error('更新失败：' + err)
-            })
-          }
-        }
-      })
+      // this.$refs.postForm.validate((valid) => {
+      //   if (valid) {
+      //     // 新建
+      //     if (this.postForm.id === '') {
+      //       createProjectImportance(this.postForm).then((res) => {
+      //         this.$message.success('新建成功！')
+      //         this.list.unshift(res.data);
+      //         this.total++
+      //         this.dialogVisible = false
+      //       }).catch((err) => {
+      //         this.$message.error('新建失败：' + err)
+      //       })
+      //     }
+      //     // 编辑更新
+      //     else {
+      //       editProjectImportance(this.postForm).then((res) => {
+      //         this.$message.success('更新成功！')
+      //         this.dialogVisible = false
+      //       }).catch((err) => {
+      //         this.$message.error('更新失败：' + err)
+      //       })
+      //     }
+      //   }
+      // })
     },
     // 获取数据列表
     getList(cPage, pSize) {
       let that = this
       that.listLoading = true
       that.list = []
-      const param = { skpCount: (cPage - 1) * this.pageSize, maxCount: pSize }
+      const param = { skpCount: (cPage - 1) * this.pageSize, maxCount: pSize, searchType: 0, searchValue: '' }
       fetchProjectListPaged(param).then((res) => {
         that.total = res.data.totalCount
         that.list = res.data.items
@@ -172,9 +181,31 @@ export default {
         });
       });
     },
-    doSearch() {
-      const paSe = { sType: 1, keyword: '江苏省' }
-      this.showQueryTip = true;
+    // 执行搜索
+    doSearch(cPage, pSize) {
+      let that = this
+      if (that.searchForm.keyword.trim().length < 1) {
+        return
+      }
+      that.listLoading = true
+      that.list = []
+      const param = {
+        skpCount: (cPage - 1) * this.pageSize,
+        maxCount: pSize,
+        searchType: that.searchForm.searchType,
+        searchValue: that.searchForm.keyword
+      }
+      fetchProjectListPaged(param).then((res) => {
+        that.total = res.data.totalCount
+        that.list = res.data.items
+        that.listLoading = false
+        this.showQueryTip = true;
+      }).catch((err) => {
+        that.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        });
+      });
     },
     // 清空关键字
     clearKW() {
@@ -231,12 +262,22 @@ export default {
     // 每页显示数目变动
     handleSizeChange(val) {
       this.pageSize = val;
-      this.getList(this.currentPage, this.pageSize);
+      if (this.searchForm.keyword.trim() === "") {
+        this.getList(this.currentPage, this.pageSize);
+      }
+      else {
+        this.doSearch(this.currentPage, this.pageSize)
+      }
     },
     // 切换页码-后台分页
     handleCurrentPageChange(val) {
       this.currentPage = val;
-      this.getList(this.currentPage, this.pageSize);
+      if (this.searchForm.keyword.trim() === "") {
+        this.getList(this.currentPage, this.pageSize);
+      }
+      else {
+        this.doSearch(this.currentPage, this.pageSize)
+      }
     },
     heaerCellStyle,
     columnStyle

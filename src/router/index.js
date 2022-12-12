@@ -96,8 +96,10 @@ export const asyncRoutes = [
       {
         path: 'list',
         component: () => import('@/views/project/project-list'),
-        name: 'List',
-        meta: { title: '项目管理', icon: 'el-icon-suitcase-1' }
+        // 若要页面不被刷新，这个name必须和vue页面的export名称一致。
+        name: 'ProjectList',
+        noCache: true,
+        meta: { title: '项目管理', icon: 'el-icon-suitcase-1' },
       },
       {
         path: 'detail',

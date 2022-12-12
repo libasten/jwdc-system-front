@@ -10,7 +10,7 @@ export function fetchProjectList() {
 // 获取项目列表（后台分页）
 export function fetchProjectListPaged(pa) {
   return request({
-    url: '/Projects/GetProjects',
+    url: '/Projects/GetProjects1',
     method: 'get',
     params: pa
   })
