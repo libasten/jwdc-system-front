@@ -98,11 +98,11 @@ export const asyncRoutes = [
         meta: { title: '项目管理', icon: 'el-icon-suitcase-1' },
       },
       {
-        path: 'detail',
-        component: () => import('@/views/project/project-detail'),
-        name: 'Detail',
+        path: 'edit/:id',
+        component: () => import('@/views/project/project-edit'),
+        name: 'ProjectEdit',
         hidden: true,
-        meta: { title: '项目详情', }
+        meta: { title: '项目编辑', }
       },
     ]
   },

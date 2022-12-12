@@ -15,6 +15,14 @@ export function fetchProjectListPaged(pa) {
     params: pa
   })
 }
+// 获取单个项目详情
+export function fetchProjectDetail(id) {
+  return request({
+    url: '/Projects/GetProjectDetail?id=' + id,
+    method: 'get',
+  })
+}
+
 //#endregion
 
 //#region 项目阶段

@@ -3,13 +3,13 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="createImportance">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="goDetail">编辑查看</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click="editImportance">人员</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-map-location" @click="editImportance">里程碑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click="editImportance">分享</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteImportance">删除</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate">新建</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goEdit">查看编辑</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showMember">人员</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-map-location" @click.native="showMilestone">里程碑</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click.native="showShare">分享</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click.native="deleteProject">删除</el-button>
       </el-button-group>
     </div>
     <div class="query-box">
@@ -134,7 +134,6 @@ export default {
     },
   },
   created() {
-    console.log(this.$router)
     this.getList(1, this.pageSize);
   },
   methods: {
@@ -212,45 +211,14 @@ export default {
       this.getList(1, this.pageSize);
       this.showQueryTip = false;
     },
-    goDetail() {
-      this.$router.push({ path: '/project/detail' })
+    goEdit() {
+      this.$router.push({ path: '/project/edit/' + this.currentRow.id })
     },
-    createImportance() {
-      this.postForm = {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      }
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.dialogVisible = true
-    },
-    deleteImportance() {
-      this.$confirm('永久删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(() => {
-          delProjectImportance(this.currentRow).then((res) => {
-            const idx = this.list.findIndex(a => a.id === this.currentRow.id)
-            this.list.splice(idx, 1);
-            this.total = this.list.length;
-            this.$message({
-              type: 'success',
-              message: '删除成功!',
-            });
-          });
-        })
-        .catch((err) => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除',
-          });
-        });
-    },
+    goCreate() { },
+    showMember() { },
+    showMilestone() { },
+    showShare() { },
+    deleteProject() { },
     // 选中行
     handleCurrentChange(val) {
       this.currentRow = val;
