@@ -4,7 +4,7 @@
     <div class="top-btns">
       <el-button-group>
         <el-button type="primary" size="small" icon="el-icon-plus" @click="createImportance">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="editImportance">编辑查看</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="goDetail">编辑查看</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click="editImportance">人员</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-map-location" @click="editImportance">里程碑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click="editImportance">分享</el-button>
@@ -24,7 +24,7 @@
           <el-input v-model="keyword" placeholder="请输入关键字" @clear="clearKW" clearable style="width:500px;"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="doQuery">查询</el-button>
+          <el-button type="primary" @click="doSearch">查询</el-button>
         </el-form-item>
       </el-form>
       <el-divider class="bottom-divider"><span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{keyword}} ”</span>的筛选结果</span></el-divider>
@@ -172,13 +172,17 @@ export default {
         });
       });
     },
-    doQuery() {
+    doSearch() {
+      const paSe = { sType: 1, keyword: '江苏省' }
       this.showQueryTip = true;
     },
     // 清空关键字
     clearKW() {
       this.getList(1, this.pageSize);
       this.showQueryTip = false;
+    },
+    goDetail() {
+      this.$router.push({ path: '/project/detail' })
     },
     createImportance() {
       this.postForm = {
@@ -190,13 +194,6 @@ export default {
       if (this.$refs.postForm !== undefined) {
         this.$refs.postForm.clearValidate()
       }
-      this.dialogVisible = true
-    },
-    editImportance() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.postForm = this.currentRow
       this.dialogVisible = true
     },
     deleteImportance() {
