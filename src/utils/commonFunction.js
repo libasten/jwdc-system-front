@@ -3,7 +3,9 @@
 // 将数组转换成字符串（后台接收和发出的数组用字符串加逗号形式的）
 export function array2myString(pArray) {
     let retStr = ""
-    console.log(pArray)
+    if (pArray === null || pArray === undefined) {
+        return retStr
+    }
     if (pArray.length > 0) {
         pArray.forEach(element => {
             retStr += element + ','
@@ -15,8 +17,23 @@ export function array2myString(pArray) {
 // 将字符串转换成数组（后台接收和发出的数组用字符串加逗号形式的）
 export function myString2Array(pString) {
     let retArray = []
+    if (pString === null || pString === undefined) {
+        return retArray
+    }
     let tempArray = pString.split(',')
     tempArray.forEach(element => {
+        retArray.push(Number(element))
+    })
+    return retArray;
+}
+
+// 将内容是带引号的文本格式数字数组转换成纯数字数组
+export function myStringArr2NumArr(pArray) {
+    let retArray = []
+    if (pArray === null || pArray.length < 1) {
+        return retArray
+    }
+    pArray.forEach(element => {
         retArray.push(Number(element))
     })
     return retArray;

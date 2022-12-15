@@ -99,10 +99,17 @@ export const asyncRoutes = [
       },
       {
         path: 'edit/:id',
-        component: () => import('@/views/project/project-edit'),
+        component: () => import('@/views/project/project-view'),
         name: 'ProjectEdit',
         hidden: true,
         meta: { title: '项目编辑', }
+      },
+      {
+        path: 'view/:id',
+        component: () => import('@/views/project/project-view'),
+        name: 'ProjectView',
+        hidden: true,
+        meta: { title: '项目查看', }
       },
     ]
   },

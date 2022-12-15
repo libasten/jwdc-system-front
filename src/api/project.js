@@ -16,6 +16,13 @@ export function fetchProjectListPaged(pa) {
   })
 }
 // 获取单个项目详情
+export function fetchProjectBase(id) {
+  return request({
+    url: '/Projects/GetProject?id=' + id,
+    method: 'get',
+  })
+}
+// 获取单个项目详情
 export function fetchProjectDetail(id) {
   return request({
     url: '/Projects/GetProjectDetail?id=' + id,

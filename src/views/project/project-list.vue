@@ -4,7 +4,8 @@
     <div class="top-btns">
       <el-button-group>
         <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goEdit">查看编辑</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showMember">人员</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-map-location" @click.native="showMilestone">里程碑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click.native="showShare">分享</el-button>
@@ -213,6 +214,9 @@ export default {
     },
     goEdit() {
       this.$router.push({ path: '/project/edit/' + this.currentRow.id })
+    },
+    goView() {
+      this.$router.push({ path: '/project/view/' + this.currentRow.id })
     },
     goCreate() { },
     showMember() { },

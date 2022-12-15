@@ -107,7 +107,7 @@
               </div>
               <div class="edit-info">{{node.updaterName}} @ {{node.updateTimeFormat}} <span v-if="node.nodeType===1"> | {{node.location}}</span></div>
               <div class="right-btns">
-                <el-button v-if="node.canEdit" size="small">修改</el-button><br /><br />
+                <el-button v-if="node.canEdit" size="small">修改</el-button><br />
                 <el-button type="danger" size="small" v-if="node.canDelete">删除</el-button>
               </div>
             </el-card>
@@ -148,10 +148,8 @@
 <script>
 
 import { fetchProjectDetail, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
-import NodeItem from './node-item.vue'
 export default {
   name: 'ProjectDetail',
-  components: { NodeItem },
   data() {
     return {
       loading: true,
@@ -190,17 +188,17 @@ export default {
     }
   },
   created() {
-    if (this.operateType == 'edit') {
-      this.postForm.id = this.$route.params && this.$route.params.id
-      this.getProjectDetail()
-      this.allDisabled = true
-    }
     if (this.operateType == 'create') {
       // this.fetchEnumForCreate();
     }
+    if (this.operateType == 'edit') {
+      this.postForm.id = this.$route.params && this.$route.params.id
+      this.getProjectDetail()
+    }
     if (this.operateType == 'view') {
-      // this.prjId = this.$route.params && this.$route.params.id;
-      // this.fetchProjectDetail(this.ajid);
+      this.postForm.id = this.$route.params && this.$route.params.id
+      this.getProjectDetail()
+      this.allDisabled = true
     }
   },
   methods: {
@@ -321,7 +319,6 @@ export default {
   }
 }
 .node-item-container {
-  position: relative;
   .leftNote {
     border-left: 4px solid #1e7e34;
   }
@@ -331,12 +328,24 @@ export default {
   .el-card {
     margin-top: 10px;
     margin-bottom: 10px;
+    position: relative;
     &:last-child {
-    margin-bottom: 0px;
-  }
+      margin-bottom: 0px;
+    }
   }
   .el-card__body {
     padding: 10px 20px;
+    .right-btns {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      .el-button {
+        margin-top: 10px;
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+    }
   }
   .el-timeline-item__timestamp {
     font-size: 1.1rem !important;
@@ -355,11 +364,6 @@ export default {
       cursor: pointer;
       color: #0e82f5;
     }
-  }
-  .right-btns {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
   }
 }
 </style>

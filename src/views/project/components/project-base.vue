@@ -1,0 +1,309 @@
+<template>
+  <!-- 项目基本信息 -->
+  <div class="app-container project-base" v-loading="loading">
+    <el-form ref="postForm" :loading="loading" :model="postForm" :rules="rules" label-width="100px">
+      <el-row>
+        <el-col :span="16">
+          <el-form-item label="id" v-if="false" prop="id">
+            <el-input v-model="postForm.id"></el-input>
+          </el-form-item>
+          <el-form-item label="名称" prop="name">
+            <el-input v-model="postForm.name"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="编号" prop="code">
+            <el-input v-model="postForm.code"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="承担部门" prop="departmentId">
+            <el-select v-model="postForm.departmentId" placeholder="请选择部门">
+              <el-option v-for="(item,idx) in departments" :key="idx" :label="item.text" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="类型" prop="type">
+            <el-select v-model="postForm.projectTypeId" placeholder="请选择类型" @change="typeChanged">
+              <el-option v-for="(item,idx) in projectTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="阶段" prop="projectStages">
+            <el-select v-model="postForm.projectStages" placeholder="请选择阶段">
+              <el-option v-for="(item,idx) in projectStagesFilter" :key="idx" :label="item.text" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="负责人" prop="managerName">
+            <el-input v-model="postForm.managerName"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="难易程度" prop="importanceId">
+            <el-select v-model="postForm.importanceId" placeholder="请选择难易程度">
+              <el-option v-for="(item,idx) in importances" :key="idx" :label="item.text" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="合同金额" prop="contractAmount">
+            <el-input v-model="postForm.contractAmount"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="城市" prop="cityId">
+            <el-select v-model="postForm.cityId" placeholder="请选择市">
+              <el-option v-for="(item,idx) in citys" :key="idx" :label="item.text" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="区县" prop="county">
+            <el-input v-model="postForm.county"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="乡镇" prop="town">
+            <el-input v-model="postForm.town"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="开始时间" prop="start">
+            <el-date-picker v-model="postForm.start" type="date" placeholder="选择日期" :clearable="false"></el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="结束时间" prop="completion">
+            <el-date-picker v-model="postForm.completion" type="date" placeholder="选择日期" :clearable="false"></el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="开票时间" prop="invoiceDate">
+            <el-date-picker v-model="postForm.invoiceDate" type="date" placeholder="选择日期" :clearable="false"></el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="开票金额" prop="invoiceAmount">
+            <el-input v-model="postForm.invoiceAmount"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="回款时间" prop="refundDate">
+            <el-date-picker v-model="postForm.refundDate" type="date" placeholder="选择日期" :clearable="false"></el-date-picker>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="回款金额" prop="refundAmount">
+            <el-input v-model="postForm.refundAmount"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="甲方名称" prop="partA">
+            <el-input v-model="postForm.partA"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="甲方联系人" prop="partAContact">
+            <el-input v-model="postForm.partAContact"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="甲方电话" prop="partAPhone">
+            <el-input v-model="postForm.partAPhone"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="项目合同" prop="contractIdList">
+            <el-select v-model="postForm.contractIdList" placeholder="请选择合同" multiple>
+              <el-option v-for="(item,idx) in contracts" :key="idx" :label="item.text" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="项目投标" prop="bidIdList">
+            <el-select v-model="postForm.bidIdList" placeholder="请选择投标" multiple>
+              <el-option v-for="(item,idx) in bids" :key="idx" :label="item.text" :value="item.id"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="项目评价" prop="evaluation">
+            <el-input type="textarea" v-model="postForm.evaluation"></el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <div style="float:right;overflow:hidden">
+            <el-button type="primary" @click="submit">提交确定</el-button>
+          </div>
+        </el-col>
+      </el-row>
+    </el-form>
+  </div>
+</template>
+
+<script>
+
+import { fetchProjectBase, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
+import { myStringArr2NumArr, array2myString, myString2Array } from '@/utils/commonFunction'
+export default {
+  name: 'ProjectDetail',
+  data() {
+    return {
+      loading: true,
+      resData: '',//从后台返回的完成内容
+      postForm: {
+        id: '', //当前项目的id，也是路由入参
+        name: '',
+        code: '',
+        projectTypeId: '',
+        projectStages: '',
+        startFormat: '',
+        completionFormat: '',
+        bid: '',
+        contract: '',
+        departmentName: '',
+        managerName: '',
+        importanceId: '',
+        invoiceDate: '',
+        invoiceAmount: '',
+        refundDate: '',
+        refundAmount: '',
+        cityId: '',
+        county: '',
+        town: '',
+        contractAmount: '',
+        partA: '',
+        partAContact: '',
+        partAPhone: '',
+        evaluation: '',
+        bidIds: '',
+        contractIds: ''
+      },
+      citys: [],
+      contracts: [],
+      departments: [],
+      importances: [],
+      projectTypes: [],
+      projectTypeStages: '',
+      bids: [],
+      contracts: [],
+      dialogVisible: false,
+      rules: {
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+      }
+    };
+  },
+  created() {
+    this.postForm.id = this.$route.params && this.$route.params.id
+    this.getProjectBase()
+  },
+  computed: {
+    // 阶段由类型筛选
+    projectStagesFilter() {
+      return this.projectTypeStages[this.postForm.projectTypeId]
+    },
+  },
+  mounted() {
+  },
+  methods: {
+    submit() {
+      // 记得处理合同和投标的ids入参是数组加逗号形式。
+      this.$refs.postForm.validate((valid) => {
+        if (valid) {
+          // 新建
+          // if (this.postForm.id === '') {
+          //   createProjectImportance(this.postForm).then((res) => {
+          //     this.$message.success('新建成功！')
+          //     this.list.unshift(res.data);
+          //     this.total++
+          //     this.dialogVisible = false
+          //   }).catch((err) => {
+          //     this.$message.error('新建失败：' + err)
+          //   })
+        }
+        // 编辑更新
+        else {
+          // editProjectImportance(this.postForm).then((res) => {
+          //   this.$message.success('更新成功！')
+          //   this.dialogVisible = false
+          // }).catch((err) => {
+          //   this.$message.error('更新失败：' + err)
+          // })
+          // }
+        }
+      })
+    },
+    // 获取数据列表
+    getProjectBase() {
+      this.loading = true;
+      fetchProjectBase(this.postForm.id).then((res) => {
+        console.log(res.data)
+        this.postForm = res.data.project
+        this.postForm.bidIdList = this.myStringArr2NumArr(this.postForm.bidIdList)
+        this.postForm.contractIdList = this.myStringArr2NumArr(this.postForm.contractIdList)
+        this.postForm.managerName = res.data.projectManager
+        this.citys = res.data.citys
+        this.departments = res.data.departments
+        this.projectTypes = res.data.projectTypes
+        this.projectTypeStages = res.data.projectTypeStages
+        this.importances = res.data.importances
+        this.bids = res.data.bids
+        this.contracts = res.data.contracts
+        this.canAddProjectNote = res.data.canAddProjectNote
+        this.canAddProjectArchive = res.data.canAddProjectArchive
+        this.loading = false
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        });
+      });
+    },
+    typeChanged() {
+      this.postForm.projectStages = 1;
+    },
+    createImportance() {
+      this.postForm = {
+        id: '',
+        name: '',
+        order: '',
+        description: ''
+      }
+      if (this.$refs.postForm !== undefined) {
+        this.$refs.postForm.clearValidate()
+      }
+      this.dialogVisible = true
+    },
+    editImportance() {
+      if (this.$refs.postForm !== undefined) {
+        this.$refs.postForm.clearValidate()
+      }
+      this.postForm = this.currentRow
+      this.dialogVisible = true
+    },
+    myStringArr2NumArr,
+    array2myString, myString2Array,
+  },
+};
+</script>
+
+<style scoped>
+</style>
+<style lang="scss">
+.project-base {
+  .el-input.is-disabled .el-input__inner {
+    background-color: #f5f7fa;
+    border-color: #dfe4ed;
+    color: #303133;
+    cursor: pointer;
+  }
+  .el-select,
+  .el-date-editor {
+    width: 100%;
+  }
+}
+</style>
