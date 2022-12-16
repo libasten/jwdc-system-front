@@ -1,13 +1,13 @@
 <template>
-  <project-base />
+  <project-detail />
 </template>
 
 <script>
-import ProjectBase from './components/project-base'
+import ProjectDetail from './components/project-detail'
 // 后续添加编辑、创建的
 export default {
   name: 'ProjectView',
-  components: { ProjectBase }
+  components: { ProjectDetail }
 }
 </script>
 

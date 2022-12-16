@@ -13,12 +13,14 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="编号" prop="code">
-            <el-input v-model="postForm.code"></el-input>
+            <el-tooltip content="编号由系统自动生成，无需编辑。" placement="top">
+              <el-input v-model="postForm.code" disabled></el-input>
+            </el-tooltip>
           </el-form-item>
         </el-col>
         <el-col :span="8">
           <el-form-item label="承担部门" prop="departmentId">
-            <el-select v-model="postForm.departmentId" placeholder="请选择部门">
+            <el-select v-model="postForm.departmentId" placeholder="请选择部门" clearable>
               <el-option v-for="(item,idx) in departments" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
@@ -31,8 +33,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="阶段" prop="projectStages">
-            <el-select v-model="postForm.projectStages" placeholder="请选择阶段">
+          <el-form-item label="进度" prop="progress">
+            <el-select v-model="postForm.progress" placeholder="请选择进度">
               <el-option v-for="(item,idx) in projectStagesFilter" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
@@ -117,15 +119,15 @@
           </el-form-item>
         </el-col>
         <el-col :span="24">
-          <el-form-item label="项目合同" prop="contractIdList">
-            <el-select v-model="postForm.contractIdList" placeholder="请选择合同" multiple>
+          <el-form-item label="项目合同" prop="contractIds">
+            <el-select v-model="postForm.contractIds" placeholder="请选择合同" multiple>
               <el-option v-for="(item,idx) in contracts" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="24">
-          <el-form-item label="项目投标" prop="bidIdList">
-            <el-select v-model="postForm.bidIdList" placeholder="请选择投标" multiple>
+          <el-form-item label="项目投标" prop="bidIds">
+            <el-select v-model="postForm.bidIds" placeholder="请选择投标" multiple>
               <el-option v-for="(item,idx) in bids" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
@@ -147,10 +149,10 @@
 
 <script>
 
-import { fetchProjectBase, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
-import { myStringArr2NumArr, array2myString, myString2Array } from '@/utils/commonFunction'
+import { fetchProjectBase, newProjectBase, createProject, editProject } from '@/api/project';
+import { array2myString, myString2Array } from '@/utils/commonFunction'
 export default {
-  name: 'ProjectDetail',
+  name: 'ProjectBase',
   data() {
     return {
       loading: true,
@@ -160,11 +162,10 @@ export default {
         name: '',
         code: '',
         projectTypeId: '',
-        projectStages: '',
-        startFormat: '',
-        completionFormat: '',
-        bid: '',
-        contract: '',
+        // 进度，在编辑项目的时候就是阶段节点，由枚举值类型决定
+        progress: '',
+        start: '',
+        completion: '',
         departmentName: '',
         managerName: '',
         importanceId: '',
@@ -191,15 +192,22 @@ export default {
       projectTypeStages: '',
       bids: [],
       contracts: [],
-      dialogVisible: false,
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        start: [{ required: true, message: '请选择开始时间', trigger: 'blur' }],
       }
     };
   },
   created() {
     this.postForm.id = this.$route.params && this.$route.params.id
-    this.getProjectBase()
+    // 无id,则新建
+    if (this.postForm.id === undefined) {
+      this.getNewProjectEnum()
+    }
+    // 编辑
+    else {
+      this.getProjectBase()
+    }
   },
   computed: {
     // 阶段由类型筛选
@@ -214,38 +222,35 @@ export default {
       // 记得处理合同和投标的ids入参是数组加逗号形式。
       this.$refs.postForm.validate((valid) => {
         if (valid) {
+          this.postForm.bidIds = this.array2myString(this.postForm.bidIds)
+          this.postForm.contractIds = this.array2myString(this.postForm.contractIds)
+          console.log(this.postForm)
           // 新建
-          // if (this.postForm.id === '') {
-          //   createProjectImportance(this.postForm).then((res) => {
-          //     this.$message.success('新建成功！')
-          //     this.list.unshift(res.data);
-          //     this.total++
-          //     this.dialogVisible = false
-          //   }).catch((err) => {
-          //     this.$message.error('新建失败：' + err)
-          //   })
-        }
-        // 编辑更新
-        else {
-          // editProjectImportance(this.postForm).then((res) => {
-          //   this.$message.success('更新成功！')
-          //   this.dialogVisible = false
-          // }).catch((err) => {
-          //   this.$message.error('更新失败：' + err)
-          // })
-          // }
+          if (this.postForm.id === undefined) {
+            createProject(this.postForm).then((res) => {
+              this.$router.push({ path: '/project/edit/' + res.data.id })
+              this.$message.success('新建成功！')
+            }).catch((err) => {
+              this.$message.error('新建失败：' + err)
+            })
+          }
+          // 编辑更新
+          else {
+            editProject(this.postForm).then((res) => {
+              this.getProjectBase()
+              this.$message.success('更新成功！')
+            }).catch((err) => {
+              this.$message.error('更新失败：' + err)
+            })
+          }
         }
       })
     },
-    // 获取数据列表
+    // 获取项目基本信息
     getProjectBase() {
-      this.loading = true;
+      this.loading = true
       fetchProjectBase(this.postForm.id).then((res) => {
         console.log(res.data)
-        this.postForm = res.data.project
-        this.postForm.bidIdList = this.myStringArr2NumArr(this.postForm.bidIdList)
-        this.postForm.contractIdList = this.myStringArr2NumArr(this.postForm.contractIdList)
-        this.postForm.managerName = res.data.projectManager
         this.citys = res.data.citys
         this.departments = res.data.departments
         this.projectTypes = res.data.projectTypes
@@ -253,8 +258,15 @@ export default {
         this.importances = res.data.importances
         this.bids = res.data.bids
         this.contracts = res.data.contracts
-        this.canAddProjectNote = res.data.canAddProjectNote
-        this.canAddProjectArchive = res.data.canAddProjectArchive
+        this.postForm = res.data.project
+        this.postForm.departmentId = this.postForm.departmentId === 0 ? '' : this.postForm.departmentId
+        this.postForm.cityId = this.postForm.cityId === 0 ? '' : this.postForm.cityId
+        this.postForm.importanceId = this.postForm.importanceId === 0 ? '' : this.postForm.importanceId
+        this.postForm.projectTypeId = this.postForm.projectTypeId === 0 ? '' : this.postForm.projectTypeId
+        this.postForm.progress = this.postForm.progress === 0 ? '' : this.postForm.progress
+        this.postForm.bidIds = this.myString2Array(this.postForm.bidIds)
+        this.postForm.contractIds = this.myString2Array(this.postForm.contractIds)
+        this.postForm.managerName = res.data.projectManager
         this.loading = false
       }).catch((err) => {
         this.$message({
@@ -263,30 +275,31 @@ export default {
         });
       });
     },
+    // 获取创建项目时候的枚举信息
+    getNewProjectEnum() {
+      this.loading = true
+      newProjectBase().then((res) => {
+        this.postForm.start = new Date()
+        this.postForm.completion = new Date()
+        this.postForm.invoiceDate = new Date()
+        this.postForm.refundDate = new Date()
+        this.citys = res.data.citys
+        this.departments = res.data.departments
+        this.projectTypes = res.data.projectTypes
+        this.projectTypeStages = res.data.projectTypeStages
+        this.importances = res.data.importances
+        this.bids = res.data.bids
+        this.contracts = res.data.contracts
+        this.loading = false
+      }).catch((err) => {
+        this.$message.error('错误信息：' + err)
+      })
+    },
+    // 项目类型变换
     typeChanged() {
       this.postForm.projectStages = 1;
     },
-    createImportance() {
-      this.postForm = {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      }
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.dialogVisible = true
-    },
-    editImportance() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.postForm = this.currentRow
-      this.dialogVisible = true
-    },
-    myStringArr2NumArr,
-    array2myString, myString2Array,
+    myString2Array, array2myString
   },
 };
 </script>

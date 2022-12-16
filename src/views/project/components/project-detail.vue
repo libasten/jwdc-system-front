@@ -188,18 +188,9 @@ export default {
     }
   },
   created() {
-    if (this.operateType == 'create') {
-      // this.fetchEnumForCreate();
-    }
-    if (this.operateType == 'edit') {
-      this.postForm.id = this.$route.params && this.$route.params.id
-      this.getProjectDetail()
-    }
-    if (this.operateType == 'view') {
-      this.postForm.id = this.$route.params && this.$route.params.id
-      this.getProjectDetail()
-      this.allDisabled = true
-    }
+    this.postForm.id = this.$route.params && this.$route.params.id
+    this.getProjectDetail()
+    this.allDisabled = true
   },
   methods: {
     submit() {

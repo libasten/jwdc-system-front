@@ -11,6 +11,9 @@ export function array2myString(pArray) {
             retStr += element + ','
         })
     }
+    if (retStr.lastIndexOf(',') > -1) {
+        retStr = retStr.substring(0, retStr.length - 1)
+    }
     return retStr
 }
 
@@ -22,18 +25,6 @@ export function myString2Array(pString) {
     }
     let tempArray = pString.split(',')
     tempArray.forEach(element => {
-        retArray.push(Number(element))
-    })
-    return retArray;
-}
-
-// 将内容是带引号的文本格式数字数组转换成纯数字数组
-export function myStringArr2NumArr(pArray) {
-    let retArray = []
-    if (pArray === null || pArray.length < 1) {
-        return retArray
-    }
-    pArray.forEach(element => {
         retArray.push(Number(element))
     })
     return retArray;

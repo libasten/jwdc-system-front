@@ -93,7 +93,7 @@
 
 <script>
 
-import { fetchProjectListPaged, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
+import { fetchProjectListPaged, delProject, createProjectImportance, delProjectImportance } from '@/api/project';
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
 export default {
   name: 'ProjectList',
@@ -218,11 +218,35 @@ export default {
     goView() {
       this.$router.push({ path: '/project/view/' + this.currentRow.id })
     },
-    goCreate() { },
+    goCreate() {
+      this.$router.push({ path: '/project/create' })
+    },
     showMember() { },
     showMilestone() { },
     showShare() { },
-    deleteProject() { },
+    // 删除项目
+    deleteProject() {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        delProject(this.currentRow).then((res) => {
+          const idx = this.list.findIndex(a => a.id === this.currentRow.id)
+          this.list.splice(idx, 1);
+          this.total = this.list.length;
+          this.$message({
+            type: 'success',
+            message: '删除成功!',
+          });
+        }).catch(error => { this.$message.error("删除失败，错误：" + error) });
+      }).catch((err) => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除',
+        });
+      });
+    },
     // 选中行
     handleCurrentChange(val) {
       this.currentRow = val;

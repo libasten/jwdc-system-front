@@ -15,11 +15,34 @@ export function fetchProjectListPaged(pa) {
     params: pa
   })
 }
-// 获取单个项目详情
+// 获取单个项目基本信息
 export function fetchProjectBase(id) {
   return request({
     url: '/Projects/GetProject?id=' + id,
     method: 'get',
+  })
+}
+// 获取新建项目（基本信息）时候一些枚举数据
+export function newProjectBase(id) {
+  return request({
+    url: '/Projects/NewProject',
+    method: 'get',
+  })
+}
+// 创建项目
+export function createProject(pa) {
+  return request({
+    url: '/Projects/CreateProject',
+    method: 'post',
+    params: pa,
+  })
+}
+// 编辑项目基本信息
+export function editProject(pa) {
+  return request({
+    url: '/Projects/EditProject',
+    method: 'post',
+    params: pa,
   })
 }
 // 获取单个项目详情
@@ -27,6 +50,15 @@ export function fetchProjectDetail(id) {
   return request({
     url: '/Projects/GetProjectDetail?id=' + id,
     method: 'get',
+  })
+}
+
+// 删除项目
+export function delProject(data) {
+  return request({
+    url: '/Projects/DeleteProject',
+    method: 'delete',
+    params: { id: data.id }
   })
 }
 
