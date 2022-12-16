@@ -193,7 +193,7 @@ export default {
       contracts: [],
       dialogVisible: false,
       rules: {
-        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        name: [{ required: true, message: '请输入项目名称', trigger: 'blur' }],
       }
     };
   },
