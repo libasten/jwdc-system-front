@@ -6,7 +6,7 @@
         <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate">新建</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showMember">人员</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-map-location" @click.native="showMilestone">里程碑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click.native="showShare">分享</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
@@ -71,20 +71,10 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="项目信息" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%">
-      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px">
-        <el-form-item label="id" v-if="false" prop="id">
-          <el-input v-model="postForm.id"></el-input>
-        </el-form-item>
-        <el-form-item label="难易程度" prop="name">
-          <el-input v-model="postForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="postForm.description"></el-input>
-        </el-form-item>
-      </el-form>
+    <el-dialog title="项目人员" :visible.sync="appointDialogVisible" :close-on-click-modal="false" width="66%">
+      <project-appoint :projectId="currentRow.id" v-if="appointFlag"></project-appoint>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button @click="appointDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="submit">确 定</el-button>
       </span>
     </el-dialog>
@@ -93,11 +83,12 @@
 
 <script>
 
-import { fetchProjectListPaged, delProject, createProjectImportance, delProjectImportance } from '@/api/project';
+import { fetchProjectListPaged, delProject } from '@/api/project';
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import ProjectAppoint from '@/views/project/components/project-appoint'
 export default {
   name: 'ProjectList',
-  components: {},
+  components: { ProjectAppoint },
   data() {
     return {
       rules: {},
@@ -107,6 +98,7 @@ export default {
       currentPage: 1,
       total: 0,
       currentRow: null,
+      appointFlag: false,
       searchForm: {
         searchType: 1,
         keyword: '',
@@ -120,7 +112,7 @@ export default {
           { text: '技术负责', value: 6 },],
       },
       showQueryTip: false,
-      dialogVisible: false,
+      appointDialogVisible: false,
       postForm: {
         id: '',
         name: '',
@@ -147,7 +139,7 @@ export default {
       //         this.$message.success('新建成功！')
       //         this.list.unshift(res.data);
       //         this.total++
-      //         this.dialogVisible = false
+      //         this.appointDialogVisible = false
       //       }).catch((err) => {
       //         this.$message.error('新建失败：' + err)
       //       })
@@ -156,7 +148,7 @@ export default {
       //     else {
       //       editProjectImportance(this.postForm).then((res) => {
       //         this.$message.success('更新成功！')
-      //         this.dialogVisible = false
+      //         this.appointDialogVisible = false
       //       }).catch((err) => {
       //         this.$message.error('更新失败：' + err)
       //       })
@@ -221,7 +213,12 @@ export default {
     goCreate() {
       this.$router.push({ path: '/project/create' })
     },
-    showMember() { },
+    showAppoint() {
+      if (this.appointDialogVisible === false) {
+        this.appointFlag = true
+        this.appointDialogVisible = true
+      }
+    },
     showMilestone() { },
     showShare() { },
     // 删除项目

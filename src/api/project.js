@@ -61,7 +61,15 @@ export function delProject(data) {
     params: { id: data.id }
   })
 }
+//#endregion
 
+//#region 项目人员任命
+export function fetchAppointList(data) {
+  return request({
+    url: '/Projects/GetProjectAppointments?projectId=' + data,
+    method: 'get',
+  })
+}
 //#endregion
 
 //#region 项目阶段
