@@ -71,8 +71,8 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="项目人员" :visible.sync="appointDialogVisible" :close-on-click-modal="false" width="66%">
-      <project-appoint :projectId="currentRow.id" v-if="appointFlag"></project-appoint>
+    <el-dialog :title="appointTitle" :visible.sync="appointDialogVisible" :close-on-click-modal="false" @close="closeAppoint" width="66%">
+      <project-appoint :projectId="pCurPrjId" v-if="appointFlag"></project-appoint>
       <span slot="footer" class="dialog-footer">
         <el-button @click="appointDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="submit">确 定</el-button>
@@ -99,6 +99,9 @@ export default {
       total: 0,
       currentRow: null,
       appointFlag: false,
+      appointTitle: '',
+      // 当前选中的项目ID,传递给子组件
+      pCurPrjId: '',
       searchForm: {
         searchType: 1,
         keyword: '',
@@ -215,9 +218,15 @@ export default {
     },
     showAppoint() {
       if (this.appointDialogVisible === false) {
+        this.appointTitle = this.currentRow.name + ' - 项目人员'
+        this.pCurPrjId = this.currentRow.id
         this.appointFlag = true
         this.appointDialogVisible = true
       }
+    },
+    closeAppoint() {
+      this.appointFlag = false
+      this.appointDialogVisible = false
     },
     showMilestone() { },
     showShare() { },
@@ -250,7 +259,8 @@ export default {
     },
     // 取消选中行
     cancelSelected() {
-      this.$refs.vTable.setCurrentRow();
+      this.$refs.vTable.setCurrentRow()
+      this.pCurPrjId = null
     },
     // 每页显示数目变动
     handleSizeChange(val) {

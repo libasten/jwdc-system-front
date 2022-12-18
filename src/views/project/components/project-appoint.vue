@@ -1,6 +1,6 @@
 <template>
   <!-- 项目成员任命组件 -->
-  <div class="app-container">
+  <div class="">
     <div class="top-btns">
       <el-button-group>
         <el-button type="primary" size="small" icon="el-icon-plus" @click="addAppoint">新建</el-button>
@@ -10,7 +10,7 @@
       </el-button-group>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" @current-change="handleCurrentChange">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -23,7 +23,7 @@
         </el-table-column>
         <el-table-column min-width="45%" label="项目成员" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
-            <span>{{ row.memberNames }}</span>
+            <span>{{ row.memberNamesFormat }}</span>
           </template>
         </el-table-column>
         <el-table-column min-width="25%" label="生效时间" align="center" show-overflow-tooltip>
@@ -33,16 +33,16 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="项目人员任命信息" :visible.sync="dialogVisible" append-to-body :close-on-click-modal="false" width="50%">
+    <el-dialog title="项目人员任命" :visible.sync="dialogVisible" append-to-body :close-on-click-modal="false" width="50%">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px">
-        <el-form-item label="id" v-if="false" prop="id">
-          <el-input v-model="postForm.id"></el-input>
+        <el-form-item label="项目经理" prop="managerId">
+          <el-input v-model="postForm.managerId"></el-input>
         </el-form-item>
-        <el-form-item label="难易程度" prop="name">
-          <el-input v-model="postForm.name"></el-input>
+        <el-form-item label="项目成员" prop="memberIds">
+          <el-input v-model="postForm.memberIds"></el-input>
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="postForm.description"></el-input>
+        <el-form-item label="生效日期" prop="appointmentStart">
+          <el-input v-model="postForm.appointmentStart"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -109,13 +109,14 @@ export default {
         }
       })
     },
-    // 获取人员任命列表 TODO
+    // 获取人员任命列表
     getList() {
       let that = this
       that.listLoading = true;
       that.list = [];
       fetchAppointList(this.projectId).then((res) => {
-        that.list = res.data.appointments
+        console.log(res.data.appointments)
+        that.list = res.data.appointments.filter(x => x.status === 1)
         that.listLoading = false
       }).catch((err) => {
         that.$message({
@@ -137,14 +138,14 @@ export default {
       }
       this.dialogVisible = true
     },
-    editImportance() {
+    editAppoint() {
       if (this.$refs.postForm !== undefined) {
         this.$refs.postForm.clearValidate()
       }
       this.postForm = this.currentRow
       this.dialogVisible = true
     },
-    deleteImportance() {
+    deleteAppoint() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
