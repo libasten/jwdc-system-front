@@ -250,7 +250,6 @@ export default {
     getProjectBase() {
       this.loading = true
       fetchProjectBase(this.postForm.id).then((res) => {
-        console.log(res.data)
         this.citys = res.data.citys
         this.departments = res.data.departments
         this.projectTypes = res.data.projectTypes

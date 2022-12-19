@@ -16,14 +16,24 @@
             <span>{{ row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="30%" label="项目经理" align="center" show-overflow-tooltip>
+        <el-table-column min-width="20%" label="项目经理" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.managerName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="45%" label="项目成员" align="center" show-overflow-tooltip>
+        <el-table-column min-width="40%" label="项目成员" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.memberNamesFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="20%" label="市场负责" align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
+            <span>{{ row.marketAdminNamesFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="20%" label="技术负责" align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
+            <span>{{ row.techniqueAdminNamesFormat }}</span>
           </template>
         </el-table-column>
         <el-table-column min-width="25%" label="生效时间" align="center" show-overflow-tooltip>
@@ -33,16 +43,34 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="项目人员任命" :visible.sync="dialogVisible" append-to-body :close-on-click-modal="false" width="50%">
-      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px">
+    <el-dialog title="项目人员任命" :visible.sync="dialogVisible" append-to-body :close-on-click-modal="false" width="60%">
+      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px" class="dialog-form">
         <el-form-item label="项目经理" prop="managerId">
-          <el-input v-model="postForm.managerId"></el-input>
+          <el-select v-model="postForm.managerId" filterable placeholder="请选择">
+            <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="项目成员" prop="memberIds">
-          <el-input v-model="postForm.memberIds"></el-input>
+          <el-select v-model="postForm.memberIds" filterable placeholder="请选择" multiple>
+            <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="市场负责" prop="marketAdminIds">
+          <el-select v-model="postForm.marketAdminIds" filterable placeholder="请选择" multiple>
+            <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="技术负责" prop="techniqueAdminIds">
+          <el-select v-model="postForm.techniqueAdminIds" filterable placeholder="请选择" multiple>
+            <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="生效日期" prop="appointmentStart">
-          <el-input v-model="postForm.appointmentStart"></el-input>
+          <el-date-picker v-model="postForm.appointmentStart"></el-date-picker>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -55,24 +83,32 @@
 
 <script>
 
-import { fetchAppointList, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
-import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import { fetchAppointList, fetchNewAppoint, createPrjAppoint, editPrjAppoint, deletePrjAppoint } from '@/api/project';
+import { heaerCellStyle, columnStyle, array2myString, myString2Array } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
+
 export default {
   name: 'ProjectAppoint',
   components: {},
   data() {
     return {
-      rules: [],
+      rules: {
+        managerId: [{ required: true, message: '请选负责人', trigger: 'blur' }],
+        memberIds: [{ required: true, message: '请选项目成员', trigger: 'blur' }]
+      },
       list: [],
       listLoading: true,
+      staffs: '',
       currentRow: null,
       dialogVisible: false,
       postForm: {
         id: '',
-        name: '',
-        order: '',
-        description: ''
+        projectId: '',
+        managerId: '',
+        memberIds: '',
+        marketAdminIds: '',
+        techniqueAdminIds: '',
+        appointmentStart: new Date()
       },
     };
   },
@@ -80,30 +116,35 @@ export default {
     projectId: { type: Number, default: 0 }
   },
   created() {
-    this.getList();
+    this.getList()
+    this.postForm.projectId = this.projectId
   },
   methods: {
     submit() {
       this.$refs.postForm.validate((valid) => {
         if (valid) {
+          let that = this
+          that.postForm.memberIds = that.array2myString(that.postForm.memberIds)
+          that.postForm.marketAdminIds = that.array2myString(that.postForm.marketAdminIds)
+          that.postForm.techniqueAdminIds = that.array2myString(that.postForm.techniqueAdminIds)
           // 新建
-          if (this.postForm.id === '') {
-            createProjectImportance(this.postForm).then((res) => {
-              this.$message.success('新建成功！')
-              this.list.unshift(res.data);
-              this.total++
-              this.dialogVisible = false
+          if (that.postForm.id === '') {
+            createPrjAppoint(that.postForm).then((res) => {
+              that.getList()
+              that.$message.success('新建成功！')
+              that.dialogVisible = false
             }).catch((err) => {
-              this.$message.error('新建失败：' + err)
+              that.$message.error('新建失败：' + err)
             })
           }
           // 编辑更新
           else {
-            editProjectImportance(this.postForm).then((res) => {
-              this.$message.success('更新成功！')
-              this.dialogVisible = false
+            editPrjAppoint(that.postForm).then((res) => {
+              that.getList()
+              that.$message.success('更新成功！')
+              that.dialogVisible = false
             }).catch((err) => {
-              this.$message.error('更新失败：' + err)
+              that.$message.error('更新失败：' + err)
             })
           }
         }
@@ -115,7 +156,6 @@ export default {
       that.listLoading = true;
       that.list = [];
       fetchAppointList(this.projectId).then((res) => {
-        console.log(res.data.appointments)
         that.list = res.data.appointments.filter(x => x.status === 1)
         that.listLoading = false
       }).catch((err) => {
@@ -125,25 +165,41 @@ export default {
         });
       });
     },
-
     addAppoint() {
-      this.postForm = {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      }
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.dialogVisible = true
+      fetchNewAppoint().then((res) => {
+        this.staffs = res.data.staffs
+        if (this.$refs.postForm !== undefined) {
+          // 这个方法用于重置data属性中的值。
+          Object.assign(this.$data.postForm, this.$options.data().postForm)
+          // 清空校验信息
+          this.$refs.postForm.resetFields()
+        }
+        this.dialogVisible = true
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        })
+      })
     },
     editAppoint() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.postForm = this.currentRow
-      this.dialogVisible = true
+      const that = this
+      fetchNewAppoint().then((res) => {
+        that.staffs = res.data.staffs
+        if (that.$refs.postForm !== undefined) {
+          that.$refs.postForm.clearValidate()
+        }
+        that.postForm = deepClone(that.currentRow)
+        that.postForm.memberIds = this.myString2Array(that.postForm.memberIds)
+        that.postForm.marketAdminIds = that.myString2Array(that.postForm.marketAdminIds)
+        that.postForm.techniqueAdminIds = that.myString2Array(that.postForm.techniqueAdminIds)
+        that.dialogVisible = true
+      }).catch((err) => {
+        that.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        })
+      })
     },
     deleteAppoint() {
       this.$confirm('永久删除, 是否继续?', '提示', {
@@ -152,7 +208,7 @@ export default {
         type: 'warning',
       })
         .then(() => {
-          delProjectImportance(this.currentRow).then((res) => {
+          deletePrjAppoint(this.currentRow).then((res) => {
             const idx = this.list.findIndex(a => a.id === this.currentRow.id)
             this.list.splice(idx, 1);
             this.total = this.list.length;
@@ -177,9 +233,8 @@ export default {
     cancelSelected() {
       this.$refs.vTable.setCurrentRow();
     },
-
-    heaerCellStyle,
-    columnStyle
+    array2myString, myString2Array,
+    heaerCellStyle, columnStyle
   },
 };
 </script>
@@ -187,4 +242,10 @@ export default {
 <style scoped>
 </style>
 <style lang="scss">
+.dialog-form {
+  .el-select,
+  .el-date-editor {
+    width: 100%;
+  }
+}
 </style>

@@ -64,10 +64,42 @@ export function delProject(data) {
 //#endregion
 
 //#region 项目人员任命
+// 获取任命列表
 export function fetchAppointList(data) {
   return request({
     url: '/Projects/GetProjectAppointments?projectId=' + data,
     method: 'get',
+  })
+}
+// 初始化任命信息
+export function fetchNewAppoint() {
+  return request({
+    url: '/Projects/NewProjectAppointment',
+    method: 'get',
+  })
+}
+// 创建任命信息
+export function createPrjAppoint(pa) {
+  return request({
+    url: '/Projects/CreateProjectAppointment',
+    method: 'post',
+    params: pa,
+  })
+}
+// 编辑任命信息
+export function editPrjAppoint(pa) {
+  return request({
+    url: '/Projects/EditProjectAppointment',
+    method: 'post',
+    params: pa,
+  })
+}
+// 删除任命信息
+export function deletePrjAppoint(data) {
+  return request({
+    url: '/Projects/DeleteProjectAppointment',
+    method: 'delete',
+    params: { id: data.id }
   })
 }
 //#endregion
