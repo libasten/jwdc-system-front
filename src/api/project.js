@@ -104,6 +104,40 @@ export function deletePrjAppoint(data) {
 }
 //#endregion
 
+//#region 项目里程碑
+// 获取里程碑列表
+export function fetchMilestoneList(data) {
+  return request({
+    url: '/Projects/GetProjectMilestones?projectId=' + data,
+    method: 'get',
+  })
+}
+// 创建里程碑
+export function createPrjMilestone(pa) {
+  return request({
+    url: '/Projects/CreateProjectMilestone',
+    method: 'post',
+    params: pa,
+  })
+}
+// 编辑里程碑
+export function editPrjMilestone(pa) {
+  return request({
+    url: '/Projects/EditProjectMilestone',
+    method: 'post',
+    params: pa,
+  })
+}
+// 删除里程碑
+export function deletePrjMilestone(data) {
+  return request({
+    url: '/Projects/DeleteProjectMilestone',
+    method: 'delete',
+    params: { id: data.id }
+  })
+}
+//#endregion
+
 //#region 项目阶段
 // 项目阶段列表
 export function fetchProjectStage() {

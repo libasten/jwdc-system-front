@@ -117,13 +117,13 @@ export default {
   },
   created() {
     this.getList()
-    this.postForm.projectId = this.projectId
   },
   methods: {
     submit() {
       this.$refs.postForm.validate((valid) => {
         if (valid) {
           let that = this
+          that.postForm.projectId = that.projectId
           that.postForm.memberIds = that.array2myString(that.postForm.memberIds)
           that.postForm.marketAdminIds = that.array2myString(that.postForm.marketAdminIds)
           that.postForm.techniqueAdminIds = that.array2myString(that.postForm.techniqueAdminIds)

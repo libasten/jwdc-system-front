@@ -16,12 +16,12 @@
     <div class="query-box">
       <el-divider content-position="center"><span>项目筛选</span></el-divider>
       <el-form :inline="true" :model="searchForm" ref="searchForm">
-        <el-form-item label="筛选类别">
+        <el-form-item label="筛选类别" style="margin-right:20px;">
           <el-select v-model="searchForm.searchType" placeholder="筛选类型">
             <el-option v-for="(item,idx) in searchForm.searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="筛选过滤关键字" prop="keyword" style="margin-left:20px;">
+        <el-form-item label="筛选过滤关键字" prop="keyword">
           <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable style="width:500px;"></el-input>
         </el-form-item>
         <el-form-item>
@@ -71,11 +71,18 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog :title="appointTitle" :visible.sync="appointDialogVisible" :close-on-click-modal="false" @close="closeAppoint" width="66%">
+    <!-- 人员任命 -->
+    <el-dialog :title="pCurPrjTitle" :visible.sync="appointDialogVisible" :close-on-click-modal="false" @close="closeAppoint" width="66%">
       <project-appoint :projectId="pCurPrjId" v-if="appointFlag"></project-appoint>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="appointDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submit">确 定</el-button>
+        <el-button @click="appointDialogVisible = false">关 闭</el-button>
+      </span>
+    </el-dialog>
+    <!-- 里程碑 -->
+    <el-dialog :title="pCurPrjTitle" :visible.sync="milestoneDialogVisible" :close-on-click-modal="false" @close="closeMilestone" width="60%">
+      <project-milestone :projectId="pCurPrjId" v-if="milestoneFlag"></project-milestone>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="milestoneDialogVisible = false">关 闭</el-button>
       </span>
     </el-dialog>
   </div>
@@ -86,9 +93,10 @@
 import { fetchProjectListPaged, delProject } from '@/api/project';
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
 import ProjectAppoint from '@/views/project/components/project-appoint'
+import ProjectMilestone from '@/views/project/components/project-milestone'
 export default {
   name: 'ProjectList',
-  components: { ProjectAppoint },
+  components: { ProjectAppoint, ProjectMilestone },
   data() {
     return {
       rules: {},
@@ -99,7 +107,10 @@ export default {
       total: 0,
       currentRow: null,
       appointFlag: false,
-      appointTitle: '',
+      appointDialogVisible: false,
+      milestoneFlag: false,
+      milestoneDialogVisible: false,
+      pCurPrjTitle: '',
       // 当前选中的项目ID,传递给子组件
       pCurPrjId: '',
       searchForm: {
@@ -115,13 +126,7 @@ export default {
           { text: '技术负责', value: 6 },],
       },
       showQueryTip: false,
-      appointDialogVisible: false,
-      postForm: {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      },
+
     };
   },
   computed: {
@@ -133,32 +138,6 @@ export default {
     this.getList(1, this.pageSize);
   },
   methods: {
-    submit() {
-      // this.$refs.postForm.validate((valid) => {
-      //   if (valid) {
-      //     // 新建
-      //     if (this.postForm.id === '') {
-      //       createProjectImportance(this.postForm).then((res) => {
-      //         this.$message.success('新建成功！')
-      //         this.list.unshift(res.data);
-      //         this.total++
-      //         this.appointDialogVisible = false
-      //       }).catch((err) => {
-      //         this.$message.error('新建失败：' + err)
-      //       })
-      //     }
-      //     // 编辑更新
-      //     else {
-      //       editProjectImportance(this.postForm).then((res) => {
-      //         this.$message.success('更新成功！')
-      //         this.appointDialogVisible = false
-      //       }).catch((err) => {
-      //         this.$message.error('更新失败：' + err)
-      //       })
-      //     }
-      //   }
-      // })
-    },
     // 获取数据列表
     getList(cPage, pSize) {
       let that = this
@@ -216,9 +195,10 @@ export default {
     goCreate() {
       this.$router.push({ path: '/project/create' })
     },
+    // 人员任命
     showAppoint() {
       if (this.appointDialogVisible === false) {
-        this.appointTitle = this.currentRow.name + ' - 项目人员'
+        this.pCurPrjTitle = this.currentRow.name + ' - 项目人员'
         this.pCurPrjId = this.currentRow.id
         this.appointFlag = true
         this.appointDialogVisible = true
@@ -228,7 +208,19 @@ export default {
       this.appointFlag = false
       this.appointDialogVisible = false
     },
-    showMilestone() { },
+    // 里程碑
+    showMilestone() {
+      if (this.milestoneDialogVisible === false) {
+        this.pCurPrjTitle = this.currentRow.name + ' - 里程碑'
+        this.pCurPrjId = this.currentRow.id
+        this.milestoneFlag = true
+        this.milestoneDialogVisible = true
+      }
+    },
+    closeMilestone() {
+      this.milestoneFlag = false
+      this.milestoneDialogVisible = false
+    },
     showShare() { },
     // 删除项目
     deleteProject() {
