@@ -1,12 +1,12 @@
 <template>
-  <!-- 项目里程碑 -->
+  <!-- 项目分享 -->
   <div class="">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="addMilestone">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="editMilestone">编辑</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="addShare">新建</el-button>
+        <!-- <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="editShare">编辑</el-button> -->
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteMilestone">删除</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="deleteShare">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
@@ -16,25 +16,30 @@
             <span>{{ row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="75%" label="里程碑名称" align="center" show-overflow-tooltip>
+        <el-table-column min-width="40%" label="被分享的人员" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
-            <span>{{ row.name }}</span>
+            <span>{{ row.viewerName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="25%" label="时间" align="center" show-overflow-tooltip>
+        <el-table-column min-width="30%" label="分享人" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
-            <span>{{ row.dateFormat }}</span>
+            <span>{{ row.sharerName }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="30%" label="分享时间" align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
+            <span>{{ row.updateTimeFormat }}</span>
           </template>
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog title="项目里程碑" :visible.sync="dialogVisible" append-to-body :close-on-click-modal="false" width="56%">
+    <el-dialog title="项目分享" :visible.sync="dialogVisible" append-to-body :close-on-click-modal="false" width="56%">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-width="80px" class="dialog-form">
-        <el-form-item label="里程碑" prop="name">
-          <el-input v-model="postForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="日期" prop="date">
-          <el-date-picker v-model="postForm.date"></el-date-picker>
+        <el-form-item label="分享对象" prop="viewerId">
+          <el-select v-model="postForm.viewerId" filterable placeholder="请选择">
+            <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -47,17 +52,17 @@
 
 <script>
 
-import { fetchMilestoneList, createPrjMilestone, editPrjMilestone, deletePrjMilestone } from '@/api/project';
+import { fetchShareList, fetchNewShare, createPrjShare, editPrjShare, deletePrjShare } from '@/api/project';
 import { heaerCellStyle, columnStyle, array2myString, myString2Array } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 
 export default {
-  name: 'ProjectMilestone',
+  name: 'ProjectAppoint',
   components: {},
   data() {
     return {
       rules: {
-        name: [{ required: true, message: '请输入里程碑信息', trigger: 'blur' }],
+        viewerId: [{ required: true, message: '请选择分享对象', trigger: 'blur' }],
       },
       list: [],
       listLoading: true,
@@ -67,8 +72,11 @@ export default {
       postForm: {
         id: '',
         projectId: '',
-        name: '',
-        date: new Date()
+        sharerId: '',
+        sharerName: '',
+        viewerId: '',
+        viewerName: '',
+        allowDownload: true,
       },
     };
   },
@@ -77,7 +85,6 @@ export default {
   },
   created() {
     this.getList()
-    this.postForm.projectId = this.projectId
   },
   methods: {
     submit() {
@@ -85,9 +92,12 @@ export default {
         if (valid) {
           let that = this
           that.postForm.projectId = that.projectId
+          that.postForm.memberIds = that.array2myString(that.postForm.memberIds)
+          that.postForm.marketAdminIds = that.array2myString(that.postForm.marketAdminIds)
+          that.postForm.techniqueAdminIds = that.array2myString(that.postForm.techniqueAdminIds)
           // 新建
           if (that.postForm.id === '') {
-            createPrjMilestone(that.postForm).then((res) => {
+            createPrjShare(that.postForm).then((res) => {
               that.getList()
               that.$message.success('新建成功！')
               that.dialogVisible = false
@@ -97,7 +107,7 @@ export default {
           }
           // 编辑更新
           else {
-            editPrjMilestone(that.postForm).then((res) => {
+            editPrjShare(that.postForm).then((res) => {
               that.getList()
               that.$message.success('更新成功！')
               that.dialogVisible = false
@@ -108,13 +118,13 @@ export default {
         }
       })
     },
-    // 获取人里程碑列表
+    // 获取项目分享
     getList() {
       let that = this
       that.listLoading = true;
       that.list = [];
-      fetchMilestoneList(this.projectId).then((res) => {
-        that.list = res.data.milestones.filter(x => x.status === 1)
+      fetchShareList(this.projectId).then((res) => {
+        that.list = res.data.projectShares
         that.listLoading = false
       }).catch((err) => {
         that.$message({
@@ -123,31 +133,47 @@ export default {
         });
       });
     },
-    addMilestone() {
-      if (this.$refs.postForm !== undefined) {
-        // 清空校验信息
-        this.$refs.postForm.resetFields()
-        // 这个方法用于重置data属性中的值。
-        Object.assign(this.$data.postForm, this.$options.data().postForm)
-      }
-      this.dialogVisible = true
+    addShare() {
+      fetchNewShare(this.projectId).then((res) => {
+        this.staffs = res.data.staffs
+        if (this.$refs.postForm !== undefined) {
+          // 这个方法用于重置data属性中的值。
+          Object.assign(this.$data.postForm, this.$options.data().postForm)
+          // 清空校验信息
+          this.$refs.postForm.resetFields()
+        }
+        this.dialogVisible = true
+      }).catch((err) => {
+        this.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        })
+      })
     },
-    editMilestone() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.postForm = deepClone(this.currentRow)
-      console.log(this.postForm)
-      this.dialogVisible = true
+    editShare() {
+      const that = this
+      fetchNewShare(this.projectId).then((res) => {
+        that.staffs = res.data.staffs
+        if (that.$refs.postForm !== undefined) {
+          that.$refs.postForm.clearValidate()
+        }
+        that.postForm = deepClone(that.currentRow)
+        that.dialogVisible = true
+      }).catch((err) => {
+        that.$message({
+          message: '错误信息：' + err,
+          type: 'error'
+        })
+      })
     },
-    deleteMilestone() {
+    deleteShare() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       })
         .then(() => {
-          deletePrjMilestone(this.currentRow).then((res) => {
+          deletePrjShare(this.currentRow).then((res) => {
             const idx = this.list.findIndex(a => a.id === this.currentRow.id)
             this.list.splice(idx, 1);
             this.total = this.list.length;

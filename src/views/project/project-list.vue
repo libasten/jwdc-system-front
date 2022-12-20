@@ -85,6 +85,13 @@
         <el-button @click="milestoneDialogVisible = false">关 闭</el-button>
       </span>
     </el-dialog>
+    <!-- 分享 -->
+    <el-dialog :title="pCurPrjTitle" :visible.sync="shareDialogVisible" :close-on-click-modal="false" @close="closeShare" width="60%">
+      <project-share :projectId="pCurPrjId" v-if="shareFlag"></project-share>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="shareDialogVisible = false">关 闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -94,9 +101,10 @@ import { fetchProjectListPaged, delProject } from '@/api/project';
 import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
 import ProjectAppoint from '@/views/project/components/project-appoint'
 import ProjectMilestone from '@/views/project/components/project-milestone'
+import ProjectShare from '@/views/project/components/project-share'
 export default {
   name: 'ProjectList',
-  components: { ProjectAppoint, ProjectMilestone },
+  components: { ProjectAppoint, ProjectMilestone,ProjectShare },
   data() {
     return {
       rules: {},
@@ -110,6 +118,8 @@ export default {
       appointDialogVisible: false,
       milestoneFlag: false,
       milestoneDialogVisible: false,
+      shareFlag: false,
+      shareDialogVisible: false,
       pCurPrjTitle: '',
       // 当前选中的项目ID,传递给子组件
       pCurPrjId: '',
@@ -221,7 +231,19 @@ export default {
       this.milestoneFlag = false
       this.milestoneDialogVisible = false
     },
-    showShare() { },
+    // 分享
+    showShare() {
+      if (this.shareDialogVisible === false) {
+        this.pCurPrjTitle = this.currentRow.name + ' - 分享'
+        this.pCurPrjId = this.currentRow.id
+        this.shareFlag = true
+        this.shareDialogVisible = true
+      }
+    },
+    closeShare() {
+      this.shareFlag = false
+      this.shareDialogVisible = false
+    },
     // 删除项目
     deleteProject() {
       this.$confirm('永久删除, 是否继续?', '提示', {

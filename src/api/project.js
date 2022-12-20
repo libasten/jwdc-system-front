@@ -138,6 +138,47 @@ export function deletePrjMilestone(data) {
 }
 //#endregion
 
+//#region 项目分享
+// 获取分享列表
+export function fetchShareList(data) {
+  return request({
+    url: '/Projects/GetProjectShares?projectId=' + data,
+    method: 'get',
+  })
+}
+// 初始化分享
+export function fetchNewShare(data) {
+  return request({
+    url: '/Projects/NewProjectShare?projectId=' + data,
+    method: 'get',
+  })
+}
+// 创建分享
+export function createPrjShare(pa) {
+  return request({
+    url: '/Projects/CreateProjectShare',
+    method: 'post',
+    params: pa,
+  })
+}
+// 编辑分享
+export function editPrjShare(pa) {
+  return request({
+    url: '/Projects/EditProjectShare',
+    method: 'post',
+    params: pa,
+  })
+}
+// 删除分享
+export function deletePrjShare(data) {
+  return request({
+    url: '/Projects/DeleteProjectShare',
+    method: 'delete',
+    params: { id: data.id }
+  })
+}
+//#endregion
+
 //#region 项目阶段
 // 项目阶段列表
 export function fetchProjectStage() {
