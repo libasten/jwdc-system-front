@@ -137,11 +137,11 @@ export default {
       fetchNewShare(this.projectId).then((res) => {
         this.staffs = res.data.staffs
         if (this.$refs.postForm !== undefined) {
-          // 这个方法用于重置data属性中的值。
-          Object.assign(this.$data.postForm, this.$options.data().postForm)
           // 清空校验信息
           this.$refs.postForm.resetFields()
         }
+        // 这个方法用于重置data属性中的值。
+        Object.assign(this.$data.postForm, this.$options.data().postForm)
         this.dialogVisible = true
       }).catch((err) => {
         this.$message({

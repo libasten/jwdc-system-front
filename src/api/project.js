@@ -315,34 +315,42 @@ export function delProjectArchiveType(data) {
 }
 //#endregion
 
-//#region 项目备注类型
-// 项目附件备注列表
-export function fetchProjectNoteType() {
+//#region 项目节点备注
+// 项目备注列表
+export function fetchProjectNote(noteId) {
   return request({
-    url: '/Projects/GetProjectNoteTypes',
+    url: '/Projects/GetProjectNote?id=' + noteId,
     method: 'get',
   })
 }
-// 新增项目附件类型
-export function createProjectNoteType(pa) {
+
+// 初始化节点备注
+export function newProjectNote() {
   return request({
-    url: '/Projects/CreateProjectNoteType',
+    url: '/Projects/NewProjectNote',
+    method: 'get',
+  })
+}
+// 新增项目备注
+export function createProjectNote(pa) {
+  return request({
+    url: '/Projects/CreateProjectNote',
     method: 'post',
     params: pa,
   })
 }
-// 编辑项目附件类型
-export function editProjectNoteType(pa) {
+// 编辑项目备注
+export function editProjectNote(pa) {
   return request({
-    url: '/Projects/EditProjectNoteType',
+    url: '/Projects/EditProjectNote',
     method: 'post',
     params: pa,
   })
 }
-// 删除项目附件类型
-export function delProjectNoteType(data) {
+// 删除项目备注
+export function delProjectNote(data) {
   return request({
-    url: '/Projects/DeleteProjectNoteType',
+    url: '/Projects/DeleteProjectNote',
     method: 'delete',
     params: { id: data.id }
   })

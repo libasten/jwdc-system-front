@@ -45,11 +45,6 @@
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="难易程度" prop="importanceName">
-                <el-input v-model="postForm.importanceName"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
               <el-form-item label="城市" prop="cityName">
                 <el-input v-model="postForm.cityName"></el-input>
               </el-form-item>
@@ -62,6 +57,11 @@
             <el-col :span="8">
               <el-form-item label="乡镇" prop="town">
                 <el-input v-model="postForm.town"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="难易程度" prop="importanceName">
+                <el-input v-model="postForm.importanceName"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -81,13 +81,8 @@
             </el-col>
             <el-col :span="24">
               <el-form-item label="项目评价" prop="evaluation">
-                <el-input v-model="postForm.evaluation"></el-input>
+                <el-input type="textarea" v-model="postForm.evaluation"></el-input>
               </el-form-item>
-            </el-col>
-            <el-col :span="24">
-              <div style="float:right;overflow:hidden">
-                <el-button type="primary" @click="submit">提交更新</el-button>
-              </div>
             </el-col>
           </el-row>
         </el-form>
@@ -107,47 +102,73 @@
               </div>
               <div class="edit-info">{{node.updaterName}} @ {{node.updateTimeFormat}} <span v-if="node.nodeType===1"> | {{node.location}}</span></div>
               <div class="right-btns">
-                <el-button v-if="node.canEdit" size="small">修改</el-button><br />
-                <el-button type="danger" size="small" v-if="node.canDelete">删除</el-button>
+                <el-button v-if="node.canEdit" size="small" @click.native="editNode(node)">修改</el-button><br />
+                <el-button type="danger" size="small" v-if="node.canDelete" @click.native="deleteNode(node)">删除</el-button>
               </div>
             </el-card>
           </el-timeline-item>
         </el-timeline>
         <div class="stage-btn">
-          <el-button v-if="canAddProjectNote" type="primary" icon="el-icon-chat-line-square" plain>添加备注</el-button>
-          <el-button v-if="canAddProjectArchive" type="primary" icon="el-icon-document" plain>添加附件</el-button>
+          <el-button v-if="canAddProjectNote" type="primary" icon="el-icon-chat-line-square" plain @click.native="addNote">添加备注</el-button>
+          <el-button v-if="canAddProjectArchive" type="primary" icon="el-icon-document" plain @click.native="addArchive">添加附件</el-button>
         </div>
       </el-collapse-item>
       <el-collapse-item title="3. 项目合同" name="3">
+        <div>开票回款信息放到这里</div>
         <div>该项目还没有合同</div>
       </el-collapse-item>
+      <el-collapse-item title="4. 招投标" name="4">
+        <div>该项目还没有招投标信息</div>
+        <div>市场负责人信息放在这里，参考需求Excel</div>
+      </el-collapse-item>
     </el-collapse>
-    <!-- <el-dialog title="项目节点备注" :visible.sync="dialogVisibleArchive" :close-on-click-modal="false" width="50%">
+    <el-dialog title="项目节点备注" :visible.sync="dialogVisibleNote" :close-on-click-modal="false" width="50%">
+      <el-form ref="noteForm" :model="noteForm" :rules="rules" label-width="80px">
+        <el-form-item label="id" v-if="false" prop="id">
+          <el-input v-model="noteForm.id"></el-input>
+        </el-form-item>
+        <el-form-item label="项目阶段" prop="projectStageId">
+          <el-select v-model="noteForm.projectStageId" placeholder="请选择阶段">
+            <el-option v-for="(item,idx) in stages" :key="idx" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注类型" prop="noteTypeId">
+          <el-select v-model="noteForm.noteTypeId" placeholder="请选择阶段">
+            <el-option v-for="(item,idx) in noteTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="备注内容" prop="content">
+          <el-input type="textarea" v-model="noteForm.content"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleNote = false">取 消</el-button>
+        <el-button type="primary" @click="noteSubmit">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="项目节点附件" :visible.sync="dialogVisibleArchive" :close-on-click-modal="false" width="50%">
       <el-form ref="archiveForm" :model="archiveForm" :rules="rules" label-width="80px">
-        <el-form-stageItem label="id" v-if="false" prop="id">
+        <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="archiveForm.id"></el-input>
-        </el-form-stageItem>
-        <el-form-stageItem label="名称" prop="name">
+        </el-form-item>
+        <el-form-item label="名称" prop="name">
           <el-input v-model="archiveForm.name"></el-input>
-        </el-form-stageItem>
-        <el-form-stageItem label="排序" prop="order">
-          <el-input-number v-model="archiveForm.order" :min="1" :max="100" :step="1" label="排序" style="width:100%"></el-input-number>
-        </el-form-stageItem>
-        <el-form-stageItem label="描述" prop="description">
+        </el-form-item>
+        <el-form-item label="描述" prop="description">
           <el-input v-model="archiveForm.description"></el-input>
-        </el-form-stageItem>
+        </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleArchive = false">取 消</el-button>
-        <el-button type="primary" @click="ArchiveSubmit">确 定</el-button>
+        <el-button type="primary" @click="archiveSubmit">确 定</el-button>
       </span>
-    </el-dialog> -->
+    </el-dialog>
   </div>
 </template>
 
 <script>
 
-import { fetchProjectDetail, editProjectImportance, createProjectImportance, delProjectImportance } from '@/api/project';
+import { fetchProjectDetail, newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote } from '@/api/project';
 export default {
   name: 'ProjectDetail',
   data() {
@@ -173,52 +194,38 @@ export default {
         partA: '',
         partAContact: '',
         partAPhone: '',
+        projectStage: []
       },
-      dialogVisible: false,
+      dialogVisibleNote: false,
+      noteForm: {
+        id: '',
+        projectId: '',
+        projectStageId: '',
+        noteTypeId: '',
+        content: '',
+      },
+      dialogVisibleArchive: false,
+      archiveForm: {
+        id: '',
+        name: '',
+        description: '',
+      },
       stages: [],
+      noteTypes: [],
       rules: {
-        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        projectStageId: [{ required: true, message: '请选择阶段', trigger: 'blur' }],
+        noteTypeId: [{ required: true, message: '请选择类型', trigger: 'blur' }],
+        noteContent: [{ required: true, message: '请输入内容', trigger: 'blur' }],
       }
     };
   },
-  props: {
-    operateType: {
-      type: String,
-      default: 'edit',
-    }
-  },
+  props: {},
   created() {
     this.postForm.id = this.$route.params && this.$route.params.id
     this.getProjectDetail()
     this.allDisabled = true
   },
   methods: {
-    submit() {
-      this.$refs.postForm.validate((valid) => {
-        if (valid) {
-          // 新建
-          // if (this.postForm.id === '') {
-          //   createProjectImportance(this.postForm).then((res) => {
-          //     this.$message.success('新建成功！')
-          //     this.list.unshift(res.data);
-          //     this.total++
-          //     this.dialogVisible = false
-          //   }).catch((err) => {
-          //     this.$message.error('新建失败：' + err)
-          //   })
-        }
-        // 编辑更新
-        else {
-          // editProjectImportance(this.postForm).then((res) => {
-          //   this.$message.success('更新成功！')
-          //   this.dialogVisible = false
-          // }).catch((err) => {
-          //   this.$message.error('更新失败：' + err)
-          // })
-          // }
-        }
-      })
-    },
     // 获取数据列表
     getProjectDetail() {
       this.loading = true;
@@ -238,6 +245,74 @@ export default {
         });
       });
     },
+    addNote() {
+      newProjectNote().then((res) => {
+        this.noteTypes = res.data.projectNoteTypes
+        if (this.$refs.noteForm !== undefined) {
+          // 清空校验信息
+          this.$refs.noteForm.resetFields()
+        }
+        // 这个方法用于重置data属性中的值。
+        Object.assign(this.$data.noteForm, this.$options.data().noteForm)
+        this.dialogVisibleNote = true
+      }).catch((err) => { this.$message.error('错误信息：' + err,) })
+    },
+    editNode(data) {
+      const that = this
+      fetchProjectNote(data.id).then((res) => {
+        this.noteTypes = res.data.projectNoteTypes
+        if (that.$refs.noteForm !== undefined) {
+          that.$refs.noteForm.clearValidate()
+        }
+        that.noteForm = res.data.projectNote
+        that.dialogVisibleNote = true
+      }).catch((err) => { this.$message.error('错误信息：' + err,) })
+    },
+    noteSubmit() {
+      this.$refs.noteForm.validate((valid) => {
+        if (valid) {
+          this.noteForm.projectId = this.postForm.id
+          // 新建
+          if (this.noteForm.id === '') {
+            createProjectNote(this.noteForm).then((res) => {
+              const idx = this.stages.findIndex(x => x.id === this.noteForm.projectStageId)
+              this.stages[idx].nodes.unshift(res.data)
+              this.$message.success('新建成功！')
+              this.dialogVisibleNote = false
+            }).catch((err) => { this.$message.error('新建失败：' + err) })
+          }
+          // 编辑更新
+          else {
+            editProjectNote(this.noteForm).then((res) => {
+              const idx = this.stages.findIndex(x => x.id === this.noteForm.projectStageId)
+              const idy = this.stages[idx].nodes.findIndex(y => y.id === this.noteForm.id)
+              this.stages[idx].nodes[idy] = res.data
+              this.$message.success('更新成功！')
+              this.dialogVisibleNote = false
+            }).catch((err) => { this.$message.error('更新失败：' + err) })
+          }
+        }
+      })
+    },
+    deleteNode(data) {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        delProjectNote(data).then((res) => {
+          const idx = this.stages.findIndex(x => x.id === data.projectStageId)
+          const idy = this.stages[idx].nodes.findIndex(y => y.id === data.id)
+          this.stages[idx].nodes.splice(idy, 1)
+          this.$message.success('删除成功！');
+        });
+      }).catch((err) => { this.$message.info('已取消删除'); });
+    },
+
+    addArchive() {
+      this.dialogVisibleArchive = true
+    },
+    archiveSubmit() { },
     createImportance() {
       this.postForm = {
         id: '',
@@ -262,15 +337,15 @@ export default {
 </script>
 
 <style scoped>
-.prj-title {
-  font-size: 2rem;
-  text-align: center;
-  margin: 15px 0 15px 0;
-  color: #333;
-}
 </style>
 <style lang="scss">
 .project-detail {
+  .prj-title {
+    font-size: 2rem;
+    text-align: center;
+    margin: 15px 0 15px 0;
+    color: #333;
+  }
   .el-collapse-item__header {
     font-size: 1rem;
     background-color: #f5f5f7;
@@ -282,9 +357,13 @@ export default {
   }
   .el-input.is-disabled .el-input__inner {
     background-color: #f5f7fa;
-    border-color: #dfe4ed;
+    border-color: #fff;
+    border-bottom: 1px solid #ccc;
     color: #303133;
     cursor: pointer;
+  }
+  .el-select {
+    width: 100%;
   }
   .el-timeline-item__tail {
     border-left-color: #0a76e2;
