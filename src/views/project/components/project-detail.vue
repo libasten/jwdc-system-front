@@ -147,16 +147,39 @@
       </span>
     </el-dialog>
     <el-dialog title="项目节点附件" :visible.sync="dialogVisibleArchive" :close-on-click-modal="false" width="50%">
-      <el-form ref="archiveForm" :model="archiveForm" :rules="rules" label-width="80px">
+      <el-form ref="archiveForm" :model="archiveForm" :rules="rules" label-width="78px">
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="archiveForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="名称" prop="name">
+        <el-form-item label="项目阶段" prop="projectStageId">
+          <el-select v-model="archiveForm.projectStageId" placeholder="请选择阶段">
+            <el-option v-for="(item,idx) in stages" :key="idx" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="附件类型" prop="archiveTypeId">
+          <el-select v-model="archiveForm.archiveTypeId" placeholder="请选择阶段">
+            <el-option v-for="(item,idx) in archiveTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="上传时间" prop="date">
+              <el-date-picker v-model="archiveForm.date" :clearable="false"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="上传地点" prop="location">
+              <el-input v-model="archiveForm.location"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-form-item label="附件名称" prop="name">
           <el-input v-model="archiveForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="archiveForm.description"></el-input>
-        </el-form-item>
+        <!-- 这里的上传路径随便填，因为重写了上传方法 -->
+        <el-upload class="upload-component" ref="upload" action="null" :http-request="archiveSubmit" :file-list="fileList" :auto-upload="false" :multiple="false" :on-change="handleFileChange" :on-remove="handleFileRemove" drag>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em><br>文件大小不超过500M</div>
+        </el-upload>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleArchive = false">取 消</el-button>
@@ -168,7 +191,11 @@
 
 <script>
 
-import { fetchProjectDetail, newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote } from '@/api/project';
+import {
+  fetchProjectDetail,
+  newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote,
+  newProjectArchive, fetchProjectArchive, createProjectArchive, editProjectArchive, delProjectArchive
+} from '@/api/project';
 export default {
   name: 'ProjectDetail',
   data() {
@@ -207,15 +234,25 @@ export default {
       dialogVisibleArchive: false,
       archiveForm: {
         id: '',
+        projectId: '',
+        projectStageId: '',
+        archiveTypeId: '',
+        date: new Date(),
+        location: '',
         name: '',
-        description: '',
       },
       stages: [],
       noteTypes: [],
+      archiveTypes: [],
+      fileList: [],
+      archiveFile: '',
       rules: {
         projectStageId: [{ required: true, message: '请选择阶段', trigger: 'blur' }],
         noteTypeId: [{ required: true, message: '请选择类型', trigger: 'blur' }],
         noteContent: [{ required: true, message: '请输入内容', trigger: 'blur' }],
+        archiveTypeId: [{ required: true, message: '请选择附件类型', trigger: 'blur' }],
+        date: [{ required: true, message: '请选择日期', trigger: 'blur' }],
+        name: [{ required: true, message: '请输入文件名称', trigger: 'change' }],
       }
     };
   },
@@ -276,7 +313,12 @@ export default {
           if (this.noteForm.id === '') {
             createProjectNote(this.noteForm).then((res) => {
               const idx = this.stages.findIndex(x => x.id === this.noteForm.projectStageId)
-              this.stages[idx].nodes.unshift(res.data)
+              if (this.stages[idx].nodes === null) {
+                this.stages[idx].nodes = [res.data]
+              }
+              else {
+                this.stages[idx].nodes.unshift(res.data)
+              }
               this.$message.success('新建成功！')
               this.dialogVisibleNote = false
             }).catch((err) => { this.$message.error('新建失败：' + err) })
@@ -294,43 +336,77 @@ export default {
         }
       })
     },
+    // 删除节点中的卡片，含有备注和附件
     deleteNode(data) {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       }).then(() => {
-        delProjectNote(data).then((res) => {
-          const idx = this.stages.findIndex(x => x.id === data.projectStageId)
-          const idy = this.stages[idx].nodes.findIndex(y => y.id === data.id)
-          this.stages[idx].nodes.splice(idy, 1)
-          this.$message.success('删除成功！');
-        });
-      }).catch((err) => { this.$message.info('已取消删除'); });
+        if (data.noteTypeId !== undefined) {
+          delProjectNote(data).then((res) => {
+            const idx = this.stages.findIndex(x => x.id === data.projectStageId)
+            const idy = this.stages[idx].nodes.findIndex(y => y.id === data.id)
+            this.stages[idx].nodes.splice(idy, 1)
+            this.$message.success('删除成功！');
+          });
+        }
+        else {
+          delProjectArchive(data).then((res) => {
+            const idx = this.stages.findIndex(x => x.id === data.projectStageId)
+            const idy = this.stages[idx].nodes.findIndex(y => y.id === data.id)
+            this.stages[idx].nodes.splice(idy, 1)
+            this.$message.success('删除成功！');
+          });
+        }
+      }).catch((err) => { this.$message.info('删除操作已取消'); });
     },
 
     addArchive() {
-      this.dialogVisibleArchive = true
+      newProjectArchive().then((res) => {
+        this.archiveTypes = res.data.projectArchiveTypes
+        if (this.$refs.archiveForm !== undefined) {
+          // 清空校验信息
+          this.$refs.archiveForm.resetFields()
+        }
+        // 这个方法用于重置data属性中的值。
+        Object.assign(this.$data.archiveForm, this.$options.data().archiveForm)
+        this.dialogVisibleArchive = true
+      }).catch((err) => { this.$message.error('错误信息：' + err,) })
     },
-    archiveSubmit() { },
-    createImportance() {
-      this.postForm = {
-        id: '',
-        name: '',
-        order: '',
-        description: ''
-      }
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.dialogVisible = true
+    handleFileChange(file, fileList) {
+      this.archiveForm.name = file.name
+      this.fileList = [{ name: file.name }]
+      this.archiveFile = file
     },
-    editImportance() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.postForm = this.currentRow
-      this.dialogVisible = true
+    handleFileRemove(file, fileList) {
+      this.archiveForm.name = ''
+      this.fileList = []
+    },
+    archiveSubmit() {
+      this.$refs.archiveForm.validate((valid) => {
+        if (valid) {
+          // todo: 判断是更新还是新建
+          if (this.fileList.length < 1) {
+            this.$message.warning("请选择一个文件再提交！")
+            return
+          }
+          const formData = new FormData()
+          formData.append('file', this.archiveFile.raw)
+          this.archiveForm.projectId = this.postForm.id
+          createProjectArchive(this.archiveForm, formData).then(res => {
+            const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
+            if (this.stages[idx].nodes === null) {
+              this.stages[idx].nodes = [res.data]
+            }
+            else {
+              this.stages[idx].nodes.unshift(res.data)
+            }
+            this.$message.success('上传附件成功！')
+            this.dialogVisibleArchive = false
+          }).catch(err => { this.$message.error("上传失败！") })
+        }
+      })
     },
   },
 };
@@ -362,7 +438,8 @@ export default {
     color: #303133;
     cursor: pointer;
   }
-  .el-select {
+  .el-select,
+  .el-date-editor {
     width: 100%;
   }
   .el-timeline-item__tail {
@@ -386,6 +463,21 @@ export default {
   }
   .el-collapse-item__content {
     padding: 15px 10px;
+  }
+  .upload-component {
+    margin-top: -5px;
+    .el-upload {
+      width: 100%;
+    }
+    .el-upload-dragger {
+      width: 100%;
+      height: 60px;
+      .el-upload__text {
+        margin-top: 15px;
+        line-height: 18px;
+        font-size: 0.6rem;
+      }
+    }
   }
 }
 .node-item-container {

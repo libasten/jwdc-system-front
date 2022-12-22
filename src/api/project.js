@@ -316,18 +316,17 @@ export function delProjectArchiveType(data) {
 //#endregion
 
 //#region 项目节点备注
-// 项目备注列表
-export function fetchProjectNote(noteId) {
-  return request({
-    url: '/Projects/GetProjectNote?id=' + noteId,
-    method: 'get',
-  })
-}
-
 // 初始化节点备注
 export function newProjectNote() {
   return request({
     url: '/Projects/NewProjectNote',
+    method: 'get',
+  })
+}
+// 获取备注详情
+export function fetchProjectNote(noteId) {
+  return request({
+    url: '/Projects/GetProjectNote?id=' + noteId,
     method: 'get',
   })
 }
@@ -351,6 +350,48 @@ export function editProjectNote(pa) {
 export function delProjectNote(data) {
   return request({
     url: '/Projects/DeleteProjectNote',
+    method: 'delete',
+    params: { id: data.id }
+  })
+}
+//#endregion
+
+//#region 项目节点附件
+// 初始化节点附件
+export function newProjectArchive() {
+  return request({
+    url: '/Projects/NewProjectArchive',
+    method: 'get',
+  })
+}
+// 获取节点附件详情
+export function fetchProjectArchive(archiveId) {
+  return request({
+    url: '/Projects/GetProjectArchive?id=' + archiveId,
+    method: 'get',
+  })
+}
+// 新增节点附件
+export function createProjectArchive(pa, data) {
+  return request({
+    url: '/Projects/CreateProjectArchive',
+    method: 'post',
+    params: pa,
+    data: data,
+  })
+}
+// 编辑节点附件
+export function editProjectArchive(pa) {
+  return request({
+    url: '/Projects/EditProjectArchive',
+    method: 'post',
+    params: pa,
+  })
+}
+// 删除节点附件
+export function delProjectArchive(data) {
+  return request({
+    url: '/Projects/DeleteProjectArchive',
     method: 'delete',
     params: { id: data.id }
   })
