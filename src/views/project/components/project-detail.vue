@@ -127,7 +127,7 @@
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="noteForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="项目阶段" prop="projectStageId">
+        <el-form-item label="项目阶段" prop="projectStageId" v-if="noteForm.id===''">
           <el-select v-model="noteForm.projectStageId" placeholder="请选择阶段">
             <el-option v-for="(item,idx) in stages" :key="idx" :label="item.name" :value="item.id"></el-option>
           </el-select>
@@ -151,7 +151,7 @@
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="archiveForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="项目阶段" prop="projectStageId">
+        <el-form-item label="项目阶段" prop="projectStageId" v-if="archiveForm.id===''">
           <el-select v-model="archiveForm.projectStageId" placeholder="请选择阶段">
             <el-option v-for="(item,idx) in stages" :key="idx" :label="item.name" :value="item.id"></el-option>
           </el-select>
@@ -196,6 +196,7 @@ import {
   newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote,
   newProjectArchive, fetchProjectArchive, createProjectArchive, editProjectArchive, delProjectArchive
 } from '@/api/project';
+import { deepClone } from '@/utils/index';
 export default {
   name: 'ProjectDetail',
   data() {
@@ -246,6 +247,7 @@ export default {
       archiveTypes: [],
       fileList: [],
       archiveFile: '',
+      curNode: '', //当前编辑的节点内容
       rules: {
         projectStageId: [{ required: true, message: '请选择阶段', trigger: 'blur' }],
         noteTypeId: [{ required: true, message: '请选择类型', trigger: 'blur' }],
@@ -296,14 +298,30 @@ export default {
     },
     editNode(data) {
       const that = this
-      fetchProjectNote(data.id).then((res) => {
-        this.noteTypes = res.data.projectNoteTypes
-        if (that.$refs.noteForm !== undefined) {
-          that.$refs.noteForm.clearValidate()
-        }
-        that.noteForm = res.data.projectNote
-        that.dialogVisibleNote = true
-      }).catch((err) => { this.$message.error('错误信息：' + err,) })
+      that.curNode = deepClone(data)
+      if (data.noteTypeId !== undefined) {
+        fetchProjectNote(data.id).then((res) => {
+          that.noteTypes = res.data.projectNoteTypes
+          if (that.$refs.noteForm !== undefined) {
+            that.$refs.noteForm.clearValidate()
+          }
+          that.noteForm = res.data.projectNote
+          that.dialogVisibleNote = true
+        }).catch((err) => { this.$message.error('错误信息：' + err,) })
+      }
+      else {
+        fetchProjectArchive(data.id).then((res) => {
+          that.archiveTypes = res.data.projectArchiveTypes
+          if (that.$refs.archiveForm !== undefined) {
+            that.$refs.archiveForm.clearValidate()
+          }
+          that.archiveForm = res.data.projectArchive
+          that.archiveForm.date = res.data.projectArchive.updateTime
+          that.fileList = []
+          that.archiveFile = ''
+          that.dialogVisibleArchive = true
+        }).catch((err) => { this.$message.error('错误信息：' + err,) })
+      }
     },
     noteSubmit() {
       this.$refs.noteForm.validate((valid) => {
@@ -371,6 +389,8 @@ export default {
         }
         // 这个方法用于重置data属性中的值。
         Object.assign(this.$data.archiveForm, this.$options.data().archiveForm)
+        this.fileList = []
+        this.archiveFile = ''
         this.dialogVisibleArchive = true
       }).catch((err) => { this.$message.error('错误信息：' + err,) })
     },
@@ -386,25 +406,41 @@ export default {
     archiveSubmit() {
       this.$refs.archiveForm.validate((valid) => {
         if (valid) {
-          // todo: 判断是更新还是新建
-          if (this.fileList.length < 1) {
-            this.$message.warning("请选择一个文件再提交！")
-            return
+          // 新建
+          if (this.archiveForm.id === '') {
+            // 新建要求必须上传文件，编辑的话，可以只对文件元数据信息进行编辑，无需上传文件，若上传了则更新文件。
+            if (this.fileList.length < 1) {
+              this.$message.warning("请选择一个文件再提交！")
+              return
+            }
+            const formData = new FormData()
+            formData.append('file', this.archiveFile.raw)
+            this.archiveForm.projectId = this.postForm.id
+            createProjectArchive(this.archiveForm, formData).then(res => {
+              const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
+              if (this.stages[idx].nodes === null) {
+                this.stages[idx].nodes = [res.data]
+              }
+              else {
+                this.stages[idx].nodes.unshift(res.data)
+              }
+              this.$message.success('上传附件成功！')
+              this.dialogVisibleArchive = false
+            }).catch(err => { this.$message.error("上传失败！") })
           }
-          const formData = new FormData()
-          formData.append('file', this.archiveFile.raw)
-          this.archiveForm.projectId = this.postForm.id
-          createProjectArchive(this.archiveForm, formData).then(res => {
-            const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
-            if (this.stages[idx].nodes === null) {
-              this.stages[idx].nodes = [res.data]
-            }
-            else {
-              this.stages[idx].nodes.unshift(res.data)
-            }
-            this.$message.success('上传附件成功！')
-            this.dialogVisibleArchive = false
-          }).catch(err => { this.$message.error("上传失败！") })
+          // 编辑
+          else {
+            const formData = new FormData()
+            formData.append('file', this.archiveFile.raw)
+            this.archiveForm.projectId = this.postForm.id
+            editProjectArchive(this.archiveForm, formData).then(res => {
+              const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
+              const idy = this.stages[idx].nodes.findIndex(y => y.id === this.archiveForm.id)
+              this.stages[idx].nodes[idy] = res.data
+              this.$message.success('更新成功！')
+              this.dialogVisibleArchive = false
+            }).catch(err => { this.$message.error("编辑失败！") })
+          }
         }
       })
     },
