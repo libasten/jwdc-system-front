@@ -114,12 +114,58 @@
         </div>
       </el-collapse-item>
       <el-collapse-item title="3. 项目合同" name="3">
-        <div>开票回款信息放到这里</div>
-        <div>该项目还没有合同</div>
+        <div v-if="contracts.length===0">该项目还没有合同</div>
+        <div v-else>
+          <el-table :data="contracts" style="width:100%">
+            <el-table-column label="合同名称" style="width:100%">
+              <template slot-scope="{ row }">
+                <span>{{ row.text }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center">
+              <template slot-scope="scope">
+                <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">查看合同详情</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+        <el-divider content-position="center">开票回款信息</el-divider>
+        <el-form v-model="invoiceForm">
+          <el-form-item label="开票进度">
+            <el-select v-model="postForm.invoicingProgressName" placeholder="请选择开票进度" style="width:200px">
+              <el-option label="未开票" value="1"></el-option>
+              <el-option label="部分开票" value="2"></el-option>
+              <el-option label="全额开票" value="3"></el-option>
+            </el-select>
+          </el-form-item>
+
+        </el-form>
+        <el-form v-model="collectionForm">
+          <el-form-item label="回款进度">
+            <el-select v-model="postForm.collectionProgressName" placeholder="请选择回款进度" style="width:200px">
+              <el-option label="未回款" value="1"></el-option>
+              <el-option label="部分回款" value="2"></el-option>
+              <el-option label="全额回款" value="3"></el-option>
+            </el-select>
+          </el-form-item>
+        </el-form>
       </el-collapse-item>
       <el-collapse-item title="4. 招投标" name="4">
-        <div>该项目还没有招投标信息</div>
-        <div>市场负责人信息放在这里，参考需求Excel</div>
+        <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
+        <div v-else>
+          <el-table :data="bids" style="width:100%">
+            <el-table-column label="招投标名称" style="width:100%">
+              <template slot-scope="{ row }">
+                <span>{{ row.text }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center">
+              <template slot-scope="scope">
+                <el-button size="mini" type="primary" plain @click="viewBid(scope.$index, scope.row)">查看招投标详情</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
       </el-collapse-item>
     </el-collapse>
     <el-dialog title="项目节点备注" :visible.sync="dialogVisibleNote" :close-on-click-modal="false" width="50%">
@@ -196,13 +242,12 @@ import {
   newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote,
   newProjectArchive, fetchProjectArchive, createProjectArchive, editProjectArchive, delProjectArchive
 } from '@/api/project';
-import { deepClone } from '@/utils/index';
 export default {
   name: 'ProjectDetail',
   data() {
     return {
       loading: true,
-      activeNames: ['2'],
+      activeNames: ['3'],
       allDisabled: false,
       canAddProjectNote: true,
       canAddProjectArchive: true,
@@ -214,7 +259,6 @@ export default {
         startFormat: '',
         completionFormat: '',
         departmentName: '',
-        managerName: '',
         importanceName: '',
         cityName: '',
         county: '',
@@ -222,7 +266,9 @@ export default {
         partA: '',
         partAContact: '',
         partAPhone: '',
-        projectStage: []
+        projectStage: [],
+        invoicingProgressName: '',
+        collectionProgressName: '',
       },
       dialogVisibleNote: false,
       noteForm: {
@@ -247,7 +293,8 @@ export default {
       archiveTypes: [],
       fileList: [],
       archiveFile: '',
-      curNode: '', //当前编辑的节点内容
+      contracts: [],
+      bids: [],
       rules: {
         projectStageId: [{ required: true, message: '请选择阶段', trigger: 'blur' }],
         noteTypeId: [{ required: true, message: '请选择类型', trigger: 'blur' }],
@@ -255,7 +302,8 @@ export default {
         archiveTypeId: [{ required: true, message: '请选择附件类型', trigger: 'blur' }],
         date: [{ required: true, message: '请选择日期', trigger: 'blur' }],
         name: [{ required: true, message: '请输入文件名称', trigger: 'change' }],
-      }
+      },
+      invoiceForm: [{ id: 1, date: '', number: 0 }]
     };
   },
   props: {},
@@ -272,10 +320,13 @@ export default {
       fetchProjectDetail(this.postForm.id).then((res) => {
         console.log(res.data)
         this.postForm = res.data.project
-        this.postForm.managerName = res.data.projectManager
         this.stages = res.data.project.projectStages
         this.canAddProjectNote = res.data.canAddProjectNote
         this.canAddProjectArchive = res.data.canAddProjectArchive
+        // 显示合同信息
+        this.fillContracts()
+        this.fillBids()
+        // 显示招投标信息
         this.loading = false
       }).catch((err) => {
         this.$message({
@@ -298,7 +349,6 @@ export default {
     },
     editNode(data) {
       const that = this
-      that.curNode = deepClone(data)
       if (data.noteTypeId !== undefined) {
         fetchProjectNote(data.id).then((res) => {
           that.noteTypes = res.data.projectNoteTypes
@@ -444,6 +494,34 @@ export default {
         }
       })
     },
+
+    // 填充合同信息
+    fillContracts() {
+      if (this.postForm.contractNames !== null) {
+        for (let k in this.postForm.contractNames) {
+          const element = this.postForm.contractNames[k];
+          const cTemp = { id: k, text: element }
+          this.contracts.push(cTemp)
+        }
+      }
+    },
+    viewContract() {
+      // 路由到合同管理详情
+    },
+
+    // 填招投标同信息
+    fillBids() {
+      if (this.postForm.bidNames !== null) {
+        for (let k in this.postForm.bidNames) {
+          const element = this.postForm.bidNames[k];
+          const cTemp = { id: k, text: element }
+          this.bids.push(cTemp)
+        }
+      }
+    },
+    viewBid() {
+
+    }
   },
 };
 </script>
@@ -514,6 +592,12 @@ export default {
         font-size: 0.6rem;
       }
     }
+  }
+  .sub-title {
+    font-size: 0.9rem;
+    margin-top: 10px;
+    padding-left: 10px;
+    border-top: 1px solid #0a1ce2;
   }
 }
 .node-item-container {

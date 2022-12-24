@@ -3,7 +3,7 @@
   <div class="app-container project-base" v-loading="loading">
     <el-form ref="postForm" :loading="loading" :model="postForm" :rules="rules" label-width="100px">
       <el-row>
-        <el-col :span="16">
+        <el-col :span="24">
           <el-form-item label="id" v-if="false" prop="id">
             <el-input v-model="postForm.id"></el-input>
           </el-form-item>
@@ -37,11 +37,6 @@
             <el-select v-model="postForm.progress" placeholder="请选择进度">
               <el-option v-for="(item,idx) in projectStagesFilter" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="负责人" prop="managerName">
-            <el-input v-model="postForm.managerName"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -81,26 +76,6 @@
         <el-col :span="8">
           <el-form-item label="结束时间" prop="completion">
             <el-date-picker v-model="postForm.completion" type="date" placeholder="选择日期" :clearable="false"></el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="开票时间" prop="invoiceDate">
-            <el-date-picker v-model="postForm.invoiceDate" type="date" placeholder="选择日期" :clearable="false"></el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="开票金额" prop="invoiceAmount">
-            <el-input v-model="postForm.invoiceAmount"></el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="回款时间" prop="refundDate">
-            <el-date-picker v-model="postForm.refundDate" type="date" placeholder="选择日期" :clearable="false"></el-date-picker>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="回款金额" prop="refundAmount">
-            <el-input v-model="postForm.refundAmount"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -167,12 +142,7 @@ export default {
         start: '',
         completion: '',
         departmentName: '',
-        managerName: '',
         importanceId: '',
-        invoiceDate: '',
-        invoiceAmount: '',
-        refundDate: '',
-        refundAmount: '',
         cityId: '',
         county: '',
         town: '',
@@ -265,7 +235,6 @@ export default {
         this.postForm.progress = this.postForm.progress === 0 ? '' : this.postForm.progress
         this.postForm.bidIds = this.myString2Array(this.postForm.bidIds)
         this.postForm.contractIds = this.myString2Array(this.postForm.contractIds)
-        this.postForm.managerName = res.data.projectManager
         this.loading = false
       }).catch((err) => {
         this.$message({
