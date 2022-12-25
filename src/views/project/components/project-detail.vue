@@ -116,13 +116,13 @@
       <el-collapse-item title="3. 项目合同" name="3">
         <div v-if="contracts.length===0">该项目还没有合同</div>
         <div v-else>
-          <el-table :data="contracts" style="width:100%">
-            <el-table-column label="合同名称" style="width:100%">
+          <el-table :data="contracts" border size="small" :header-cell-style="heaerCellStyle">
+            <el-table-column label="合同名称" min-width="75">
               <template slot-scope="{ row }">
                 <span>{{ row.text }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" align="center">
+            <el-table-column label="操作" align="center" min-width="25">
               <template slot-scope="scope">
                 <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">查看合同详情</el-button>
               </template>
@@ -130,36 +130,112 @@
           </el-table>
         </div>
         <el-divider content-position="center">开票回款信息</el-divider>
-        <el-form v-model="invoiceForm">
-          <el-form-item label="开票进度">
-            <el-select v-model="postForm.invoicingProgressName" placeholder="请选择开票进度" style="width:200px">
-              <el-option label="未开票" value="1"></el-option>
-              <el-option label="部分开票" value="2"></el-option>
-              <el-option label="全额开票" value="3"></el-option>
-            </el-select>
-          </el-form-item>
-
-        </el-form>
-        <el-form v-model="collectionForm">
-          <el-form-item label="回款进度">
-            <el-select v-model="postForm.collectionProgressName" placeholder="请选择回款进度" style="width:200px">
-              <el-option label="未回款" value="1"></el-option>
-              <el-option label="部分回款" value="2"></el-option>
-              <el-option label="全额回款" value="3"></el-option>
-            </el-select>
-          </el-form-item>
-        </el-form>
+        <el-row :gutter="40">
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
+            <el-form :inline="true" label-width="70px" label-position="left">
+              <el-form-item label="开票进度">
+                <el-select v-model="postForm.invoicingProgressName" placeholder="请选择开票进度">
+                  <el-option label="未开票" value="1"></el-option>
+                  <el-option label="部分开票" value="2"></el-option>
+                  <el-option label="全额开票" value="3"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" size="small" @click="addInvoice">新增开票信息</el-button>
+              </el-form-item>
+            </el-form>
+            <el-table :data="invoiceList" border size="mini" :header-cell-style="heaerCellStyle">
+              <el-table-column label="开票日期" min-width="30" align="center">
+                <template slot-scope="{ row }">
+                  <span>{{ row.date }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="开票金额" min-width="30" align="center">
+                <template slot-scope="{ row }">
+                  <span>{{ row.num }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" align="center" min-width="40">
+                <template slot-scope="scope">
+                  <el-button-group>
+                    <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">编辑</el-button>
+                    <el-button size="mini" type="danger" plain @click="viewContract(scope.$index, scope.row)">删除</el-button>
+                  </el-button-group>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-col>
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
+            <el-form :inline="true" label-width="70px" label-position="left">
+              <el-form-item label="回款进度">
+                <el-select v-model="postForm.collectionProgressName" placeholder="请选择回款进度" style="width:100%">
+                  <el-option label="未回款" value="1"></el-option>
+                  <el-option label="部分回款" value="2"></el-option>
+                  <el-option label="全额回款" value="3"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" size="small" @click="addCollection">新增回款信息</el-button>
+              </el-form-item>
+            </el-form>
+            <el-table :data="collectionList" border size="mini" :header-cell-style="heaerCellStyle">
+              <el-table-column label="回款日期" min-width="30" align="center">
+                <template slot-scope="{ row }">
+                  <span>{{ row.date }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="回款金额" min-width="30" align="center">
+                <template slot-scope="{ row }">
+                  <span>{{ row.num }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="操作" align="center" min-width="40">
+                <template slot-scope="scope">
+                  <el-button-group>
+                    <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">编辑</el-button>
+                    <el-button size="mini" type="danger" plain @click="viewContract(scope.$index, scope.row)">删除</el-button>
+                  </el-button-group>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-col>
+          <el-col :span="24">
+            <el-divider content-position="center">信息汇总</el-divider>
+            <el-form label-width="85px" label-position="left">
+              <el-col :span="12">
+                <el-form-item label="合同金额">
+                  <el-input></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="开票总金额">
+                  <el-input></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="回款金额">
+                  <el-input></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="未回款金额">
+                  <el-input></el-input>
+                </el-form-item>
+              </el-col>
+            </el-form>
+          </el-col>
+        </el-row>
       </el-collapse-item>
       <el-collapse-item title="4. 招投标" name="4">
         <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
         <div v-else>
-          <el-table :data="bids" style="width:100%">
-            <el-table-column label="招投标名称" style="width:100%">
+          <el-table :data="bids" border size="small" :header-cell-style="heaerCellStyle">
+            <el-table-column label="招投标名称" min-width="75">
               <template slot-scope="{ row }">
                 <span>{{ row.text }}</span>
               </template>
             </el-table-column>
-            <el-table-column label="操作" align="center">
+            <el-table-column label="操作" align="center" min-width="25">
               <template slot-scope="scope">
                 <el-button size="mini" type="primary" plain @click="viewBid(scope.$index, scope.row)">查看招投标详情</el-button>
               </template>
@@ -230,6 +306,40 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleArchive = false">取 消</el-button>
         <el-button type="primary" @click="archiveSubmit">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="开票信息" :visible.sync="dialogVisibleInvoice" :close-on-click-modal="false" width="40%">
+      <el-form ref="invoiceForm" :model="invoiceForm" :rules="rules" label-width="80px">
+        <el-form-item label="id" v-if="false" prop="id">
+          <el-input v-model="invoiceForm.id"></el-input>
+        </el-form-item>
+        <el-form-item label="开票日期" prop="num">
+          <el-date-picker v-model="invoiceForm.date"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="开票金额" prop="num">
+          <el-input-number v-model="invoiceForm.num" :precision="2" :step="0.01"></el-input-number>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleInvoice = false">取 消</el-button>
+        <el-button type="primary" @click="invoiceSubmit">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="回款信息" :visible.sync="dialogVisibleCollection" :close-on-click-modal="false" width="40%">
+      <el-form ref="collectionForm" :model="collectionForm" :rules="rules" label-width="80px">
+        <el-form-item label="id" v-if="false" prop="id">
+          <el-input v-model="collectionForm.id"></el-input>
+        </el-form-item>
+        <el-form-item label="回款日期" prop="num">
+          <el-date-picker v-model="collectionForm.date"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="回款金额" prop="num">
+          <el-input-number v-model="collectionForm.num" :precision="2" :step="0.01"></el-input-number>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleCollection = false">取 消</el-button>
+        <el-button type="primary" @click="collectionSubmit">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -303,7 +413,12 @@ export default {
         date: [{ required: true, message: '请选择日期', trigger: 'blur' }],
         name: [{ required: true, message: '请输入文件名称', trigger: 'change' }],
       },
-      invoiceForm: [{ id: 1, date: '', number: 0 }]
+      dialogVisibleInvoice: false,
+      invoiceForm: { id: 1, date: '', num: 0 },
+      invoiceList: [],
+      dialogVisibleCollection: false,
+      collectionForm: { id: 1, date: '', num: 0 },
+      collectionList: [],
     };
   },
   props: {},
@@ -520,8 +635,24 @@ export default {
       }
     },
     viewBid() {
+    },
+    // 新增开票信息
+    addInvoice() {
+      this.dialogVisibleInvoice = true
+    },
+    // 新增回款信息
+    addCollection() {
+      this.dialogVisibleCollection = true
+    },
 
+    invoiceSubmit() { },
+
+    collectionSubmit() { },
+
+    heaerCellStyle() {
+      return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
     }
+
   },
 };
 </script>
@@ -553,7 +684,8 @@ export default {
     cursor: pointer;
   }
   .el-select,
-  .el-date-editor {
+  .el-date-editor,
+  .el-input-number {
     width: 100%;
   }
   .el-timeline-item__tail {
