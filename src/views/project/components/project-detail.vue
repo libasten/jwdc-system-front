@@ -201,7 +201,7 @@
           </el-col>
           <el-col :span="24">
             <el-divider content-position="center">信息汇总</el-divider>
-            <el-form label-width="85px" label-position="left" :disabled="allDisabled">
+            <el-form label-width="85px" label-position="left">
               <el-col :span="12">
                 <el-form-item label="合同金额">
                   <el-input v-model="postForm.contractAmount"></el-input>
