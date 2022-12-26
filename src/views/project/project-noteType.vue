@@ -69,7 +69,6 @@ export default {
       postForm: {
         id: '',
         name: '',
-        order: '',
         description: ''
       },
       rules: {
@@ -122,6 +121,7 @@ export default {
       this.listLoading = true;
       this.list = [];
       fetchProjectNoteType().then((res) => {
+        console.log(res.data)
         this.total = res.data.length
         this.list = res.data
         this.listLoading = false
@@ -136,7 +136,6 @@ export default {
       this.postForm = {
         id: '',
         name: '',
-        order: '',
         description: ''
       }
       if (this.$refs.postForm !== undefined) {

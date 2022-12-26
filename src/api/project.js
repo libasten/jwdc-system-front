@@ -281,6 +281,40 @@ export function delProjectImportance(data) {
 }
 //#endregion
 
+//#region 项目备注类型
+// 项目备注类型列表
+export function fetchProjectNoteType() {
+  return request({
+    url: '/Projects/GetProjectNoteTypes',
+    method: 'get',
+  })
+}
+// 新增项目备注类型
+export function createProjectNoteType(pa) {
+  return request({
+    url: '/Projects/CreateProjectNoteType',
+    method: 'post',
+    params: pa,
+  })
+}
+// 编辑项目备注类型
+export function editProjectNoteType(pa) {
+  return request({
+    url: '/Projects/EditProjectNoteType',
+    method: 'post',
+    params: pa,
+  })
+}
+// 删除项目备注类型
+export function delProjectNoteType(data) {
+  return request({
+    url: '/Projects/DeleteProjectNoteType',
+    method: 'delete',
+    params: { id: data.id }
+  })
+}
+//#endregion
+
 //#region 项目附件类型
 // 项目附件类型列表
 export function fetchProjectArchiveType() {
