@@ -141,25 +141,25 @@
                 </el-select>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" size="small" @click="addInvoice">新增开票信息</el-button>
+                <el-button type="primary" size="small" plain @click="addInvoice">新增开票信息</el-button>
               </el-form-item>
             </el-form>
             <el-table :data="invoiceList" border size="mini" :header-cell-style="heaerCellStyle">
               <el-table-column label="开票日期" min-width="30" align="center">
                 <template slot-scope="{ row }">
-                  <span>{{ row.date }}</span>
+                  <span>{{ row.dateFormat }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="开票金额" min-width="30" align="center">
                 <template slot-scope="{ row }">
-                  <span>{{ row.num }}</span>
+                  <span>{{ row.amount }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="操作" align="center" min-width="40">
                 <template slot-scope="scope">
                   <el-button-group>
-                    <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">编辑</el-button>
-                    <el-button size="mini" type="danger" plain @click="viewContract(scope.$index, scope.row)">删除</el-button>
+                    <el-button size="mini" type="primary" plain @click="editInvoice(scope.row)">编辑</el-button>
+                    <el-button size="mini" type="danger" plain @click="deleteInvoice(scope.row)">删除</el-button>
                   </el-button-group>
                 </template>
               </el-table-column>
@@ -175,25 +175,25 @@
                 </el-select>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" size="small" @click="addCollection">新增回款信息</el-button>
+                <el-button type="primary" size="small" plain @click="addCollection">新增回款信息</el-button>
               </el-form-item>
             </el-form>
             <el-table :data="collectionList" border size="mini" :header-cell-style="heaerCellStyle">
               <el-table-column label="回款日期" min-width="30" align="center">
                 <template slot-scope="{ row }">
-                  <span>{{ row.date }}</span>
+                  <span>{{ row.dateFormat }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="回款金额" min-width="30" align="center">
                 <template slot-scope="{ row }">
-                  <span>{{ row.num }}</span>
+                  <span>{{ row.amount }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="操作" align="center" min-width="40">
                 <template slot-scope="scope">
                   <el-button-group>
-                    <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">编辑</el-button>
-                    <el-button size="mini" type="danger" plain @click="viewContract(scope.$index, scope.row)">删除</el-button>
+                    <el-button size="mini" type="primary" plain @click="editCollection(scope.row)">编辑</el-button>
+                    <el-button size="mini" type="danger" plain @click="deleteCollection(scope.row)">删除</el-button>
                   </el-button-group>
                 </template>
               </el-table-column>
@@ -201,25 +201,25 @@
           </el-col>
           <el-col :span="24">
             <el-divider content-position="center">信息汇总</el-divider>
-            <el-form label-width="85px" label-position="left">
+            <el-form label-width="85px" label-position="left" :disabled="allDisabled">
               <el-col :span="12">
                 <el-form-item label="合同金额">
-                  <el-input></el-input>
+                  <el-input v-model="postForm.contractAmount"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="开票总金额">
-                  <el-input></el-input>
+                  <el-input v-model="postForm.invoicingTotal"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="回款金额">
-                  <el-input></el-input>
+                  <el-input v-model="postForm.collectionTotal"></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="未回款金额">
-                  <el-input></el-input>
+                  <el-input v-model="postForm.unCollectionTotal"></el-input>
                 </el-form-item>
               </el-col>
             </el-form>
@@ -313,11 +313,11 @@
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="invoiceForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="开票日期" prop="num">
-          <el-date-picker v-model="invoiceForm.date"></el-date-picker>
+        <el-form-item label="开票日期" prop="date">
+          <el-date-picker v-model="invoiceForm.date" :clearable="false"></el-date-picker>
         </el-form-item>
-        <el-form-item label="开票金额" prop="num">
-          <el-input-number v-model="invoiceForm.num" :precision="2" :step="0.01"></el-input-number>
+        <el-form-item label="开票金额" prop="amount ">
+          <el-input-number v-model="invoiceForm.amount " :precision="2" :step="0.01"></el-input-number>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -330,11 +330,11 @@
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="collectionForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="回款日期" prop="num">
-          <el-date-picker v-model="collectionForm.date"></el-date-picker>
+        <el-form-item label="回款日期" prop="date">
+          <el-date-picker v-model="collectionForm.date" :clearable="false"></el-date-picker>
         </el-form-item>
-        <el-form-item label="回款金额" prop="num">
-          <el-input-number v-model="collectionForm.num" :precision="2" :step="0.01"></el-input-number>
+        <el-form-item label="回款金额" prop="amount ">
+          <el-input-number v-model="collectionForm.amount " :precision="2" :step="0.01"></el-input-number>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -350,8 +350,11 @@
 import {
   fetchProjectDetail,
   newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote,
-  newProjectArchive, fetchProjectArchive, createProjectArchive, editProjectArchive, delProjectArchive
+  newProjectArchive, fetchProjectArchive, createProjectArchive, editProjectArchive, delProjectArchive,
+  fetchInvoices, createInvoicingProgress, editInvoicingProgress, delInvoicingProgress,
+  fetchCollections, createCollectionProgress, editCollectionProgress, delCollectionProgress
 } from '@/api/project';
+import { deepClone } from '@/utils/index'
 export default {
   name: 'ProjectDetail',
   data() {
@@ -414,10 +417,10 @@ export default {
         name: [{ required: true, message: '请输入文件名称', trigger: 'change' }],
       },
       dialogVisibleInvoice: false,
-      invoiceForm: { id: 1, date: '', num: 0 },
+      invoiceForm: { id: '', projectId: '', date: new Date(), amount: 0 },
       invoiceList: [],
       dialogVisibleCollection: false,
-      collectionForm: { id: 1, date: '', num: 0 },
+      collectionForm: { id: '', projectId: '', date: new Date(), amount: 0 },
       collectionList: [],
     };
   },
@@ -440,8 +443,11 @@ export default {
         this.canAddProjectArchive = res.data.canAddProjectArchive
         // 显示合同信息
         this.fillContracts()
-        this.fillBids()
         // 显示招投标信息
+        this.fillBids()
+        // 获取开票和回款信息列表
+        this.getInvoices()
+        this.getCollections()
         this.loading = false
       }).catch((err) => {
         this.$message({
@@ -636,23 +642,143 @@ export default {
     },
     viewBid() {
     },
+    // 获取开票信息
+    getInvoices() {
+      fetchInvoices(this.postForm.id).then((res) => {
+        this.invoiceList = res.data.filter(a => a.status === 1)
+        if (this.invoiceList.length > 0) {
+          this.postForm.invoicingProgressName = '2'
+        }
+        else {
+          this.postForm.invoicingProgressName = '1'
+        }
+      }).catch((err) => {
+        this.$message.error("获取开票信息失败！");
+      });
+    },
     // 新增开票信息
     addInvoice() {
+      if (this.$refs.invoiceForm !== undefined) {
+        this.$refs.invoiceForm.resetFields()
+      }
+      Object.assign(this.$data.invoiceForm, this.$options.data().invoiceForm)
       this.dialogVisibleInvoice = true
+    },
+    // 编辑开票信息
+    editInvoice(data) {
+      if (this.$refs.invoiceForm !== undefined) {
+        this.$refs.invoiceForm.clearValidate()
+      }
+      this.invoiceForm = deepClone(data)
+      this.dialogVisibleInvoice = true
+    },
+    // 开票信息提交
+    invoiceSubmit() {
+      this.$refs.invoiceForm.validate((valid) => {
+        if (valid) {
+          this.invoiceForm.projectId = this.postForm.id
+          // 新建
+          if (this.invoiceForm.id === '') {
+            createInvoicingProgress(this.invoiceForm).then((res) => {
+              this.$message.success('新建成功！')
+              this.getInvoices()
+              this.dialogVisibleInvoice = false
+            }).catch((err) => { this.$message.error('新建失败：' + err) })
+          }
+          // 编辑更新
+          else {
+            editInvoicingProgress(this.invoiceForm).then((res) => {
+              this.$message.success('更新成功！')
+              this.getInvoices()
+              this.dialogVisibleInvoice = false
+            }).catch((err) => { this.$message.error('更新失败：' + err) })
+          }
+        }
+      })
+    },
+    // 删除开票信息
+    deleteInvoice(data) {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        delInvoicingProgress(data).then((res) => {
+          this.getInvoices()
+          this.$message.success('删除成功！');
+        });
+      }).catch((err) => { this.$message.info('删除操作已取消'); });
+    },
+    // 获取回款信息
+    getCollections() {
+      fetchCollections(this.postForm.id).then((res) => {
+        this.collectionList = res.data.filter(a => a.status === 1)
+        if (this.collectionList.length > 0) {
+          this.postForm.collectionProgressName = '2'
+        }
+        else {
+          this.postForm.collectionProgressName = '1'
+        }
+      }).catch((err) => {
+        this.$message.error("获取回款信息失败！");
+      });
     },
     // 新增回款信息
     addCollection() {
+      if (this.$refs.collectionForm !== undefined) {
+        this.$refs.collectionForm.resetFields()
+      }
+      Object.assign(this.$data.collectionForm, this.$options.data().collectionForm)
       this.dialogVisibleCollection = true
     },
-
-    invoiceSubmit() { },
-
-    collectionSubmit() { },
-
+    // 编辑回款信息
+    editCollection(data) {
+      if (this.$refs.collectionForm !== undefined) {
+        this.$refs.collectionForm.clearValidate()
+      }
+      this.collectionForm = deepClone(data)
+      this.dialogVisibleCollection = true
+    },
+    // 回款信息提交
+    collectionSubmit() {
+      this.$refs.collectionForm.validate((valid) => {
+        if (valid) {
+          this.collectionForm.projectId = this.postForm.id
+          // 新建
+          if (this.collectionForm.id === '') {
+            createCollectionProgress(this.collectionForm).then((res) => {
+              this.$message.success('新建成功！')
+              this.getCollections()
+              this.dialogVisibleCollection = false
+            }).catch((err) => { this.$message.error('新建失败：' + err) })
+          }
+          // 编辑更新
+          else {
+            editCollectionProgress(this.collectionForm).then((res) => {
+              this.$message.success('更新成功！')
+              this.getCollections()
+              this.dialogVisibleCollection = false
+            }).catch((err) => { this.$message.error('更新失败：' + err) })
+          }
+        }
+      })
+    },
+    // 删除回款信息
+    deleteCollection(data) {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        delCollectionProgress(data).then((res) => {
+          this.getCollections()
+          this.$message.success('删除成功！');
+        });
+      }).catch((err) => { this.$message.info('删除操作已取消'); });
+    },
     heaerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
     }
-
   },
 };
 </script>

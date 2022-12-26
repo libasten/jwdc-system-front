@@ -397,3 +397,72 @@ export function delProjectArchive(data) {
   })
 }
 //#endregion
+
+//#region 开票信息
+// 获取开票信息列表 - 通过项目ID
+export function fetchInvoices(id) {
+  return request({
+    url: '/InvoicingProgresses/GetInvoicingProgresses?projectId=' + id,
+    method: 'get',
+  })
+}
+// 新增开票信息
+export function createInvoicingProgress(pa) {
+  return request({
+    url: '/InvoicingProgresses/CreateInvoicingProgress',
+    method: 'post',
+    params: pa,
+  })
+}
+// 编辑开票信息
+export function editInvoicingProgress(pa) {
+  return request({
+    url: '/InvoicingProgresses/EditInvoicingProgress',
+    method: 'post',
+    params: pa,
+  })
+}
+// 删除开票信息
+export function delInvoicingProgress(data) {
+  return request({
+    url: '/InvoicingProgresses/DeleteInvoicingProgress',
+
+    method: 'delete',
+    params: { id: data.id }
+  })
+}
+//#endregion
+
+//#region 回款信息
+// 获取回款信息列表 - 通过项目ID
+export function fetchCollections(id) {
+  return request({
+    url: '/CollectionProgresses/GetCollectionProgresses?projectId=' + id,
+    method: 'get',
+  })
+}
+// 新增回款信息
+export function createCollectionProgress(pa) {
+  return request({
+    url: '/CollectionProgresses/CreateCollectionProgress',
+    method: 'post',
+    params: pa,
+  })
+}
+// 编辑回款信息
+export function editCollectionProgress(pa) {
+  return request({
+    url: '/CollectionProgresses/EditCollectionProgress',
+    method: 'post',
+    params: pa,
+  })
+}
+// 删除回款信息
+export function delCollectionProgress(data) {
+  return request({
+    url: '/CollectionProgresses/DeleteCollectionProgress',
+    method: 'delete',
+    params: { id: data.id }
+  })
+}
+//#endregion
