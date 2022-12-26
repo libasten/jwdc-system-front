@@ -372,7 +372,7 @@ export default {
   data() {
     return {
       loading: true,
-      activeNames: ['1', '2'],
+      activeNames: ['3'],
       allDisabled: false,
       canAddProjectNote: true,
       canAddProjectArchive: true,
@@ -448,6 +448,7 @@ export default {
       this.loading = true;
       this.list = [];
       fetchProjectDetail(this.postForm.id).then((res) => {
+        console.log(res.data)
         this.postForm = res.data.project
         this.stages = res.data.project.projectStages
         this.canAddProjectNote = res.data.canAddProjectNote

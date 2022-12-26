@@ -195,6 +195,25 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/contract',
+    component: Layout,
+    meta: { title: '合同管理', icon: 'el-icon-c-scale-to-original', auth: '16-1' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/contract/contract-list'),
+        name: 'ContractList',
+        meta: { title: '合同管理', icon: 'documentation' }
+      },
+      {
+        path: 'detail/:id',
+        component: () => import('@/views/contract/contract-detail'),
+        name: 'ContractDetail',
+        meta: { title: '合同详情', icon: 'documentation' }
+      },
+    ]
+  },
+  {
     path: '/icon',
     component: Layout,
     children: [
@@ -206,7 +225,6 @@ export const asyncRoutes = [
       }
     ]
   },
-
   /** when your routing map is too long, you can split it into small modules **/
   // chartsRouter,
 
