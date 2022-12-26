@@ -132,18 +132,24 @@
         <el-divider content-position="center">开票回款信息</el-divider>
         <el-row :gutter="40">
           <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
-            <el-form :inline="true" label-width="70px" label-position="left">
-              <el-form-item label="开票进度">
-                <el-select v-model="postForm.invoicingProgressName" placeholder="请选择开票进度">
-                  <el-option label="未开票" value="1"></el-option>
-                  <el-option label="部分开票" value="2"></el-option>
-                  <el-option label="全额开票" value="3"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" size="small" plain @click="addInvoice">新增开票信息</el-button>
-              </el-form-item>
-            </el-form>
+            <el-col :span="16">
+              <el-form label-width="70px" label-position="left" :disabled="allDisabled">
+                <el-form-item label="开票进度">
+                  <el-select v-model="postForm.invoicingProgressName" placeholder="请选择开票进度">
+                    <el-option label="未开票" value="1"></el-option>
+                    <el-option label="部分开票" value="2"></el-option>
+                    <el-option label="全额开票" value="3"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
+            </el-col>
+            <el-col :span="6">
+              <el-form>
+                <el-form-item>
+                  <el-button type="primary" size="small" plain @click="addInvoice">新增开票信息</el-button>
+                </el-form-item>
+              </el-form>
+            </el-col>
             <el-table :data="invoiceList" border size="mini" :header-cell-style="heaerCellStyle">
               <el-table-column label="开票日期" min-width="30" align="center">
                 <template slot-scope="{ row }">
@@ -166,18 +172,24 @@
             </el-table>
           </el-col>
           <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
-            <el-form :inline="true" label-width="70px" label-position="left">
-              <el-form-item label="回款进度">
-                <el-select v-model="postForm.collectionProgressName" placeholder="请选择回款进度" style="width:100%">
-                  <el-option label="未回款" value="1"></el-option>
-                  <el-option label="部分回款" value="2"></el-option>
-                  <el-option label="全额回款" value="3"></el-option>
-                </el-select>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" size="small" plain @click="addCollection">新增回款信息</el-button>
-              </el-form-item>
-            </el-form>
+            <el-col :span="16">
+              <el-form label-width="70px" label-position="left" :disabled="allDisabled">
+                <el-form-item label="回款进度">
+                  <el-select v-model="postForm.collectionProgressName" placeholder="请选择回款进度" style="width:100%">
+                    <el-option label="未回款" value="1"></el-option>
+                    <el-option label="部分回款" value="2"></el-option>
+                    <el-option label="全额回款" value="3"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-form>
+            </el-col>
+            <el-col :span="6">
+              <el-form>
+                <el-form-item>
+                  <el-button type="primary" size="small" plain @click="addCollection">新增回款信息</el-button>
+                </el-form-item>
+              </el-form>
+            </el-col>
             <el-table :data="collectionList" border size="mini" :header-cell-style="heaerCellStyle">
               <el-table-column label="回款日期" min-width="30" align="center">
                 <template slot-scope="{ row }">
@@ -201,7 +213,7 @@
           </el-col>
           <el-col :span="24">
             <el-divider content-position="center">信息汇总</el-divider>
-            <el-form label-width="85px" label-position="left">
+            <el-form label-width="85px" label-position="left" :disabled="allDisabled">
               <el-col :span="12">
                 <el-form-item label="合同金额">
                   <el-input v-model="postForm.contractAmount"></el-input>
