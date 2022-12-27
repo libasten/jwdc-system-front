@@ -3,11 +3,11 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="add">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="edit">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="view">查看</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click="goAdd">新建</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="goEdit">编辑</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="goView">查看</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="del">删除</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="goDelete">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
@@ -87,9 +87,9 @@
 
 <script>
 
-import { fetchContracts, getContract, editContract, createContract, deleteContract } from '@/api/contract';
+import { fetchContracts, editContract, createContract, deleteContract } from '@/api/contract';
 import { heaerCellStyle } from '@/utils/commonFunction'
-import { deepClone } from '@/utils/index';
+import { deepClone } from '@/utils/index'
 export default {
   name: 'ContractList',
   components: {},
@@ -111,7 +111,7 @@ export default {
         description: ''
       },
       rules: {
-        code: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        code: [{ required: true, message: '请输入编号', trigger: 'blur' }],
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
       }
     };
@@ -132,7 +132,7 @@ export default {
         this.$message.error('错误信息：' + err);
       });
     },
-    add() {
+    goAdd() {
       if (this.$refs.postForm !== undefined) {
         this.$refs.postForm.clearValidate()
       }
@@ -140,7 +140,7 @@ export default {
       Object.assign(this.$data.postForm, this.$options.data().postForm)
       this.dialogVisible = true
     },
-    edit() {
+    goEdit() {
       if (this.$refs.postForm !== undefined) {
         this.$refs.postForm.clearValidate()
       }
@@ -175,7 +175,9 @@ export default {
         }
       })
     },
-    view() { },
+    goView() {
+      this.$router.push({ path: '/contract/detail/' + this.currentRow.id })
+    },
     // 选中行
     handleCurrentChange(val) {
       this.currentRow = val;
@@ -184,7 +186,7 @@ export default {
     cancelSelected() {
       this.$refs.vTable.setCurrentRow();
     },
-    del() {
+    goDelete() {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

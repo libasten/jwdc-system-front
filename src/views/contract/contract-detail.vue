@@ -1,316 +1,90 @@
 <template>
-  <!-- 项目详情 -->
-  <div class="app-container project-detail">
-    <div class="prj-title">{{postForm.name}}</div>
+  <!-- 合同详情 -->
+  <div class="app-container contract-detail">
+    <div class="title">{{postForm.name}}</div>
     <el-collapse v-model="activeNames">
       <el-collapse-item title="1. 基本信息" name="1">
-        <el-form ref="postForm" :loading="loading" :model="postForm" :rules="rules" label-width="100px" :disabled="allDisabled">
+        <el-form ref="postForm" :loading="loading" :model="postForm" label-width="100px" :disabled="allDisabled">
           <el-row>
             <el-col :span="24">
               <el-form-item label="id" v-if="false" prop="id">
                 <el-input v-model="postForm.id"></el-input>
               </el-form-item>
-              <el-form-item label="名称" prop="name">
-                <el-input v-model="postForm.name"></el-input>
-              </el-form-item>
             </el-col>
-            <el-col :span="8">
-              <el-form-item label="编号" prop="code">
+            <el-col :span="12">
+              <el-form-item label="登记编号" prop="code">
                 <el-input v-model="postForm.code"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="8">
-              <el-form-item label="承担部门" prop="departmentName">
-                <el-input v-model="postForm.departmentName"></el-input>
+            <el-col :span="12">
+              <el-form-item label="项目编号" prop="projectCode">
+                <el-input v-model="postForm.projectCode"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="8">
-              <el-form-item label="类型" prop="projectTypeName">
-                <el-input v-model="postForm.projectTypeName"></el-input>
+            <el-col :span="12">
+              <el-form-item label="合同名称" prop="name">
+                <el-input v-model="postForm.name"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="8">
-              <el-form-item label="负责人" prop="managerName">
-                <el-input v-model="postForm.managerName"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="开始时间" prop="startFormat">
-                <el-input v-model="postForm.startFormat"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="结束时间" prop="completionFormat">
-                <el-input v-model="postForm.completionFormat"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="城市" prop="cityName">
-                <el-input v-model="postForm.cityName"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="区县" prop="county">
-                <el-input v-model="postForm.county"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="乡镇" prop="town">
-                <el-input v-model="postForm.town"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="难易程度" prop="importanceName">
-                <el-input v-model="postForm.importanceName"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
+
+            <el-col :span="12">
               <el-form-item label="甲方名称" prop="partA">
                 <el-input v-model="postForm.partA"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="8">
-              <el-form-item label="甲方联系人" prop="partAContact">
-                <el-input v-model="postForm.partAContact"></el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8">
-              <el-form-item label="甲方电话" prop="partAPhone">
-                <el-input v-model="postForm.partAPhone"></el-input>
+            <el-col :span="24">
+              <el-form-item label="合同金额" prop="amount">
+                <el-input v-model="postForm.amount"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="24">
-              <el-form-item label="项目评价" prop="evaluation">
-                <el-input type="textarea" v-model="postForm.evaluation"></el-input>
+              <el-form-item label="合同描述" prop="description">
+                <el-input type="textarea" v-model="postForm.description"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
       </el-collapse-item>
-      <el-collapse-item title="2. 进度节点" name="2">
-        <!-- 用时间线实现节点信息，timestamp是阶段名称 -->
-        <el-timeline>
-          <el-timeline-item v-for="(stage, index) in stages" :key="index" :timestamp="stage.name" placement="top" size="large" icon="el-icon-location-information" type="primary" class="node-item-container">
-            <el-card v-for="(node, idx) in stage.nodes" :key="idx" :class="[{leftNote: node.nodeType==2},{leftArchive:node.nodeType===1}]">
-              <div v-if="node.nodeType===2">
-                <div class="type-name">{{node.noteTypeName}}</div>
-                <div class="node-content">{{node.content}}</div>
-              </div>
-              <div v-if="node.nodeType===1">
-                <div class="type-name">{{node.archiveTypeName}}</div>
-                <div class="node-content archive" title="点击下载该文件"><i class="el-icon-tickets"></i> {{node.name}}</div>
-              </div>
-              <div class="edit-info">{{node.updaterName}} @ {{node.updateTimeFormat}} <span v-if="node.nodeType===1"> | {{node.location}}</span></div>
-              <div class="right-btns">
-                <el-button v-if="node.canEdit" size="small" @click.native="editNode(node)">修改</el-button><br />
-                <el-button type="danger" size="small" v-if="node.canDelete" @click.native="deleteNode(node)">删除</el-button>
-              </div>
-            </el-card>
-          </el-timeline-item>
-        </el-timeline>
-        <div class="stage-btn">
-          <el-button v-if="canAddProjectNote" type="primary" icon="el-icon-chat-line-square" plain @click.native="addNote">添加备注</el-button>
-          <el-button v-if="canAddProjectArchive" type="primary" icon="el-icon-document" plain @click.native="addArchive">添加附件</el-button>
+      <el-collapse-item title="2. 合同文件" name="2">
+        <div class="top-btns">
+          <el-button size="mini" type="primary" @click="addArchive">上传文件</el-button>
         </div>
-      </el-collapse-item>
-      <el-collapse-item title="3. 项目合同" name="3">
-        <div v-if="contracts.length===0">该项目还没有合同</div>
-        <div v-else>
-          <el-table :data="contracts" border size="small" :header-cell-style="heaerCellStyle">
-            <el-table-column label="合同名称" min-width="75">
-              <template slot-scope="{ row }">
-                <span>{{ row.text }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" align="center" min-width="25">
-              <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">查看合同详情</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-        <el-divider content-position="center">开票回款信息</el-divider>
-        <el-row :gutter="40">
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
-            <el-col :span="16">
-              <el-form label-width="70px" label-position="left" :disabled="allDisabled">
-                <el-form-item label="开票进度">
-                  <el-select v-model="postForm.invoicingProgressName" placeholder="请选择开票进度">
-                    <el-option label="未开票" value="1"></el-option>
-                    <el-option label="部分开票" value="2"></el-option>
-                    <el-option label="全额开票" value="3"></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-form>
-            </el-col>
-            <el-col :span="6">
-              <el-form>
-                <el-form-item>
-                  <el-button type="primary" size="small" plain @click="addInvoice">新增开票信息</el-button>
-                </el-form-item>
-              </el-form>
-            </el-col>
-            <el-table :data="invoiceList" border size="mini" :header-cell-style="heaerCellStyle">
-              <el-table-column label="开票日期" min-width="30" align="center">
-                <template slot-scope="{ row }">
-                  <span>{{ row.dateFormat }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="开票金额" min-width="30" align="center">
-                <template slot-scope="{ row }">
-                  <span>{{ row.amount }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" align="center" min-width="40">
-                <template slot-scope="scope">
-                  <el-button-group>
-                    <el-button size="mini" type="primary" plain @click="editInvoice(scope.row)">编辑</el-button>
-                    <el-button size="mini" type="danger" plain @click="deleteInvoice(scope.row)">删除</el-button>
-                  </el-button-group>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-col>
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
-            <el-col :span="16">
-              <el-form label-width="70px" label-position="left" :disabled="allDisabled">
-                <el-form-item label="回款进度">
-                  <el-select v-model="postForm.collectionProgressName" placeholder="请选择回款进度" style="width:100%">
-                    <el-option label="未回款" value="1"></el-option>
-                    <el-option label="部分回款" value="2"></el-option>
-                    <el-option label="全额回款" value="3"></el-option>
-                  </el-select>
-                </el-form-item>
-              </el-form>
-            </el-col>
-            <el-col :span="6">
-              <el-form>
-                <el-form-item>
-                  <el-button type="primary" size="small" plain @click="addCollection">新增回款信息</el-button>
-                </el-form-item>
-              </el-form>
-            </el-col>
-            <el-table :data="collectionList" border size="mini" :header-cell-style="heaerCellStyle">
-              <el-table-column label="回款日期" min-width="30" align="center">
-                <template slot-scope="{ row }">
-                  <span>{{ row.dateFormat }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="回款金额" min-width="30" align="center">
-                <template slot-scope="{ row }">
-                  <span>{{ row.amount }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" align="center" min-width="40">
-                <template slot-scope="scope">
-                  <el-button-group>
-                    <el-button size="mini" type="primary" plain @click="editCollection(scope.row)">编辑</el-button>
-                    <el-button size="mini" type="danger" plain @click="deleteCollection(scope.row)">删除</el-button>
-                  </el-button-group>
-                </template>
-              </el-table-column>
-            </el-table>
-          </el-col>
-          <el-col :span="24">
-            <el-divider content-position="center">信息汇总</el-divider>
-            <el-form label-width="85px" label-position="left" :disabled="allDisabled">
-              <el-col :span="12">
-                <el-form-item label="合同金额">
-                  <el-input v-model="postForm.contractAmount"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="开票总金额">
-                  <el-input v-model="postForm.invoicingTotal"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="回款金额">
-                  <el-input v-model="postForm.collectionTotal"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="未回款金额">
-                  <el-input v-model="postForm.unCollectionTotal"></el-input>
-                </el-form-item>
-              </el-col>
-            </el-form>
-          </el-col>
-        </el-row>
-      </el-collapse-item>
-      <el-collapse-item title="4. 招投标" name="4">
-        <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
-        <div v-else>
-          <el-table :data="bids" border size="small" :header-cell-style="heaerCellStyle">
-            <el-table-column label="招投标名称" min-width="75">
-              <template slot-scope="{ row }">
-                <span>{{ row.text }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" align="center" min-width="25">
-              <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain @click="viewBid(scope.$index, scope.row)">查看招投标详情</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
+        <el-table :data="contractFileList" border :header-cell-style="heaerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
+          <el-table-column label="文件名称" min-width="40" show-overflow-tooltip>
+            <template slot-scope="{ row }">
+              <span>{{ row.name }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="上传日期" min-width="20" align="center" show-overflow-tooltip>
+            <template slot-scope="{ row }">
+              <span>{{ row.updateTimeFormat }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="上传人员" min-width="15" align="center" show-overflow-tooltip>
+            <template slot-scope="{ row }">
+              <span>{{ row.updaterName }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" align="center" min-width="25">
+            <template slot-scope="scope">
+              <el-button-group>
+                <el-button size="mini" type="primary" plain @click="editArchive(scope.row)">编辑</el-button>
+                <el-button size="mini" type="primary" plain @click="downloadArchive(scope.row)">下载</el-button>
+                <el-button size="mini" type="danger" plain @click="deleteArchive(scope.row)">删除</el-button>
+              </el-button-group>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-collapse-item>
     </el-collapse>
-    <el-dialog title="项目节点备注" :visible.sync="dialogVisibleNote" :close-on-click-modal="false" width="50%">
-      <el-form ref="noteForm" :model="noteForm" :rules="rules" label-width="80px">
-        <el-form-item label="id" v-if="false" prop="id">
-          <el-input v-model="noteForm.id"></el-input>
-        </el-form-item>
-        <el-form-item label="项目阶段" prop="projectStageId" v-if="noteForm.id===''">
-          <el-select v-model="noteForm.projectStageId" placeholder="请选择阶段">
-            <el-option v-for="(item,idx) in stages" :key="idx" :label="item.name" :value="item.id"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注类型" prop="noteTypeId">
-          <el-select v-model="noteForm.noteTypeId" placeholder="请选择阶段">
-            <el-option v-for="(item,idx) in noteTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注内容" prop="content">
-          <el-input type="textarea" v-model="noteForm.content"></el-input>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisibleNote = false">取 消</el-button>
-        <el-button type="primary" @click="noteSubmit">确 定</el-button>
-      </span>
-    </el-dialog>
-    <el-dialog title="项目节点附件" :visible.sync="dialogVisibleArchive" :close-on-click-modal="false" width="50%">
-      <el-form ref="archiveForm" :model="archiveForm" :rules="rules" label-width="78px">
+    <el-dialog title="合同文件信息" :visible.sync="dialogVisibleArchive" :close-on-click-modal="false" width="50%">
+      <el-form ref="archiveForm" :model="archiveForm" :rules="rules" label-width="60px">
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="archiveForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="项目阶段" prop="projectStageId" v-if="archiveForm.id===''">
-          <el-select v-model="archiveForm.projectStageId" placeholder="请选择阶段">
-            <el-option v-for="(item,idx) in stages" :key="idx" :label="item.name" :value="item.id"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="附件类型" prop="archiveTypeId">
-          <el-select v-model="archiveForm.archiveTypeId" placeholder="请选择阶段">
-            <el-option v-for="(item,idx) in archiveTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-row>
-          <el-col :span="12">
-            <el-form-item label="上传时间" prop="date">
-              <el-date-picker v-model="archiveForm.date" :clearable="false"></el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="上传地点" prop="location">
-              <el-input v-model="archiveForm.location"></el-input>
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-form-item label="附件名称" prop="name">
+        <el-form-item label="名称" prop="name">
           <el-input v-model="archiveForm.name"></el-input>
         </el-form-item>
-        <!-- 这里的上传路径随便填，因为重写了上传方法 -->
         <el-upload class="upload-component" ref="upload" action="null" :http-request="archiveSubmit" :file-list="fileList" :auto-upload="false" :multiple="false" :on-change="handleFileChange" :on-remove="handleFileRemove" drag>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em><br>文件大小不超过500M</div>
         </el-upload>
@@ -320,262 +94,96 @@
         <el-button type="primary" @click="archiveSubmit">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="开票信息" :visible.sync="dialogVisibleInvoice" :close-on-click-modal="false" width="40%">
-      <el-form ref="invoiceForm" :model="invoiceForm" :rules="rules" label-width="80px">
-        <el-form-item label="id" v-if="false" prop="id">
-          <el-input v-model="invoiceForm.id"></el-input>
-        </el-form-item>
-        <el-form-item label="开票日期" prop="date">
-          <el-date-picker v-model="invoiceForm.date" :clearable="false"></el-date-picker>
-        </el-form-item>
-        <el-form-item label="开票金额" prop="amount ">
-          <el-input-number v-model="invoiceForm.amount " :precision="2" :step="0.01"></el-input-number>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisibleInvoice = false">取 消</el-button>
-        <el-button type="primary" @click="invoiceSubmit">确 定</el-button>
-      </span>
-    </el-dialog>
-    <el-dialog title="回款信息" :visible.sync="dialogVisibleCollection" :close-on-click-modal="false" width="40%">
-      <el-form ref="collectionForm" :model="collectionForm" :rules="rules" label-width="80px">
-        <el-form-item label="id" v-if="false" prop="id">
-          <el-input v-model="collectionForm.id"></el-input>
-        </el-form-item>
-        <el-form-item label="回款日期" prop="date">
-          <el-date-picker v-model="collectionForm.date" :clearable="false"></el-date-picker>
-        </el-form-item>
-        <el-form-item label="回款金额" prop="amount ">
-          <el-input-number v-model="collectionForm.amount " :precision="2" :step="0.01"></el-input-number>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisibleCollection = false">取 消</el-button>
-        <el-button type="primary" @click="collectionSubmit">确 定</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
 <script>
 
 import {
-  fetchProjectDetail,
-  newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote,
-  newProjectArchive, fetchProjectArchive, createProjectArchive, editProjectArchive, delProjectArchive,
-  fetchInvoices, createInvoicingProgress, editInvoicingProgress, delInvoicingProgress,
-  fetchCollections, createCollectionProgress, editCollectionProgress, delCollectionProgress
-} from '@/api/project';
+  fetchContractDetail, fetchContractArchive,
+  createContractArchive, editContractArchive, delContractArchive, fetchContractArchiveUrl
+} from '@/api/contract';
 import { deepClone } from '@/utils/index'
+import { downloadFile } from '@/utils/req-down'
+
 export default {
-  name: 'ProjectDetail',
+  name: 'ContractDetail',
   data() {
     return {
       loading: true,
-      activeNames: ['3'],
+      activeNames: ['2'],
       allDisabled: false,
-      canAddProjectNote: true,
-      canAddProjectArchive: true,
       postForm: {
         id: '', //当前项目的id，也是路由入参
         name: '',
         code: '',
-        projectTypeName: '',
-        startFormat: '',
-        completionFormat: '',
-        departmentName: '',
-        importanceName: '',
-        cityName: '',
-        county: '',
-        town: '',
+        projectCode: '',
         partA: '',
-        partAContact: '',
-        partAPhone: '',
-        projectStage: [],
-        invoicingProgressName: '',
-        collectionProgressName: '',
+        amount: '',
+        description: '',
       },
-      dialogVisibleNote: false,
-      noteForm: {
-        id: '',
-        projectId: '',
-        projectStageId: '',
-        noteTypeId: '',
-        content: '',
-      },
-      dialogVisibleArchive: false,
+      dialogVisible: false,
+      contractFileList: [],
+      archiveFile: '',
+      fileList: [],
       archiveForm: {
         id: '',
-        projectId: '',
-        projectStageId: '',
-        archiveTypeId: '',
-        date: new Date(),
-        location: '',
+        contractId: '',
         name: '',
       },
-      stages: [],
-      noteTypes: [],
-      archiveTypes: [],
-      fileList: [],
-      archiveFile: '',
-      contracts: [],
-      bids: [],
+      dialogVisibleArchive: false,
       rules: {
-        projectStageId: [{ required: true, message: '请选择阶段', trigger: 'blur' }],
-        noteTypeId: [{ required: true, message: '请选择类型', trigger: 'blur' }],
-        noteContent: [{ required: true, message: '请输入内容', trigger: 'blur' }],
-        archiveTypeId: [{ required: true, message: '请选择附件类型', trigger: 'blur' }],
-        date: [{ required: true, message: '请选择日期', trigger: 'blur' }],
-        name: [{ required: true, message: '请输入文件名称', trigger: 'change' }],
-      },
-      dialogVisibleInvoice: false,
-      invoiceForm: { id: '', projectId: '', date: new Date(), amount: 0 },
-      invoiceList: [],
-      dialogVisibleCollection: false,
-      collectionForm: { id: '', projectId: '', date: new Date(), amount: 0 },
-      collectionList: [],
+        code: [{ required: true, message: '请输入编号', trigger: 'blur' }],
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        // archiveName: [{ required: true, message: '请输入附件名称', trigger: 'change' }],
+      }
     };
   },
   props: {},
   created() {
     this.postForm.id = this.$route.params && this.$route.params.id
-    this.getProjectDetail()
+    this.getContractDetail()
+    this.getContractArchive()
     this.allDisabled = true
   },
   methods: {
-    // 获取数据列表
-    getProjectDetail() {
+    // 获取数据详情
+    getContractDetail() {
       this.loading = true;
       this.list = [];
-      fetchProjectDetail(this.postForm.id).then((res) => {
-        console.log(res.data)
-        this.postForm = res.data.project
-        this.stages = res.data.project.projectStages
-        this.canAddProjectNote = res.data.canAddProjectNote
-        this.canAddProjectArchive = res.data.canAddProjectArchive
-        // 显示合同信息
-        this.fillContracts()
-        // 显示招投标信息
-        this.fillBids()
-        // 获取开票和回款信息列表
-        this.getInvoices()
-        this.getCollections()
+      fetchContractDetail(this.postForm.id).then((res) => {
+        this.postForm = res.data
         this.loading = false
-      }).catch((err) => {
-        this.$message({
-          message: '错误信息：' + err,
-          type: 'error'
-        });
-      });
+      }).catch((err) => { this.$message.error('错误信息：' + err) });
     },
-    addNote() {
-      newProjectNote().then((res) => {
-        this.noteTypes = res.data.projectNoteTypes
-        if (this.$refs.noteForm !== undefined) {
-          // 清空校验信息
-          this.$refs.noteForm.resetFields()
-        }
-        // 这个方法用于重置data属性中的值。
-        Object.assign(this.$data.noteForm, this.$options.data().noteForm)
-        this.dialogVisibleNote = true
-      }).catch((err) => { this.$message.error('错误信息：' + err,) })
-    },
-    editNode(data) {
-      const that = this
-      if (data.noteTypeId !== undefined) {
-        fetchProjectNote(data.id).then((res) => {
-          that.noteTypes = res.data.projectNoteTypes
-          if (that.$refs.noteForm !== undefined) {
-            that.$refs.noteForm.clearValidate()
-          }
-          that.noteForm = res.data.projectNote
-          that.dialogVisibleNote = true
-        }).catch((err) => { this.$message.error('错误信息：' + err,) })
-      }
-      else {
-        fetchProjectArchive(data.id).then((res) => {
-          that.archiveTypes = res.data.projectArchiveTypes
-          if (that.$refs.archiveForm !== undefined) {
-            that.$refs.archiveForm.clearValidate()
-          }
-          that.archiveForm = res.data.projectArchive
-          that.archiveForm.date = res.data.projectArchive.updateTime
-          that.fileList = []
-          that.archiveFile = ''
-          that.dialogVisibleArchive = true
-        }).catch((err) => { this.$message.error('错误信息：' + err,) })
-      }
-    },
-    noteSubmit() {
-      this.$refs.noteForm.validate((valid) => {
-        if (valid) {
-          this.noteForm.projectId = this.postForm.id
-          // 新建
-          if (this.noteForm.id === '') {
-            createProjectNote(this.noteForm).then((res) => {
-              const idx = this.stages.findIndex(x => x.id === this.noteForm.projectStageId)
-              if (this.stages[idx].nodes === null) {
-                this.stages[idx].nodes = [res.data]
-              }
-              else {
-                this.stages[idx].nodes.unshift(res.data)
-              }
-              this.$message.success('新建成功！')
-              this.dialogVisibleNote = false
-            }).catch((err) => { this.$message.error('新建失败：' + err) })
-          }
-          // 编辑更新
-          else {
-            editProjectNote(this.noteForm).then((res) => {
-              const idx = this.stages.findIndex(x => x.id === this.noteForm.projectStageId)
-              const idy = this.stages[idx].nodes.findIndex(y => y.id === this.noteForm.id)
-              this.stages[idx].nodes[idy] = res.data
-              this.$message.success('更新成功！')
-              this.dialogVisibleNote = false
-            }).catch((err) => { this.$message.error('更新失败：' + err) })
-          }
-        }
-      })
-    },
-    // 删除节点中的卡片，含有备注和附件
-    deleteNode(data) {
-      this.$confirm('永久删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        if (data.noteTypeId !== undefined) {
-          delProjectNote(data).then((res) => {
-            const idx = this.stages.findIndex(x => x.id === data.projectStageId)
-            const idy = this.stages[idx].nodes.findIndex(y => y.id === data.id)
-            this.stages[idx].nodes.splice(idy, 1)
-            this.$message.success('删除成功！');
-          });
-        }
-        else {
-          delProjectArchive(data).then((res) => {
-            const idx = this.stages.findIndex(x => x.id === data.projectStageId)
-            const idy = this.stages[idx].nodes.findIndex(y => y.id === data.id)
-            this.stages[idx].nodes.splice(idy, 1)
-            this.$message.success('删除成功！');
-          });
-        }
-      }).catch((err) => { this.$message.info('删除操作已取消'); });
+    // 获取合同附件列表
+    getContractArchive() {
+      fetchContractArchive(this.postForm.id).then((res) => {
+        this.contractFileList = res.data.filter(a => a.status === 1)
+        console.log(res.data)
+        this.loading = false
+      }).catch((err) => { this.$message.error('获取合同附件错误，错误信息：' + err) });
     },
 
     addArchive() {
-      newProjectArchive().then((res) => {
-        this.archiveTypes = res.data.projectArchiveTypes
-        if (this.$refs.archiveForm !== undefined) {
-          // 清空校验信息
-          this.$refs.archiveForm.resetFields()
-        }
-        // 这个方法用于重置data属性中的值。
-        Object.assign(this.$data.archiveForm, this.$options.data().archiveForm)
-        this.fileList = []
-        this.archiveFile = ''
-        this.dialogVisibleArchive = true
-      }).catch((err) => { this.$message.error('错误信息：' + err,) })
+      if (this.$refs.archiveForm !== undefined) {
+        // 清空校验信息
+        this.$refs.archiveForm.resetFields()
+      }
+      // 这个方法用于重置data属性中的值。
+      Object.assign(this.$data.archiveForm, this.$options.data().archiveForm)
+      this.fileList = []
+      this.archiveFile = ''
+      this.dialogVisibleArchive = true
+    },
+    editArchive(data) {
+      if (this.$refs.archiveForm !== undefined) {
+        this.$refs.archiveForm.clearValidate()
+      }
+      this.archiveForm = deepClone(data)
+      this.fileList = []
+      this.archiveFile = ''
+      this.dialogVisibleArchive = true
     },
     handleFileChange(file, fileList) {
       this.archiveForm.name = file.name
@@ -598,16 +206,10 @@ export default {
             }
             const formData = new FormData()
             formData.append('file', this.archiveFile.raw)
-            this.archiveForm.projectId = this.postForm.id
-            createProjectArchive(this.archiveForm, formData).then(res => {
-              const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
-              if (this.stages[idx].nodes === null) {
-                this.stages[idx].nodes = [res.data]
-              }
-              else {
-                this.stages[idx].nodes.unshift(res.data)
-              }
+            this.archiveForm.contractId = this.postForm.id
+            createContractArchive(this.archiveForm, formData).then(res => {
               this.$message.success('上传附件成功！')
+              this.getContractArchive()
               this.dialogVisibleArchive = false
             }).catch(err => { this.$message.error("上传失败！") })
           }
@@ -615,11 +217,9 @@ export default {
           else {
             const formData = new FormData()
             formData.append('file', this.archiveFile.raw)
-            this.archiveForm.projectId = this.postForm.id
-            editProjectArchive(this.archiveForm, formData).then(res => {
-              const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
-              const idy = this.stages[idx].nodes.findIndex(y => y.id === this.archiveForm.id)
-              this.stages[idx].nodes[idy] = res.data
+            this.archiveForm.contractId = this.postForm.id
+            editContractArchive(this.archiveForm, formData).then(res => {
+              this.getContractArchive()
               this.$message.success('更新成功！')
               this.dialogVisibleArchive = false
             }).catch(err => { this.$message.error("编辑失败！") })
@@ -627,163 +227,41 @@ export default {
         }
       })
     },
-
-    // 填充合同信息
-    fillContracts() {
-      if (this.postForm.contractNames !== null) {
-        for (let k in this.postForm.contractNames) {
-          const element = this.postForm.contractNames[k];
-          const cTemp = { id: k, text: element }
-          this.contracts.push(cTemp)
-        }
+    // 下载合同文件
+    downloadArchive(data) {
+      this.loading = true
+      const pConfig = {
+        url: process.env.VUE_APP_BASE_API + '/Contracts/DownloadContractArchive?id=' + data.id
       }
-    },
-    viewContract() {
-      // 路由到合同管理详情
-    },
-
-    // 填招投标同信息
-    fillBids() {
-      if (this.postForm.bidNames !== null) {
-        for (let k in this.postForm.bidNames) {
-          const element = this.postForm.bidNames[k];
-          const cTemp = { id: k, text: element }
-          this.bids.push(cTemp)
+      downloadFile(pConfig).then(res => {
+        let blob = new Blob([res.data])
+        const dotIdx = data.guid.lastIndexOf('.')
+        const suffix = data.guid.substring(dotIdx)
+        let fileName = data.name + suffix
+        if ('download' in document.createElement('a')) { // 不是IE浏览器
+          let url = window.URL.createObjectURL(blob)
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', fileName)
+          document.body.appendChild(link)
+          link.click()
+          this.loading = false
+          document.body.removeChild(link) // 下载完成移除元素
+          window.URL.revokeObjectURL(url) // 释放掉blob对象
+        } else { // IE 10+
+          window.navigator.msSaveBlob(blob, fileName)
         }
-      }
+      }).catch(err => { this.$message.error("获取下载文件失败" + err) })
     },
-    viewBid() {
-    },
-    // 获取开票信息
-    getInvoices() {
-      fetchInvoices(this.postForm.id).then((res) => {
-        this.invoiceList = res.data.filter(a => a.status === 1)
-        if (this.invoiceList.length > 0) {
-          this.postForm.invoicingProgressName = '2'
-        }
-        else {
-          this.postForm.invoicingProgressName = '1'
-        }
-      }).catch((err) => {
-        this.$message.error("获取开票信息失败！");
-      });
-    },
-    // 新增开票信息
-    addInvoice() {
-      if (this.$refs.invoiceForm !== undefined) {
-        this.$refs.invoiceForm.resetFields()
-      }
-      Object.assign(this.$data.invoiceForm, this.$options.data().invoiceForm)
-      this.dialogVisibleInvoice = true
-    },
-    // 编辑开票信息
-    editInvoice(data) {
-      if (this.$refs.invoiceForm !== undefined) {
-        this.$refs.invoiceForm.clearValidate()
-      }
-      this.invoiceForm = deepClone(data)
-      this.dialogVisibleInvoice = true
-    },
-    // 开票信息提交
-    invoiceSubmit() {
-      this.$refs.invoiceForm.validate((valid) => {
-        if (valid) {
-          this.invoiceForm.projectId = this.postForm.id
-          // 新建
-          if (this.invoiceForm.id === '') {
-            createInvoicingProgress(this.invoiceForm).then((res) => {
-              this.$message.success('新建成功！')
-              this.getInvoices()
-              this.dialogVisibleInvoice = false
-            }).catch((err) => { this.$message.error('新建失败：' + err) })
-          }
-          // 编辑更新
-          else {
-            editInvoicingProgress(this.invoiceForm).then((res) => {
-              this.$message.success('更新成功！')
-              this.getInvoices()
-              this.dialogVisibleInvoice = false
-            }).catch((err) => { this.$message.error('更新失败：' + err) })
-          }
-        }
-      })
-    },
-    // 删除开票信息
-    deleteInvoice(data) {
+    deleteArchive(data) {
       this.$confirm('永久删除, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning',
       }).then(() => {
-        delInvoicingProgress(data).then((res) => {
-          this.getInvoices()
-          this.$message.success('删除成功！');
-        });
-      }).catch((err) => { this.$message.info('删除操作已取消'); });
-    },
-    // 获取回款信息
-    getCollections() {
-      fetchCollections(this.postForm.id).then((res) => {
-        this.collectionList = res.data.filter(a => a.status === 1)
-        if (this.collectionList.length > 0) {
-          this.postForm.collectionProgressName = '2'
-        }
-        else {
-          this.postForm.collectionProgressName = '1'
-        }
-      }).catch((err) => {
-        this.$message.error("获取回款信息失败！");
-      });
-    },
-    // 新增回款信息
-    addCollection() {
-      if (this.$refs.collectionForm !== undefined) {
-        this.$refs.collectionForm.resetFields()
-      }
-      Object.assign(this.$data.collectionForm, this.$options.data().collectionForm)
-      this.dialogVisibleCollection = true
-    },
-    // 编辑回款信息
-    editCollection(data) {
-      if (this.$refs.collectionForm !== undefined) {
-        this.$refs.collectionForm.clearValidate()
-      }
-      this.collectionForm = deepClone(data)
-      this.dialogVisibleCollection = true
-    },
-    // 回款信息提交
-    collectionSubmit() {
-      this.$refs.collectionForm.validate((valid) => {
-        if (valid) {
-          this.collectionForm.projectId = this.postForm.id
-          // 新建
-          if (this.collectionForm.id === '') {
-            createCollectionProgress(this.collectionForm).then((res) => {
-              this.$message.success('新建成功！')
-              this.getCollections()
-              this.dialogVisibleCollection = false
-            }).catch((err) => { this.$message.error('新建失败：' + err) })
-          }
-          // 编辑更新
-          else {
-            editCollectionProgress(this.collectionForm).then((res) => {
-              this.$message.success('更新成功！')
-              this.getCollections()
-              this.dialogVisibleCollection = false
-            }).catch((err) => { this.$message.error('更新失败：' + err) })
-          }
-        }
-      })
-    },
-    // 删除回款信息
-    deleteCollection(data) {
-      this.$confirm('永久删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        delCollectionProgress(data).then((res) => {
-          this.getCollections()
+        delContractArchive(data).then((res) => {
+          this.getContractArchive()
           this.$message.success('删除成功！');
         });
       }).catch((err) => { this.$message.info('删除操作已取消'); });
@@ -798,8 +276,8 @@ export default {
 <style scoped>
 </style>
 <style lang="scss">
-.project-detail {
-  .prj-title {
+.contract-detail {
+  .title {
     font-size: 2rem;
     text-align: center;
     margin: 15px 0 15px 0;
@@ -863,59 +341,8 @@ export default {
       }
     }
   }
-  .sub-title {
-    font-size: 0.9rem;
-    margin-top: 10px;
-    padding-left: 10px;
-    border-top: 1px solid #0a1ce2;
-  }
-}
-.node-item-container {
-  .leftNote {
-    border-left: 4px solid #1e7e34;
-  }
-  .leftArchive {
-    border-left: 4px solid #ff851b;
-  }
-  .el-card {
-    margin-top: 10px;
+  .top-btns {
     margin-bottom: 10px;
-    position: relative;
-    &:last-child {
-      margin-bottom: 0px;
-    }
-  }
-  .el-card__body {
-    padding: 10px 20px;
-    .right-btns {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      .el-button {
-        margin-top: 10px;
-        &:first-child {
-          margin-top: 0;
-        }
-      }
-    }
-  }
-  .el-timeline-item__timestamp {
-    font-size: 1.1rem !important;
-  }
-  &:last-child {
-    margin-bottom: 0px;
-  }
-  .type-name,
-  .edit-info {
-    color: #606266;
-  }
-  .node-content {
-    font-size: 1rem;
-    margin: 5px 0;
-    &.archive {
-      cursor: pointer;
-      color: #0e82f5;
-    }
   }
 }
 </style>

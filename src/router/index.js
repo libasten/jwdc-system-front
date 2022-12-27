@@ -203,12 +203,13 @@ export const asyncRoutes = [
         path: 'list',
         component: () => import('@/views/contract/contract-list'),
         name: 'ContractList',
-        meta: { title: '合同管理', icon: 'documentation' }
+        meta: { title: '合同管理', icon: 'el-icon-c-scale-to-original' }
       },
       {
         path: 'detail/:id',
         component: () => import('@/views/contract/contract-detail'),
         name: 'ContractDetail',
+        hidden: true,
         meta: { title: '合同详情', icon: 'documentation' }
       },
     ]

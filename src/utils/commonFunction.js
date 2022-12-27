@@ -41,3 +41,38 @@ export function columnStyle({ row, column, rowIndex, columnIndex }) {
 export function heaerCellStyle() {
     return { color: '#444', fontSize: '16px', backgroundColor: '#F3F6FC' }
 }
+
+// 下载文件
+export function downloadFile(url, fileName) {
+    try {
+        let req = new XMLHttpRequest();
+        req.open("GET", url, true);
+        req.responseType = "blob";
+        req.send();
+        req.onreadystatechange = function () {
+            if (req.readyState === 4 && req.status === 200) {
+                if (typeof window.chrome !== 'undefined') {
+                    // Chrome version
+                    var link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(req.response);
+                    link.download = fileName;
+                    link.click();
+                } else if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                    // IE version
+                    var blob = new Blob([req.response], { type: 'application/force-download' });
+                    window.navigator.msSaveBlob(blob, fileName);
+                } else {
+                    // Firefox version
+                    var file = new File([req.response], fileName, { type: 'application/force-download' });
+                    window.open(URL.createObjectURL(file));
+                }
+            }
+            if (req.readyState === 4 && req.status !== 200) {
+                console.log('错误信息：<br/>' + req.status + '<br/>' + req.statusText);
+            }
+        };
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
