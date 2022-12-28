@@ -215,6 +215,26 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/bid',
+    component: Layout,
+    meta: { title: '投标管理', icon: 'el-icon-wallet', auth: '18-1' },
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/bid/bid-list'),
+        name: 'BidList',
+        meta: { title: '投标管理', icon: 'el-icon-wallet' }
+      },
+      {
+        path: 'detail/:id',
+        component: () => import('@/views/bid/bid-detail'),
+        name: 'BidDetail',
+        hidden: true,
+        meta: { title: '投标详情', icon: 'documentation' }
+      },
+    ]
+  },
+  {
     path: '/icon',
     component: Layout,
     children: [

@@ -101,7 +101,7 @@
 
 import {
   fetchContractDetail, fetchContractArchive,
-  createContractArchive, editContractArchive, delContractArchive, fetchContractArchiveUrl
+  createContractArchive, editContractArchive, delContractArchive
 } from '@/api/contract';
 import { deepClone } from '@/utils/index'
 import { downloadFile } from '@/utils/req-down'
@@ -160,7 +160,6 @@ export default {
     getContractArchive() {
       fetchContractArchive(this.postForm.id).then((res) => {
         this.contractFileList = res.data.filter(a => a.status === 1)
-        console.log(res.data)
         this.loading = false
       }).catch((err) => { this.$message.error('获取合同附件错误，错误信息：' + err) });
     },

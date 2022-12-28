@@ -61,19 +61,12 @@ export function createContractArchive(pa, data) {
   })
 }
 // 编辑合同附件文件
-export function editContractArchive(pa) {
+export function editContractArchive(pa, data) {
   return request({
     url: '/Contracts/EditContractArchive',
     method: 'post',
     params: pa,
-  })
-}
-// 获取附件下载路径
-export function fetchContractArchiveUrl(data) {
-  return request({
-    // url: '/Contracts/DownloadContractArchive?id=' + data,
-    url: '/Projects/DownloadProjectArchive?id=38',
-    method: 'get',
+    data: data,
   })
 }
 

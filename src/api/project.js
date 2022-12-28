@@ -415,11 +415,12 @@ export function createProjectArchive(pa, data) {
   })
 }
 // 编辑节点附件
-export function editProjectArchive(pa) {
+export function editProjectArchive(pa, data) {
   return request({
     url: '/Projects/EditProjectArchive',
     method: 'post',
     params: pa,
+    data: data,
   })
 }
 // 删除节点附件
