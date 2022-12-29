@@ -10,7 +10,7 @@
       </el-button-group>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" :cell-style="columnStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" :cell-style="columnStyle">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -53,7 +53,7 @@
 <script>
 
 import { fetchProjectArchiveType, editProjectArchiveType, createProjectArchiveType, delProjectArchiveType } from '@/api/project';
-import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import { headerCellStyle, columnStyle } from '@/utils/commonFunction'
 export default {
   name: 'ProjectArchiveType',
   components: {},
@@ -182,7 +182,7 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
-    heaerCellStyle,
+    headerCellStyle,
     columnStyle
   },
 };

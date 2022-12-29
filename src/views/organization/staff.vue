@@ -11,7 +11,7 @@
       </el-button-group>
     </div>
     <div class="table-view">
-      <el-table ref="vTable" v-loading="listLoading" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" :cell-style="columnStyle" @current-change="handleCurrentChange">
+      <el-table ref="vTable" v-loading="listLoading" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" :cell-style="columnStyle" @current-change="handleCurrentChange">
         <el-table-column v-if="false" label="id">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -166,7 +166,7 @@
 <script>
 
 import { fetchStaffs, editStaff, createStaff, resignStaff, getStaffEnum, getStaff } from '@/api/organization'
-import { heaerCellStyle, columnStyle, myString2Array, array2myString } from '@/utils/commonFunction'
+import { headerCellStyle, columnStyle, myString2Array, array2myString } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 export default {
   name: 'Staff',
@@ -342,7 +342,7 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
-    heaerCellStyle,
+    headerCellStyle,
     columnStyle
   }
 }

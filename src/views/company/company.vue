@@ -1,7 +1,6 @@
 <template>
   <!-- 公司信息 -->
   <div class="app-container company-detail">
-    <div class="title">{{postForm.name}}</div>
     <el-collapse v-model="activeNames">
       <el-collapse-item title="1. 公司基本信息" name="1">
         <el-card>
@@ -48,7 +47,7 @@
         <div class="top-btns">
           <el-button size="mini" type="primary" @click="addArchive">上传公司附件</el-button>
         </div>
-        <el-table :data="archiveFileList" border :header-cell-style="heaerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
+        <el-table :data="archiveFileList" border :header-cell-style="headerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
           <el-table-column label="文件名称" min-width="50" show-overflow-tooltip>
             <template slot-scope="{ row }">
               <span>{{ row.name }}</span>
@@ -262,7 +261,7 @@ export default {
         });
       }).catch((err) => { this.$message.info('删除操作已取消'); });
     },
-    heaerCellStyle() {
+    headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
     }
   },
@@ -273,12 +272,6 @@ export default {
 </style>
 <style lang="scss">
 .company-detail {
-  .title {
-    font-size: 2rem;
-    text-align: center;
-    margin: 15px 0 15px 0;
-    color: #333;
-  }
   .el-collapse-item__header {
     font-size: 1rem;
     background-color: #f5f5f7;

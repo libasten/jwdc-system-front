@@ -49,7 +49,7 @@
         <div class="top-btns">
           <el-button size="mini" type="primary" @click="addArchive">上传文件</el-button>
         </div>
-        <el-table :data="contractFileList" border :header-cell-style="heaerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
+        <el-table :data="contractFileList" border :header-cell-style="headerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
           <el-table-column label="文件名称" min-width="40" show-overflow-tooltip>
             <template slot-scope="{ row }">
               <span>{{ row.name }}</span>
@@ -265,7 +265,7 @@ export default {
         });
       }).catch((err) => { this.$message.info('删除操作已取消'); });
     },
-    heaerCellStyle() {
+    headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
     }
   },

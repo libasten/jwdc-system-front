@@ -10,7 +10,7 @@
       </el-button-group>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle" @current-change="handleCurrentChange">
+      <el-table v-loading="listLoading" ref="vTable" :data="list" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" @current-change="handleCurrentChange">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -53,7 +53,7 @@
 <script>
 
 import { fetchShareList, fetchNewShare, createPrjShare, editPrjShare, deletePrjShare } from '@/api/project';
-import { heaerCellStyle, columnStyle, array2myString, myString2Array } from '@/utils/commonFunction'
+import { headerCellStyle, columnStyle, array2myString, myString2Array } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 
 export default {
@@ -199,7 +199,7 @@ export default {
       this.$refs.vTable.setCurrentRow();
     },
     array2myString, myString2Array,
-    heaerCellStyle, columnStyle
+    headerCellStyle, columnStyle
   },
 };
 </script>

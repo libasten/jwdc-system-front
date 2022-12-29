@@ -31,7 +31,7 @@
       <el-divider class="bottom-divider"><span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{searchForm.keyword}} ”</span>的筛选结果</span></el-divider>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -98,7 +98,7 @@
 <script>
 
 import { fetchProjectListPaged, delProject } from '@/api/project';
-import { heaerCellStyle, columnStyle } from '@/utils/commonFunction'
+import { headerCellStyle, columnStyle } from '@/utils/commonFunction'
 import ProjectAppoint from '@/views/project/components/project-appoint'
 import ProjectMilestone from '@/views/project/components/project-milestone'
 import ProjectShare from '@/views/project/components/project-share'
@@ -296,7 +296,7 @@ export default {
         this.doSearch(this.currentPage, this.pageSize)
       }
     },
-    heaerCellStyle,
+    headerCellStyle,
     columnStyle
   },
 };

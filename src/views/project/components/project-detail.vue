@@ -116,7 +116,7 @@
       <el-collapse-item title="3. 项目合同" name="3">
         <div v-if="contracts.length===0">该项目还没有合同</div>
         <div v-else>
-          <el-table :data="contracts" border size="small" :header-cell-style="heaerCellStyle">
+          <el-table :data="contracts" border size="small" :header-cell-style="headerCellStyle">
             <el-table-column label="合同名称" min-width="75">
               <template slot-scope="{ row }">
                 <span>{{ row.text }}</span>
@@ -150,7 +150,7 @@
                 </el-form-item>
               </el-form>
             </el-col>
-            <el-table :data="invoiceList" border size="mini" :header-cell-style="heaerCellStyle">
+            <el-table :data="invoiceList" border size="mini" :header-cell-style="headerCellStyle">
               <el-table-column label="开票日期" min-width="30" align="center">
                 <template slot-scope="{ row }">
                   <span>{{ row.dateFormat }}</span>
@@ -190,7 +190,7 @@
                 </el-form-item>
               </el-form>
             </el-col>
-            <el-table :data="collectionList" border size="mini" :header-cell-style="heaerCellStyle">
+            <el-table :data="collectionList" border size="mini" :header-cell-style="headerCellStyle">
               <el-table-column label="回款日期" min-width="30" align="center">
                 <template slot-scope="{ row }">
                   <span>{{ row.dateFormat }}</span>
@@ -241,7 +241,7 @@
       <el-collapse-item title="4. 招投标" name="4">
         <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
         <div v-else>
-          <el-table :data="bids" border size="small" :header-cell-style="heaerCellStyle">
+          <el-table :data="bids" border size="small" :header-cell-style="headerCellStyle">
             <el-table-column label="招投标名称" min-width="75">
               <template slot-scope="{ row }">
                 <span>{{ row.text }}</span>
@@ -787,7 +787,7 @@ export default {
         });
       }).catch((err) => { this.$message.info('删除操作已取消'); });
     },
-    heaerCellStyle() {
+    headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
     }
   },

@@ -11,7 +11,7 @@
       </el-button-group>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="heaerCellStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -129,7 +129,7 @@
 <script>
 
 import { fetchBids, editBid, createBid, deleteBid } from '@/api/bid';
-import { heaerCellStyle } from '@/utils/commonFunction'
+import { headerCellStyle } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 export default {
   name: 'BidList',
@@ -259,7 +259,7 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
-    heaerCellStyle
+    headerCellStyle
   },
 };
 </script>
