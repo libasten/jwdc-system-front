@@ -235,6 +235,19 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/company',
+    component: Layout,
+    meta: { title: '公司信息', icon: 'el-icon-school', auth: '1-1' },
+    children: [
+      {
+        path: 'Info',
+        component: () => import('@/views/company/company'),
+        name: 'CompanyInfo',
+        meta: { title: '公司信息', icon: 'el-icon-school' }
+      },
+    ]
+  },
+  {
     path: '/icon',
     component: Layout,
     children: [
