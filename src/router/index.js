@@ -248,6 +248,37 @@ export const asyncRoutes = [
     ]
   },
   {
+    path: '/workflow',
+    component: Layout,
+    meta: { title: '业务流程', icon: 'el-icon-document-checked' },
+    children: [
+      {
+        path: 'todo',
+        component: () => import('@/views/workflow/todo'),
+        name: 'Todo',
+        meta: { title: '待办事务', icon: 'documentation' }
+      },
+      {
+        path: 'create',
+        component: () => import('@/views/workflow/create'),
+        name: 'Create',
+        meta: { title: '新建流程', icon: 'documentation' }
+      },
+      {
+        path: 'doing',
+        component: () => import('@/views/workflow/doing'),
+        name: 'Doing',
+        meta: { title: '我的经办', icon: 'documentation' }
+      },
+      {
+        path: 'done',
+        component: () => import('@/views/workflow/done'),
+        name: 'Done',
+        meta: { title: '完结流程', icon: 'documentation' }
+      },
+    ]
+  },
+  {
     path: '/icon',
     component: Layout,
     children: [

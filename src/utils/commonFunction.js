@@ -38,8 +38,13 @@ export function columnStyle({ row, column, rowIndex, columnIndex }) {
 }
 
 // 表头样式
-export function heaerCellStyle() {
+export function headerCellStyle() {
     return { color: '#444', fontSize: '16px', backgroundColor: '#F3F6FC' }
+}
+
+// 工作流表行样式
+export function workflowRowStyle() {
+    return { cursor: 'pointer', }
 }
 
 // 下载文件
@@ -75,4 +80,18 @@ export function downloadFile(url, fileName) {
     catch (error) {
         console.log(error)
     }
+}
+
+// 工作流4个路由切换
+export function goTodo() {
+    this.$router.push({ path: '/workflow/todo' })
+}
+export function goCreate() {
+    this.$router.push({ path: '/workflow/Create' })
+}
+export function goDoing() {
+    this.$router.push({ path: '/workflow/doing' })
+}
+export function goDone() {
+    this.$router.push({ path: '/workflow/done' })
 }
