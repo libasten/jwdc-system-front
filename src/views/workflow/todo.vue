@@ -7,7 +7,7 @@
       <el-button icon="el-icon-football" size="small" :type="$route.name==='Doing'? 'primary' : 'info'" @click.native="goDoing">经办流程</el-button>
       <el-button icon="el-icon-finished" size="small" :type="$route.name==='Done'? 'primary' : 'info'" @click.native="goDone">完结流程</el-button>
     </div>
-    <el-table :data="todoList" border v-loading="loading" :header-cell-style="headerCellStyle">
+    <el-table :data="todoList.slice((currentPage-1)*pageSize,currentPage*pageSize)" border v-loading="loading" :header-cell-style="headerCellStyle" @row-click="rowClick">
       <el-table-column label="id" v-if="false">
         <template slot-scope="{ row }">
           <span>{{ row.id }}</span>
@@ -18,12 +18,12 @@
           <span>{{ row.starterName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="主题" min-width="30" align="center" show-overflow-tooltip>
+      <el-table-column label="主题" min-width="25" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.workflowCategoryName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="当前处理人" min-width="15" align="center" show-overflow-tooltip>
+      <el-table-column label="当前处理人" min-width="20" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.currentHandler }}</span>
         </template>
@@ -33,14 +33,9 @@
           <span>{{ row.currentStatus }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="发起时间" min-width="15" align="center" show-overflow-tooltip>
+      <el-table-column label="发起时间" min-width="25" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.updateTimeFormat }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" min-width="10" align="center" show-overflow-tooltip>
-        <template slot-scope="{ row }">
-          <el-button size="small" type="primary" plain @click="open(row)">打开</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -72,7 +67,7 @@ export default {
     // 获取数据详情
     getTodoList() {
       this.loading = true;
-      this.list = [];
+      this.todoList = [];
       fetchTodoList().then(res => {
         this.todoList = res.data
         this.todoList.push(
@@ -96,7 +91,9 @@ export default {
         this.loading = false
       }).catch((err) => { this.$message.error('错误信息：' + err) });
     },
-
+    rowClick(row, column, event) {
+      this.$router.push({ path: '/workflow/expense/detail/' + row.id })
+    },
     // 每页显示数目变动
     handleSizeChange(val) {
       this.pageSize = val
@@ -105,9 +102,6 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
-    open(data) {
-      console.log(data)
-    }
   },
 };
 </script>
@@ -115,15 +109,4 @@ export default {
 <style scoped>
 </style>
 <style lang="scss">
-.workflow-page {
-  .flow-btns {
-    margin-bottom: 20px;
-    i {
-      margin-right: 4px;
-    }
-  }
-  .el-table--border td {
-    border-right: 0;
-  }
-}
 </style>

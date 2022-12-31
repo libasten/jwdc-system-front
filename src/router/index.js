@@ -276,6 +276,20 @@ export const asyncRoutes = [
         name: 'Done',
         meta: { title: '完结流程', icon: 'documentation' }
       },
+      {
+        path: 'expense/detail/:id',
+        component: () => import('@/views/workflow/expense'),
+        name: 'ExpenseDetail',
+        hidden: true,
+        meta: { title: '报销流程单', icon: 'documentation' }
+      },
+      {
+        path: 'expense/create',
+        component: () => import('@/views/workflow/expense'),
+        name: 'ExpenseCreate',
+        hidden: true,
+        meta: { title: '新建报销流程单', icon: 'documentation' }
+      },
     ]
   },
   {

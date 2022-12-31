@@ -211,3 +211,24 @@ aside {
     }
   }
 }
+
+// 流程页面表格样式
+.workflow-page {
+  .flow-btns {
+    margin-bottom: 20px;
+
+    i {
+      margin-right: 4px;
+    }
+  }
+
+  .el-table--border td {
+    border-right: 0;
+  }
+
+  .el-table--enable-row-hover .el-table__body tr:hover>td {
+    background-color: #0e60c590 !important;
+    color: #fff;
+    cursor: pointer;
+  }
+}

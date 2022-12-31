@@ -87,7 +87,7 @@ export function goTodo() {
     this.$router.push({ path: '/workflow/todo' })
 }
 export function goCreate() {
-    this.$router.push({ path: '/workflow/Create' })
+    this.$router.push({ path: '/workflow/create' })
 }
 export function goDoing() {
     this.$router.push({ path: '/workflow/doing' })

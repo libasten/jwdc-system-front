@@ -7,13 +7,18 @@
       <el-button icon="el-icon-football" size="small" :type="$route.name==='Doing'? 'primary' : 'info'" @click.native="goDoing">经办流程</el-button>
       <el-button icon="el-icon-finished" size="small" :type="$route.name==='Done'? 'primary' : 'info'" @click.native="goDone">完结流程</el-button>
     </div>
-    <el-table :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" border fit stripe highlight-current-row v-loading="loading" :header-cell-style="headerCellStyle" :row-style="workflowRowStyle">
-      <el-table-column label="发起人员" min-width="20" align="center" show-overflow-tooltip>
+    <el-table :data="doingList.slice((currentPage-1)*pageSize,currentPage*pageSize)" border fit stripe highlight-current-row v-loading="loading" :header-cell-style="headerCellStyle" :row-style="workflowRowStyle" @row-click="rowClick">
+      <el-table-column label="id" v-if="false">
+        <template slot-scope="{ row }">
+          <span>{{ row.id }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="发起人员" min-width="15" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.starterName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="主题" min-width="30" align="center" show-overflow-tooltip>
+      <el-table-column label="主题" min-width="25" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.workflowCategoryName }}</span>
         </template>
@@ -28,7 +33,7 @@
           <span>{{ row.currentStatus }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="更新时间" min-width="15" align="center" show-overflow-tooltip>
+      <el-table-column label="更新时间" min-width="25" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.updateTimeFormat }}</span>
         </template>
@@ -62,11 +67,15 @@ export default {
     // 获取数据详情
     getDoingList() {
       this.loading = true;
-      this.list = [];
+      this.doingList = [];
       fetchDoingList().then(res => {
         this.doingList = res.data
+        this.total = res.data.length
         this.loading = false
       }).catch(err => { this.$message.error('错误信息：' + err) });
+    },
+    rowClick(row, column, event) {
+      this.$router.push({ path: '/workflow/expense/detail/' + row.id })
     },
     // 每页显示数目变动
     handleSizeChange(val) {
@@ -83,12 +92,4 @@ export default {
 <style scoped>
 </style>
 <style lang="scss">
-.workflow-page {
-  .flow-btns {
-    margin-bottom: 20px;
-    i {
-      margin-right: 4px;
-    }
-  }
-}
 </style>

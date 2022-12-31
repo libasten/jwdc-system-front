@@ -8,7 +8,7 @@
       <el-button icon="el-icon-finished" size="small" :type="$route.name==='Done'? 'primary' : 'info'" @click.native="goDone">完结流程</el-button>
     </div>
     <el-card shadow="never" style="padding:10px 20px;margin-top:40px;">
-      <el-button icon="el-icon-money" type="primary" size="large" plain @click.native="goDone" style="width:100%">新建报销流程</el-button>
+      <el-button icon="el-icon-money" type="primary" size="large" plain @click.native="createExpense" style="width:100%">新建报销流程</el-button>
     </el-card>
   </div>
 </template>
@@ -32,6 +32,9 @@ export default {
     goDoing,
     goDone,
     headerCellStyle,
+    createExpense() {
+      this.$router.push({ path: '/workflow/expense/create' })
+    },
   },
 };
 </script>
