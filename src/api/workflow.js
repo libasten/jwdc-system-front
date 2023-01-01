@@ -21,6 +21,7 @@ export function fetchDoneList() {
     method: 'get',
   })
 }
+
 //#endregion
 
 //#region 报销流程单
@@ -51,6 +52,44 @@ export function fetchLogList(flowId) {
   return request({
     url: '/Workflows/GetTravelLogs?expenseWorkflowId=' + flowId,
     method: 'get',
+  })
+}
+// 初始化报销明细
+export function newExpenseCategory() {
+  return request({
+    url: '/Workflows/NewExpenseCategory',
+    method: 'get',
+  })
+}
+// 创建报销明细
+export function createExpenseCategory(pa) {
+  return request({
+    url: '/Workflows/CreateExpenseCategory',
+    method: 'post',
+    params: pa
+  })
+}
+// 获取报销明细项
+export function fetchExpenseCategory(expenseItemId) {
+  return request({
+    url: '/Workflows/GetExpenseCategory?id=' + expenseItemId,
+    method: 'get',
+  })
+}
+// 编辑报销明细
+export function editExpenseCategory(pa) {
+  return request({
+    url: '/Workflows/EditExpenseCategory',
+    method: 'post',
+    params: pa
+  })
+}
+// 删除报销明细
+export function delExpenseCategory(data) {
+  return request({
+    url: '/Workflows/DeleteExpenseCategory',
+    method: 'delete',
+    params: { id: data.id }
   })
 }
 //#endregion

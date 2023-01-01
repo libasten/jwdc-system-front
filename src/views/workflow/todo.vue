@@ -70,24 +70,6 @@ export default {
       this.todoList = [];
       fetchTodoList().then(res => {
         this.todoList = res.data
-        this.todoList.push(
-          {
-            id: 1, starterName: '张三1', workflowCategoryName: '报销单据',
-            currentHandler: '王五', currentStatus: '审批', updateTimeFormat: '2022-1-1'
-          },
-          {
-            id: 2, starterName: '张三2', workflowCategoryName: '报销单据',
-            currentHandler: '王五', currentStatus: '审批', updateTimeFormat: '2022-1-2'
-          },
-          {
-            id: 3, starterName: '张三3', workflowCategoryName: '报销单据',
-            currentHandler: '王五', currentStatus: '审批', updateTimeFormat: '2022-1-3'
-          },
-          {
-            id: 4, starterName: '张三4', workflowCategoryName: '报销单据',
-            currentHandler: '王五', currentStatus: '审批', updateTimeFormat: '2022-1-4'
-          },
-        )
         this.loading = false
       }).catch((err) => { this.$message.error('错误信息：' + err) });
     },

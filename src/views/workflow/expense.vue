@@ -162,23 +162,57 @@
       </el-col>
     </el-row>
     <el-dialog title="报销明细" :visible.sync="dialogVisibleExpense" :close-on-click-modal="false" width="60%">
-      <el-form ref="expenseForm" :model="expenseForm" :rules="rules" label-width="80px">
+      <el-form ref="expenseForm" :model="expenseForm" :rules="rules" label-width="60px">
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="expenseForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="expenseForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="expenseForm.description"></el-input>
-        </el-form-item>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="类别" prop="category">
+              <el-select v-model="expenseForm.category" filterable>
+                <el-option v-for="(item,idx) in categories" :key=idx :value="item.id" :label="item.text"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="时间" prop="date">
+              <el-date-picker v-model="expenseForm.date" :clearable="false"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="单价" prop="amount">
+              <el-tooltip effect="dark" content="单位：元，只接受2位小数，精确到角。" placement="bottom">
+                <el-input-number v-model="expenseForm.amount" :min="0" :controls="false" :precision="2"></el-input-number>
+              </el-tooltip>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="数量" prop="count">
+              <el-tooltip effect="dark" content="只接受正整数。" placement="bottom">
+                <el-input-number v-model="expenseForm.count" :min="0" :controls="false" :precision="0"></el-input-number>
+              </el-tooltip>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="小计" prop="totalAmount">
+              <el-tooltip effect="dark" content="单位：元，自动计算，无需编辑。" placement="bottom">
+                <el-input v-model="totalAmount" disabled></el-input>
+              </el-tooltip>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="说明" prop="description">
+              <el-input type="textarea" :rows="3" v-model="expenseForm.description" placeholder="请输入备注说明。"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleExpense = false">取 消</el-button>
-        <el-button type="primary" @click="logSubmit">确 定</el-button>
+        <el-button type="primary" @click="expenseSubmit">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="行动日志" :visible.sync="dialogVisibleLog" :close-on-click-modal="false" width="60%">
+    <el-dialog title="行动日志" :visible.sync="dialogVisibleLog" :close-on-click-modal="false" width="50%">
       <el-form ref="logForm" :model="logForm" :rules="rules" label-width="80px">
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="logForm.id"></el-input>
@@ -199,12 +233,25 @@
 </template>
 
 <script>
-import { newExpense, saveExpense, fetchExpenseDetail, fetchLogList } from "@/api/workflow";
+import {
+  saveExpense, fetchExpenseDetail, fetchLogList,
+  newExpense, newExpenseCategory, fetchExpenseCategory, createExpenseCategory, editExpenseCategory, delExpenseCategory
+} from "@/api/workflow";
 import { goTodo } from "@/utils/commonFunction";
+import { deepClone } from "@/utils/index";
 
 export default {
   name: 'WorkFlowExpense',
   data() {
+    // 自定义校验
+    var checkAmount = (rule, value, callback) => {
+      if (parseInt(value) === 0) {
+        return callback(new Error('不能为0和空值'));
+      }
+      else {
+        callback();
+      }
+    }
     return {
       flow: {},
       staff: '',
@@ -216,7 +263,19 @@ export default {
       expenseList: [],
       expenseCurrentRow: null,
       dialogVisibleExpense: false,
-      expenseForm: { id: '' },
+      expenseForm: {
+        id: '',
+        // 隶属的流程单据，刚初始化的时候不存在ID
+        expenseWorkflowId: '',
+        // 类别，就是会计科目
+        category: '',
+        date: new Date(),
+        amount: 0,
+        count: 1,
+        description: '',
+      },
+      // 会计科目
+      categories: [],
       projectId: '',
       projects: [],
       // 单据上信息可否编辑
@@ -232,10 +291,18 @@ export default {
       logForm: { id: '' },
       // 审批信息
       financeOffice: '同意', //财务专员意见-目前只要审批到这里，只有一个节点。
-      rules: {}
-    };
+      rules: {
+        category: [{ required: true, message: '请选择费用类别', trigger: 'blur' }],
+        date: [{ required: true, message: '请选择时间', trigger: 'blur' }],
+        amount: [{ validator: checkAmount, trigger: 'blur' }]
+      }
+    }
   },
   computed: {
+    // 报销明细的小计
+    totalAmount: function () {
+      return this.expenseForm.amount * this.expenseForm.count
+    },
     getExpenseSum: function () {
       let sumTemp = 0
       if (this.expenseList.length > 0) {
@@ -244,9 +311,8 @@ export default {
         })
         return sumTemp.toFixed(2)
       }
-    }
-  }
-  ,
+    },
+  },
   filters: {
     dateFormat(val) {
       let temp = new Date(val).toLocaleDateString()
@@ -303,15 +369,44 @@ export default {
         }).catch(err => { this.$message.error('获取工作流详情失败：' + err) })
       }
     },
-
     // 新建报销明细
     addExpenseItem() {
+      this.categories = []
+      newExpenseCategory().then(res => {
+        this.categories = res.data.categories
+        this.expenseForm.category = 1
+      }).catch(err => { this.$message.error('获取报销费用类别失败：' + err) })
+      if (this.$refs.expenseForm !== undefined) {
+        this.$refs.expenseForm.clearValidate()
+      }
+      Object.assign(this.$data.expenseForm, this.$options.data().expenseForm)
       this.dialogVisibleExpense = true
     },
     // 编辑报销明细
-    editExpenseItem() { },
+    editExpenseItem() {
+      if (this.$refs.expenseForm !== undefined) {
+        this.$refs.expenseForm.clearValidate()
+      }
+      fetchExpenseCategory(this.expenseCurrentRow.id).then(res => {
+        this.categories = res.data.categories
+      }).catch(err => { this.$message.error('获取报销明细项失败：' + err) })
+      this.expenseForm = deepClone(this.expenseCurrentRow)
+      this.dialogVisibleExpense = true
+    },
     // 删除报销明细
-    deleteExpenseItem() { },
+    deleteExpenseItem() {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        delExpenseCategory(this.expenseCurrentRow).then(res => {
+          const idx = this.expenseList.findIndex(a => a.id === this.expenseCurrentRow.id)
+          this.expenseList.splice(idx, 1);
+          this.$message.success('删除成功!');
+        });
+      }).catch(err => { this.$message.info('已取消删除' + err) });
+    },
     // 选中报销明细行
     handleExpenseCurrentChange(val) {
       this.expenseCurrentRow = val;
@@ -322,7 +417,30 @@ export default {
     },
     // 报销明细提交
     expenseSubmit() {
-
+      this.$refs.expenseForm.validate((valid) => {
+        if (valid) {
+          this.expenseForm.expenseWorkflowId = this.flow.id
+          // 新建
+          if (this.expenseForm.id === '') {
+            createExpenseCategory(this.expenseForm).then(res => {
+              this.expenseList.unshift(res.data);
+              this.dialogVisibleExpense = false
+              this.$message.success('新建成功！')
+            }).catch(err => { this.$message.error('创建报销明细项失败：' + err) })
+          }
+          // 编辑
+          else {
+            editExpenseCategory(this.expenseForm).then(res => {
+              const idx = this.expenseList.findIndex(a => a.id === this.expenseCurrentRow.id)
+              // 采用这种方法修改数组vue计算属性才能监测到。
+              this.$set(this.expenseList, idx, res.data)
+              this.$refs.expenseTable.setCurrentRow(this.expenseList[idx]);
+              this.$message.success('更新成功！')
+              this.dialogVisibleExpense = false
+            }).catch(err => { this.$message.error('更新失败：' + err) })
+          }
+        }
+      })
     },
     // 新建行动日志
     addLog() {
@@ -405,9 +523,7 @@ export default {
         margin: 0 10px;
         color: #ff0000;
       }
-      .el-select {
-        width: 100%;
-      }
+
       .el-input.is-disabled .el-input__inner,
       .el-textarea.is-disabled .el-textarea__inner {
         background-color: #f5f7fa;
@@ -432,6 +548,19 @@ export default {
           width: 140px;
         }
       }
+    }
+  }
+  .el-input-number,
+  .el-date-editor,
+  .el-select {
+    width: 100%;
+  }
+  .el-input.is-disabled {
+    .el-input__inner {
+      background-color: rgb(246, 246, 246);
+      border-bottom: 1px solid #ababab;
+      color: #303133;
+      cursor: default;
     }
   }
 }
