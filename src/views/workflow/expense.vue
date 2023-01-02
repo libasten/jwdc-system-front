@@ -2,7 +2,7 @@
   <!-- 报销单 -->
   <div class="app-container workflow-detail-page">
     <el-row :gutter="20">
-      <el-col :md="18" class="detail-div">
+      <el-col :md="20" class="detail-div">
         <el-card shadow="hover">
           <div slot="header" class="clearfix">
             <span style="font-size:1.4rem;font-weight:700;">报销单据</span>
@@ -80,9 +80,9 @@
           </div>
           <div class="section-sub-title" style="margin-top:10px;">报销总金额：<span class="sum">{{getExpenseSum}}</span>元</div>
           <div class="section-sub-title">报销说明</div>
-          <el-input type="textarea" :disabled="!expenseEditable" v-model="flow.reason"></el-input>
+          <el-input type="textarea" :disabled="!expenseEditable" v-model="reason"></el-input>
           <div class="section-sub-title">关联项目 <span style="color:#909399;font-weight:500;font-size:0.6rem;">支持搜索，非必填</span></div>
-          <el-select v-model="flow.projectId" filterable clearable :disabled="!expenseEditable">
+          <el-select v-model="projectId" filterable :clearable=false :disabled="!expenseEditable">
             <el-option v-for="(item,idx) in projects" :key="idx" :label="item.text" :value="item.id"></el-option>
           </el-select>
           <div class="section-sub-title">行动日志</div>
@@ -96,7 +96,7 @@
               </el-button-group>
             </div>
             <div class="table-view">
-              <el-table ref="logTable" v-loading="logLoading" :data="logList" border fit stripe highlight-current-row :header-cell-style="innerHeaderCellStyle" @current-change="handleExpenseCurrentChange">
+              <el-table ref="logTable" v-loading="logLoading" :data="logList" border fit stripe highlight-current-row :header-cell-style="innerHeaderCellStyle" @current-change="handleLogCurrentChange">
                 <el-table-column label="id" v-if="false">
                   <template slot-scope="{ row }">
                     <span>{{ row.id }}</span>
@@ -107,22 +107,22 @@
                     <span>{{  scope.$index + 1 }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column min-width="15%" label="开始时间" align="center" show-overflow-tooltip>
+                <el-table-column min-width="20%" label="开始时间" align="center" show-overflow-tooltip>
                   <template slot-scope="{ row }">
-                    <span>{{ row.startDate|dateFormat }}</span>
+                    <span>{{ row.startDate|dateTimeFormat }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column min-width="15%" label="结束时间" align="center" show-overflow-tooltip>
+                <el-table-column min-width="20%" label="结束时间" align="center" show-overflow-tooltip>
                   <template slot-scope="{ row }">
-                    <span>{{ row.endDate|dateFormat }}</span>
+                    <span>{{ row.endDate|dateTimeFormat }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column min-width="12%" label="出发地" align="center" show-overflow-tooltip>
+                <el-table-column min-width="10%" label="出发地" align="center" show-overflow-tooltip>
                   <template slot-scope="{ row }">
                     <span>{{ row.startLocation }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column min-width="12%" label="目的地" align="center" show-overflow-tooltip>
+                <el-table-column min-width="10%" label="目的地" align="center" show-overflow-tooltip>
                   <template slot-scope="{ row }">
                     <span>{{ row.targetLocation }}</span>
                   </template>
@@ -132,7 +132,7 @@
                     <span>{{ row.arrangement }}</span>
                   </template>
                 </el-table-column>
-                <el-table-column min-width="14%" label="备注说明" align="center" show-overflow-tooltip>
+                <el-table-column min-width="10%" label="说明" align="center" show-overflow-tooltip>
                   <template slot-scope="{ row }">
                     <span>{{ row.description }}</span>
                   </template>
@@ -143,13 +143,15 @@
           <el-divider></el-divider>
           <div class="section-title">审批信息</div>
           <div class="section-sub-title">财务意见 </div>
-          <el-input v-model="financeOffice" disabled> </el-input>
+          <el-input v-model="financeOfficeOpinion" disabled> </el-input>
+          <div class="section-sub-title"></div>
+          <el-button type="primary" size="small" icon="el-icon-download" @click.native="downloadExpenseTable">下载</el-button>
         </el-card>
       </el-col>
-      <el-col :md="6" class="op-div">
+      <el-col :md="4" class="op-div">
         <el-card shadow="hover">
           <div slot="header" class="clearfix">
-            <span style="font-size:1.4rem">流程操作</span>
+            <span style="font-size:1.2rem;font-weight:700;color:#666;">流程操作</span>
           </div>
           <div class="op-btns">
             <el-button plain v-if="showSaveBtn" icon="el-icon-camera" type="primary" @click.native="save">保存</el-button>
@@ -212,17 +214,38 @@
         <el-button type="primary" @click="expenseSubmit">确 定</el-button>
       </span>
     </el-dialog>
-    <el-dialog title="行动日志" :visible.sync="dialogVisibleLog" :close-on-click-modal="false" width="50%">
+    <el-dialog title="行动日志" :visible.sync="dialogVisibleLog" :close-on-click-modal="false" width="66%">
       <el-form ref="logForm" :model="logForm" :rules="rules" label-width="80px">
         <el-form-item label="id" v-if="false" prop="id">
           <el-input v-model="logForm.id"></el-input>
         </el-form-item>
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="logForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="描述" prop="description">
-          <el-input v-model="logForm.description"></el-input>
-        </el-form-item>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="起止时间" prop="seDate">
+              <el-date-picker v-model="logForm.seDate" type="datetimerange" range-separator="至" start-placeholder="开始时间" end-placeholder="结束时间" :default-time="['9:00:00', '18:00:00']" :clearable="false"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="出发地点" prop="startLocation">
+              <el-input v-model="logForm.startLocation"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="目的地点" prop="targetLocation">
+              <el-input v-model="logForm.targetLocation"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="行程安排" prop="arrangement">
+              <el-input type="textarea" v-model="logForm.arrangement" placeholder="请输入行程安排"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="备注说明" prop="remark">
+              <el-input type="textarea" v-model="logForm.remark" placeholder="请输入备注说明"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleLog = false">取 消</el-button>
@@ -235,7 +258,9 @@
 <script>
 import {
   saveExpense, fetchExpenseDetail, fetchLogList,
-  newExpense, newExpenseCategory, fetchExpenseCategory, createExpenseCategory, editExpenseCategory, delExpenseCategory
+  newExpense, newExpenseCategory, fetchExpenseCategory, createExpenseCategory, editExpenseCategory, delExpenseCategory,
+  createLog, editLog, delLog,
+  approveExpense, rejectExpense,
 } from "@/api/workflow";
 import { goTodo } from "@/utils/commonFunction";
 import { deepClone } from "@/utils/index";
@@ -288,13 +313,22 @@ export default {
       logList: [],
       logCurrentRow: null,
       dialogVisibleLog: false,
-      logForm: { id: '' },
+      logForm: {
+        id: '',
+        // 隶属的流程单据，刚初始化的时候不存在ID
+        expenseWorkflowId: '',
+        seDate: '',//行动日志的起止时间数组
+        startDate: '', endDate: '',
+        startLocation: '', targetLocation: '',
+        arrangement: '', remark: ''
+      },
       // 审批信息
-      financeOffice: '同意', //财务专员意见-目前只要审批到这里，只有一个节点。
+      financeOfficeOpinion: '', //财务专员意见-目前只要审批到这里，只有一个节点。
       rules: {
         category: [{ required: true, message: '请选择费用类别', trigger: 'blur' }],
         date: [{ required: true, message: '请选择时间', trigger: 'blur' }],
-        amount: [{ validator: checkAmount, trigger: 'blur' }]
+        amount: [{ validator: checkAmount, trigger: 'blur' }],
+        seDate: [{ required: true, message: '请选择起止时间', trigger: 'blur' }]
       }
     }
   },
@@ -303,20 +337,26 @@ export default {
     totalAmount: function () {
       return this.expenseForm.amount * this.expenseForm.count
     },
+    // 报销总金额
     getExpenseSum: function () {
       let sumTemp = 0
       if (this.expenseList.length > 0) {
         this.expenseList.forEach(a => {
           sumTemp += a.totalAmount
         })
-        return sumTemp.toFixed(2)
       }
+      return sumTemp.toFixed(2)
     },
   },
   filters: {
     dateFormat(val) {
       let temp = new Date(val).toLocaleDateString()
       return temp.replace(/\//g, '-') // 利用正则可以将/换成-的分隔符
+    },
+    dateTimeFormat(val) {
+      let tempDate = new Date(val).toLocaleDateString().replace(/\//g, '-')
+      let tempTime = new Date(val).toLocaleTimeString().substring(0, 5)
+      return tempDate + ' ' + tempTime
     }
   },
   created() {
@@ -333,12 +373,14 @@ export default {
           this.department = res.data.department
           this.createTime = res.data.createTime
           this.projects = res.data.projects
+          this.projects.unshift({ id: 0, text: '无项目' })
+          this.projectId = 0
           this.expenseEditable = true
           this.showCommitBtn = false
           this.showAgreeBtn = false
           this.showDisAgreeBtn = false
         }
-        ).catch(err => { this.$message.error('创建失败：' + err) })
+        ).catch(err => { this.$message.error('初始化失败：' + err) })
       }
       // 编辑
       else {
@@ -356,6 +398,7 @@ export default {
           this.expenseEditable = this.flow.canReason
           this.reason = this.flow.reason
           this.projects = res.data.projects
+          this.projects.unshift({ id: 0, text: '无项目' })
           this.projectId = this.flow.projectId
           // 报销明细表
           this.expenseList = res.data.categories
@@ -366,11 +409,16 @@ export default {
             this.logList = res.data
             this.logLoading = false
           })
+          this.financeOfficeOpinion = this.flow.financeOfficeOpinion
         }).catch(err => { this.$message.error('获取工作流详情失败：' + err) })
       }
     },
     // 新建报销明细
     addExpenseItem() {
+      if (this.flow.id === undefined) {
+        this.$message.warning('请先保存单据后再添加明细信息。')
+        return
+      }
       this.categories = []
       newExpenseCategory().then(res => {
         this.categories = res.data.categories
@@ -444,12 +492,39 @@ export default {
     },
     // 新建行动日志
     addLog() {
+      if (this.flow.id === undefined) {
+        this.$message.warning('请先保存单据后再添加行动日志。')
+        return
+      }
+      if (this.$refs.logForm !== undefined) {
+        this.$refs.logForm.clearValidate()
+      }
+      Object.assign(this.$data.logForm, this.$options.data().logForm)
       this.dialogVisibleLog = true
     },
     // 编辑行动日志
-    editLog() { },
+    editLog() {
+      if (this.$refs.logForm !== undefined) {
+        this.$refs.logForm.clearValidate()
+      }
+      this.logCurrentRow.seDate = [this.logCurrentRow.startDate, this.logCurrentRow.endDate]
+      this.logForm = deepClone(this.logCurrentRow)
+      this.dialogVisibleLog = true
+    },
     // 删除行动日志
-    deleteLog() { },
+    deleteLog() {
+      this.$confirm('永久删除, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        delLog(this.logCurrentRow).then(res => {
+          const idx = this.logList.findIndex(a => a.id === this.logCurrentRow.id)
+          this.logList.splice(idx, 1);
+          this.$message.success('删除成功!');
+        });
+      }).catch(err => { this.$message.info('已取消删除' + err) });
+    },
     // 选中行动日志行
     handleLogCurrentChange(val) {
       this.logCurrentRow = val;
@@ -460,24 +535,97 @@ export default {
     },
     // 行动日志提交
     logSubmit() {
-
+      this.$refs.logForm.validate((valid) => {
+        if (valid) {
+          this.logForm.expenseWorkflowId = this.flow.id
+          // 获取拆分开的行动日志起始时间
+          this.logForm.startDate = this.logForm.seDate[0]
+          this.logForm.endDate = this.logForm.seDate[1]
+          // 新建
+          if (this.logForm.id === '') {
+            createLog(this.logForm).then(res => {
+              this.logList.unshift(res.data);
+              this.dialogVisibleLog = false
+              this.$message.success('新建成功！')
+            }).catch(err => { this.$message.error('创建报销明细项失败：' + err) })
+          }
+          // 编辑
+          else {
+            editLog(this.logForm).then(res => {
+              const idx = this.logList.findIndex(a => a.id === this.logCurrentRow.id)
+              // 采用这种方法修改数组vue计算属性才能监测到。
+              this.$set(this.logList, idx, res.data)
+              this.$refs.logTable.setCurrentRow(this.logList[idx]);
+              this.$message.success('更新成功！')
+              this.dialogVisibleLog = false
+            }).catch(err => { this.$message.error('更新失败：' + err) })
+          }
+        }
+      })
     },
     // 保存流程单据
     save() {
-      if (this.flow.reason.trim() === '') {
+      if (this.reason === null || this.reason.trim() === '') {
         this.$message.warning('请填写报销说明。')
         return
       }
-      saveExpense().then(res => {
+      let params = {
+        id: this.flow.id === undefined ? -1 : this.flow.id,
+        projectId: this.projectId,
+        amount: this.getExpenseSum,
+        reason: this.reason
+      }
+      console.log(params)
+      saveExpense(params).then(res => {
         this.flow = res.data
+        // 调用全局挂载的方法，关闭当前标签，跳转到详情路由
+        if (this.$route.name === 'ExpenseCreate') {
+          this.$store.dispatch("tagsView/delView", this.$route);
+          this.$router.push({ path: '/workflow/expense/detail/' + this.flow.id })
+        }
         this.showCommitBtn = true
         this.$message.success('保存单据成功！')
       }).catch(err => { this.$message.error('保存失败：' + err) })
     },
-    // 同意流程
-    agree() { },
+    // 同意（提交）流程
+    agree() {
+      let paraTemp = {
+        id: this.flow.id,
+        projectId: this.projectId,
+        amount: this.getExpenseSum,
+        reason: this.reason,
+        departmentOpinion: this.flow.canDepartmentOpinion ? "同意" : "",
+        financeOfficeOpinion: this.flow.canFinanceOfficeOpinion ? "同意" : "",
+        generalManagerOpinion: this.flow.canGeneralManagerOpinion ? "同意" : "",
+        financeOpinion: this.flow.canFinanceOpinion ? "同意" : "",
+      };
+      if (parseFloat(paraTemp.amount) === 0) {
+        this.$message.warning('报销金额合计不能为0。')
+        return;
+      }
+      approveExpense(paraTemp).then(res => {
+        if (res.status == 1) {
+          this.$message.success('操作成功！')
+          this.$router.push({ path: '/workflow/todo' })
+        }
+      }).catch(err => { this.$message.error('同意操作失败！' + err) })
+    },
     // 拒绝流程
-    disagree() { },
+    disagree() {
+      let paraTemp = {
+        id: this.flow.id,
+        departmentOpinion: this.flow.canDepartmentOpinion ? "不同意" : "",
+        financeOfficeOpinion: this.flow.canFinanceOfficeOpinion ? "不同意" : "",
+        generalManagerOpinion: this.flow.canGeneralManagerOpinion ? "不同意" : "",
+        financeOpinion: this.flow.canFinanceOpinion ? "不同意" : "",
+      };
+      rejectExpense(paraTemp).then(res => {
+        if (res.status == 1) {
+          this.$message.success('拒绝回退成功！')
+          this.$router.push({ path: '/workflow/todo' })
+        }
+      }).catch(err => { this.$message.error('同意操作失败！' + err) })
+    },
     // 下载报销明细单据
     downloadExpenseTable() { },
     innerHeaderCellStyle() {
@@ -537,15 +685,15 @@ export default {
     .el-card {
       text-align: center;
       .el-card__header {
-        padding: 14px 10px;
-        letter-spacing: 2px;
-        border-top: 4px solid #409eff;
+        padding: 15px 10px;
+        letter-spacing: 1px;
+        border-top: 5px solid #409eff;
       }
       .el-card__body {
         .el-button {
           display: block;
           margin: 0 auto 10px auto;
-          width: 140px;
+          width: 100%;
         }
       }
     }

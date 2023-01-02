@@ -33,11 +33,11 @@ export function newExpense() {
   })
 }
 // 保存报销单据
-export function saveExpense(data) {
+export function saveExpense(pa) {
   return request({
     url: '/Workflows/SaveExpenseWorkflow',
     method: 'post',
-    data: data
+    params: pa
   })
 }
 // 获取报销单详情
@@ -90,6 +90,52 @@ export function delExpenseCategory(data) {
     url: '/Workflows/DeleteExpenseCategory',
     method: 'delete',
     params: { id: data.id }
+  })
+}
+//#endregion
+
+//#region 报销行动日志
+// 创建行动日志
+export function createLog(pa) {
+  return request({
+    url: '/Workflows/CreateTravelLog',
+    method: 'post',
+    params: pa
+  })
+}
+// 编辑行动日志
+export function editLog(pa) {
+  return request({
+    url: '/Workflows/EditTravelLog',
+    method: 'post',
+    params: pa
+  })
+}
+// 删除行动日志
+export function delLog(data) {
+  return request({
+    url: '/Workflows/DeleteTravelLog',
+    method: 'delete',
+    params: { id: data.id }
+  })
+}
+//#endregion
+
+//#region 报销工作流操作
+// 同意报销
+export function approveExpense(pa) {
+  return request({
+    url: '/Workflows/ApproveExpenseWorkflow',
+    method: 'post',
+    params: pa
+  })
+}
+// 拒绝报销流程
+export function rejectExpense(pa) {
+  return request({
+    url: '/Workflows/RejectExpenseWorkflow',
+    method: 'post',
+    params: pa
   })
 }
 //#endregion

@@ -70,6 +70,7 @@ export default {
       this.todoList = [];
       fetchTodoList().then(res => {
         this.todoList = res.data
+        this.total = res.data.length
         this.loading = false
       }).catch((err) => { this.$message.error('错误信息：' + err) });
     },
