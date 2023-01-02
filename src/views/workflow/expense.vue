@@ -264,7 +264,8 @@ import {
 } from "@/api/workflow";
 import { goTodo } from "@/utils/commonFunction";
 import { deepClone } from "@/utils/index";
-
+const ExcelJS = require("exceljs");
+import { saveAs } from "file-saver";
 export default {
   name: 'WorkFlowExpense',
   data() {
@@ -627,13 +628,189 @@ export default {
       }).catch(err => { this.$message.error('同意操作失败！' + err) })
     },
     // 下载报销明细单据
-    downloadExpenseTable() { },
+    downloadExpenseTable() {
+      const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, }
+      const contentCenter = { vertical: "middle", horizontal: "center", wrapText: true, }
+      const workbook = new ExcelJS.Workbook()
+      const worksheet = workbook.addWorksheet("报销明细表-单次项目", { views: [{ showGridLines: true }], })
+      worksheet.addRow(["报销明细"]).height = 25
+      worksheet.getCell("A1").border = borderStyle
+      worksheet.mergeCells("A1", "G1")
+      // 样式-对齐
+      worksheet.getCell("A1").alignment = contentCenter
+      // 样式-字体
+      worksheet.getCell("A1").font = { size: 16, bold: true }
+      let staffName = this.staff
+      let departmentName = this.department
+      let expenseDate = this.createTime
+      let strBlank = "                     "
+      worksheet.getCell("A2").value = "报销人：" + staffName + strBlank + "部门：" + departmentName + strBlank + " 报销时间：" + expenseDate
+      worksheet.getCell("A2").border = borderStyle
+      worksheet.getCell("A2").alignment = contentCenter
+      worksheet.mergeCells("A2", "G2")
+      worksheet.getRow(2).height = 25
+      // 行填充信息
+      let titles = ["序号", "科目", "单价", "数量", "合计", "时间", "备注说明"]
+      const titleRow = worksheet.addRow(titles)
+      titleRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle
+        cell.alignment = contentCenter
+      })
+      //  从界面上的Table获数据
+      let rowDataList = []
+      // 样例数据
+      // let rowDataList = [
+      //     [1, "差旅费", 64.5, 1, 64.5, "2022.3.1", "高铁：南京南-常州北 （去程）"],
+      //     [2, "交通费", 64.5, 1, 64.5, "2022.3.1", "高铁：南京南-常州北 （去程）"],
+      // ]
+      for (let i = 0; i < this.expenseList.length; i++) {
+        const e = this.expenseList[i]
+        let arrTmep = []
+        arrTmep[0] = i + 1
+        arrTmep[1] = e.categoryName
+        arrTmep[2] = e.amount
+        arrTmep[3] = e.count
+        arrTmep[4] = e.totalAmount
+        arrTmep[5] = new Date(e.date).toLocaleDateString()
+        arrTmep[6] = e.description === null ? '' : e.description
+        rowDataList[i] = arrTmep
+      }
+      rowDataList.forEach((r) => {
+        const tempRow = worksheet.addRow(r)
+        tempRow.eachCell(function (cell, colNumber) {
+          cell.border = borderStyle
+          cell.alignment = contentCenter
+        })
+      })
+      // 空行
+      let nullRow1 = worksheet.addRow(["", "", "", "", "", "", ""])
+      nullRow1.eachCell(function (cell, colNumber) {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" }, }
+      })
+      nullRow1.height = 25
+      // 报销合计行
+      var sumMoney = this.getExpenseSum
+      const sumRow = worksheet.addRow(["报销金额合计", "", "", "", sumMoney, "", "",]) // 前两个合并，只要6个
+      // 获取新加行的行次 sumRow.number
+      worksheet.mergeCells("A" + sumRow.number, "B" + sumRow.number)
+      sumRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle
+        cell.alignment = contentCenter
+      })
+      // 合计信息加粗
+      worksheet.getCell("A" + sumRow.number).font = { bold: true }
+      worksheet.getCell("E" + sumRow.number).font = { bold: true }
+      sumRow.height = 20
+      // 空行
+      let nullRow2 = worksheet.addRow(["", "", "", "", "", "", ""])
+      nullRow2.eachCell(function (cell, colNumber) {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" }, }
+      })
+      nullRow2.height = 25
+      // 报销说明
+      const noteTitleRow = worksheet.addRow(["报销说明"])
+      noteTitleRow.height = 20
+      worksheet.getCell("A" + noteTitleRow.number).font = { bold: true }
+      worksheet.getCell("A" + noteTitleRow.number).alignment = { vertical: "middle" }
+      worksheet.mergeCells("A" + noteTitleRow.number, "G" + noteTitleRow.number)
+      noteTitleRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle
+      })
+      let strNote = this.reason
+      const noteRow = worksheet.addRow([strNote])
+      worksheet.mergeCells("A" + noteRow.number, "G" + noteRow.number)
+      noteRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle
+        cell.alignment = { vertical: "middle", wrapText: true }
+      })
+      noteRow.height = 60
+      // 空行
+      let nullRow3 = worksheet.addRow(["", "", "", "", "", "", ""])
+      nullRow3.eachCell(function (cell, colNumber) {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" }, }
+      })
+      nullRow3.height = 25
+      // 关联项目
+      const prjTitleRow = worksheet.addRow(["关联项目"])
+      prjTitleRow.height = 20
+      worksheet.getCell("A" + prjTitleRow.number).font = { bold: true }
+      worksheet.getCell("A" + prjTitleRow.number).alignment = { vertical: "middle" }
+      worksheet.mergeCells("A" + prjTitleRow.number, "G" + prjTitleRow.number)
+      prjTitleRow.eachCell(function (cell, colNumber) { cell.border = borderStyle })
+      // 项目名称
+      let prjName = this.projects.find(x => x.id === this.projectId).text
+      const prjNameRow = worksheet.addRow([" " + prjName])
+      prjNameRow.height = 25
+      worksheet.getCell("A" + prjNameRow.number).alignment = { vertical: "middle", wrapText: true, }
+      worksheet.mergeCells("A" + prjNameRow.number, "G" + prjNameRow.number)
+      prjNameRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle
+      })
+      // 行动日志
+      const logTitleRow = worksheet.addRow(["行动日志"])
+      logTitleRow.height = 20
+      worksheet.getCell("A" + logTitleRow.number).font = { bold: true }
+      worksheet.getCell("A" + logTitleRow.number).alignment = { vertical: "middle" }
+      worksheet.mergeCells("A" + logTitleRow.number, "G" + logTitleRow.number)
+      logTitleRow.eachCell(function (cell, colNumber) { cell.border = borderStyle })
+      let logRow = worksheet.addRow(["序号", "开始时间", "结束时间", "出发前办公地点", "目的地办公地点", "行程安排", "备注说明"])
+      logRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle
+        cell.alignment = contentCenter
+      })
+      let rowLogList = []
+      for (let i = 0; i < this.logList.length; i++) {
+        const e = this.logList[i]
+        let arrTmep = []
+        arrTmep[0] = i + 1
+        arrTmep[1] = new Date(e.startDate).toLocaleDateString() + ' ' + new Date(e.endDate).toLocaleTimeString()
+        arrTmep[2] = new Date(e.endDate).toLocaleDateString() + ' ' + new Date(e.endDate).toLocaleTimeString()
+        arrTmep[3] = e.startLocation === null ? '' : e.startLocation
+        arrTmep[4] = e.targetLocation === null ? '' : e.targetLocation
+        arrTmep[5] = e.arrangement === null ? '' : e.arrangement
+        arrTmep[6] = e.remark === null ? '' : e.remark
+        rowLogList[i] = arrTmep
+      }
+      rowLogList.forEach((r) => {
+        const tempRow = worksheet.addRow(r)
+        tempRow.eachCell(function (cell, colNumber) {
+          cell.border = borderStyle
+          cell.alignment = contentCenter
+        })
+      })
+
+      // 空行
+      let nullRow4 = worksheet.addRow(["", "", "", "", "", "", ""])
+      nullRow4.eachCell(function (cell, colNumber) {
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" }, }
+      })
+      nullRow4.height = 25
+      // 签字区域
+      let signText = "       经手人签字:\n\n       部门经理签字：\n\n       总（副总）经理签字："
+      let signRow = worksheet.addRow([signText])
+      signRow.height = 100
+      worksheet.getCell("A" + signRow.number).alignment = {
+        wrapText: true,
+        vertical: "middle",
+      }
+      worksheet.getCell("A" + signRow.number).border = borderStyle
+      worksheet.mergeCells("A" + signRow.number, "G" + signRow.number)
+      // 设置列属性 - 宽度
+      worksheet.getColumn(2).width = 20
+      worksheet.getColumn(3).width = 20
+      worksheet.getColumn(4).width = 20
+      worksheet.getColumn(5).width = 20
+      worksheet.getColumn(6).width = 40
+      worksheet.getColumn(7).width = 35
+      // 保存到本地
+      workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "报销单导出.xlsx")).catch((err) => console.log("Error writing excel export", err))
+    },
     innerHeaderCellStyle() {
       return { color: '#666', fontSize: '14px', backgroundColor: '#F3F6FC' }
     },
     goTodo,
   },
-};
+}
 </script>
 
 <style scoped>
