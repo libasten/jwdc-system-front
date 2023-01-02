@@ -632,7 +632,7 @@ export default {
       const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, }
       const contentCenter = { vertical: "middle", horizontal: "center", wrapText: true, }
       const workbook = new ExcelJS.Workbook()
-      const worksheet = workbook.addWorksheet("报销明细表-单次项目", { views: [{ showGridLines: true }], })
+      const worksheet = workbook.addWorksheet("报销明细表-单次报销", { views: [{ showGridLines: true }], })
       worksheet.addRow(["报销明细"]).height = 25
       worksheet.getCell("A1").border = borderStyle
       worksheet.mergeCells("A1", "G1")
