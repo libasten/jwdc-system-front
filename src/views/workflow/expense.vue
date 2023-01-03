@@ -1,168 +1,157 @@
 <template>
   <!-- 报销单 -->
   <div class="app-container workflow-detail-page">
-    <el-row :gutter="20">
-      <el-col :md="20" class="detail-div">
-        <el-card shadow="hover">
-          <div slot="header" class="clearfix">
-            <span style="font-size:1.4rem;font-weight:700;">报销单据</span>
-          </div>
-          <el-row class="base-info">
-            <el-col :span="8">
-              <span class="label">姓名：</span>
-              <span class="text">{{staff}}</span>
-            </el-col>
-            <el-col :span="8">
-              <span class="label">部门：</span>
-              <span class="text">{{department}}</span>
-            </el-col>
-            <el-col :span="8">
-              <span class="label">创建时间：</span>
-              <span class="text">{{createTime}}</span>
-            </el-col>
-          </el-row>
-          <el-divider></el-divider>
-          <div class="section-title">报销信息</div>
-          <div class="section-sub-title">报销明细</div>
-          <div class="expense-table-div">
-            <div class="top-btns">
-              <el-button-group v-if="expenseEditable">
-                <el-button type="primary" size="mini" icon="el-icon-plus" @click="addExpenseItem">新建</el-button>
-                <el-button v-if="expenseCurrentRow!==null" type="primary" size="mini" icon="el-icon-edit" @click="editExpenseItem">编辑</el-button>
-                <el-button v-if="expenseCurrentRow!==null" type="primary" size="mini" icon="el-icon-reading" @click="cancelExpenseSelected">取消选中</el-button>
-                <el-button v-if="expenseCurrentRow!==null" type="danger" size="mini" icon="el-icon-delete" @click="deleteExpenseItem">删除</el-button>
-              </el-button-group>
-            </div>
-            <div class="table-view">
-              <el-table ref="expenseTable" v-loading="expenseLoading" :data="expenseList" border fit stripe highlight-current-row :header-cell-style="innerHeaderCellStyle" @current-change="handleExpenseCurrentChange">
-                <el-table-column label="id" v-if="false">
-                  <template slot-scope="{ row }">
-                    <span>{{ row.id }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="8%" label="序号" align="center" show-overflow-tooltip>
-                  <template slot-scope="scope">
-                    <span>{{  scope.$index + 1 }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="14%" label="类别" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.categoryName }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="10%" label="单价" header-align="center" align="right" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.amount }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="8%" label="数量" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.count }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="10%" label="合计" header-align="center" align="right" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.totalAmount }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="15%" label="时间" header-align="center" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.date|dateFormat }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="34%" label="说明" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.description }}</span>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-          </div>
-          <div class="section-sub-title" style="margin-top:10px;">报销总金额：<span class="sum">{{getExpenseSum}}</span>元</div>
-          <div class="section-sub-title">报销说明</div>
-          <el-input type="textarea" :disabled="!expenseEditable" v-model="reason"></el-input>
-          <div class="section-sub-title">关联项目 <span style="color:#909399;font-weight:500;font-size:0.6rem;">支持搜索，非必填</span></div>
-          <el-select v-model="projectId" filterable :clearable=false :disabled="!expenseEditable">
-            <el-option v-for="(item,idx) in projects" :key="idx" :label="item.text" :value="item.id"></el-option>
-          </el-select>
-          <div class="section-sub-title">行动日志</div>
-          <div class="log-table-div">
-            <div class="top-btns">
-              <el-button-group v-if="expenseEditable">
-                <el-button type="primary" size="mini" icon="el-icon-plus" @click="addLog">新建</el-button>
-                <el-button v-if="logCurrentRow!==null" type="primary" size="mini" icon="el-icon-edit" @click="editLog">编辑</el-button>
-                <el-button v-if="logCurrentRow!==null" type="primary" size="mini" icon="el-icon-reading" @click="cancelLogSelected">取消选中</el-button>
-                <el-button v-if="logCurrentRow!==null" type="danger" size="mini" icon="el-icon-delete" @click="deleteLog">删除</el-button>
-              </el-button-group>
-            </div>
-            <div class="table-view">
-              <el-table ref="logTable" v-loading="logLoading" :data="logList" border fit stripe highlight-current-row :header-cell-style="innerHeaderCellStyle" @current-change="handleLogCurrentChange">
-                <el-table-column label="id" v-if="false">
-                  <template slot-scope="{ row }">
-                    <span>{{ row.id }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="8%" label="序号" align="center" show-overflow-tooltip>
-                  <template slot-scope="scope">
-                    <span>{{  scope.$index + 1 }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="20%" label="开始时间" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.startDate|dateTimeFormat }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="20%" label="结束时间" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.endDate|dateTimeFormat }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="10%" label="出发地" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.startLocation }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="10%" label="目的地" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.targetLocation }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="25%" label="行程安排" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.arrangement }}</span>
-                  </template>
-                </el-table-column>
-                <el-table-column min-width="10%" label="说明" align="center" show-overflow-tooltip>
-                  <template slot-scope="{ row }">
-                    <span>{{ row.description }}</span>
-                  </template>
-                </el-table-column>
-              </el-table>
-            </div>
-          </div>
-          <el-divider></el-divider>
-          <div class="section-title">审批信息</div>
-          <div class="section-sub-title">财务意见 </div>
-          <el-input v-model="financeOfficeOpinion" disabled> </el-input>
-          <div class="section-sub-title"></div>
-          <el-button type="primary" size="small" icon="el-icon-download" @click.native="downloadExpenseTable">下载</el-button>
-        </el-card>
-      </el-col>
-      <el-col :md="4" class="op-div">
-        <el-card shadow="hover">
-          <div slot="header" class="clearfix">
-            <span style="font-size:1.2rem;font-weight:700;color:#666;">流程操作</span>
-          </div>
-          <div class="op-btns">
-            <el-button plain v-if="showSaveBtn" icon="el-icon-camera" type="primary" @click.native="save">保存</el-button>
-            <el-button plain v-if="showCommitBtn" icon="el-icon-position" type="primary" @click.native="agree">提交</el-button>
-            <el-button plain v-if="showAgreeBtn" icon="el-icon-check" type="primary" @click.native="agree">同意</el-button>
-            <el-button plain v-if="showDisAgreeBtn" icon="el-icon-close" type="primary" @click.native="disagree">拒绝</el-button>
-            <el-button plain icon="el-icon-d-arrow-left" @click.native="goTodo">返回</el-button>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <div class="top-op-btns">
+      <el-button type="primary" v-if="showSaveBtn" icon="el-icon-document-checked" @click.native="save">保存</el-button>
+      <el-button type="primary" v-if="showCommitBtn" icon="el-icon-position" @click.native="agree">提交</el-button>
+      <el-button type="primary" v-if="showAgreeBtn" icon="el-icon-check" @click.native="agree">同意</el-button>
+      <el-button type="primary" v-if="showDisAgreeBtn" icon="el-icon-close" @click.native="disagree">拒绝</el-button>
+      <el-button plain type="primary" icon=" el-icon-d-arrow-left" @click.native="goTodo">返回</el-button>
+    </div>
+    <el-card shadow="hover">
+      <div slot="header" class="clearfix">
+        <span style="font-size:1.4rem;font-weight:700;">报销单据</span>
+      </div>
+      <el-row class="base-info">
+        <el-col :span="8">
+          <span class="label">姓名：</span>
+          <span class="text">{{staff}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="label">部门：</span>
+          <span class="text">{{department}}</span>
+        </el-col>
+        <el-col :span="8">
+          <span class="label">创建时间：</span>
+          <span class="text">{{createTime}}</span>
+        </el-col>
+      </el-row>
+      <el-divider></el-divider>
+      <div class="section-title">报销信息</div>
+      <div class="section-sub-title">报销明细</div>
+      <div class="expense-table-div">
+        <div class="top-btns">
+          <el-button-group v-if="expenseEditable">
+            <el-button type="primary" size="mini" icon="el-icon-plus" @click="addExpenseItem">新建</el-button>
+            <el-button v-if="expenseCurrentRow!==null" type="primary" size="mini" icon="el-icon-edit" @click="editExpenseItem">编辑</el-button>
+            <el-button v-if="expenseCurrentRow!==null" type="primary" size="mini" icon="el-icon-reading" @click="cancelExpenseSelected">取消选中</el-button>
+            <el-button v-if="expenseCurrentRow!==null" type="danger" size="mini" icon="el-icon-delete" @click="deleteExpenseItem">删除</el-button>
+          </el-button-group>
+        </div>
+        <div class="table-view">
+          <el-table ref="expenseTable" v-loading="expenseLoading" :data="expenseList" border fit stripe highlight-current-row :header-cell-style="innerHeaderCellStyle" @current-change="handleExpenseCurrentChange">
+            <el-table-column label="id" v-if="false">
+              <template slot-scope="{ row }">
+                <span>{{ row.id }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="8%" label="序号" align="center" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>{{  scope.$index + 1 }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="14%" label="类别" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.categoryName }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="10%" label="单价" header-align="center" align="right" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.amount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="8%" label="数量" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.count }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="10%" label="合计" header-align="center" align="right" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.totalAmount }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="15%" label="时间" header-align="center" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.date|dateFormat }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="34%" label="说明" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.description }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+      <div class="section-sub-title" style="margin-top:10px;">报销总金额：<span class="sum">{{getExpenseSum}}</span>元</div>
+      <div class="section-sub-title">报销说明</div>
+      <el-input type="textarea" :disabled="!expenseEditable" v-model="reason"></el-input>
+      <div class="section-sub-title">关联项目 <span style="color:#909399;font-weight:500;font-size:0.6rem;">支持搜索，非必填</span></div>
+      <el-select v-model="projectId" filterable :clearable=false :disabled="!expenseEditable">
+        <el-option v-for="(item,idx) in projects" :key="idx" :label="item.text" :value="item.id"></el-option>
+      </el-select>
+      <div class="section-sub-title">行动日志</div>
+      <div class="log-table-div">
+        <div class="top-btns">
+          <el-button-group v-if="expenseEditable">
+            <el-button type="primary" size="mini" icon="el-icon-plus" @click="addLog">新建</el-button>
+            <el-button v-if="logCurrentRow!==null" type="primary" size="mini" icon="el-icon-edit" @click="editLog">编辑</el-button>
+            <el-button v-if="logCurrentRow!==null" type="primary" size="mini" icon="el-icon-reading" @click="cancelLogSelected">取消选中</el-button>
+            <el-button v-if="logCurrentRow!==null" type="danger" size="mini" icon="el-icon-delete" @click="deleteLog">删除</el-button>
+          </el-button-group>
+        </div>
+        <div class="table-view">
+          <el-table ref="logTable" v-loading="logLoading" :data="logList" border fit stripe highlight-current-row :header-cell-style="innerHeaderCellStyle" @current-change="handleLogCurrentChange">
+            <el-table-column label="id" v-if="false">
+              <template slot-scope="{ row }">
+                <span>{{ row.id }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="8%" label="序号" align="center" show-overflow-tooltip>
+              <template slot-scope="scope">
+                <span>{{  scope.$index + 1 }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="20%" label="开始时间" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.startDate|dateTimeFormat }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="20%" label="结束时间" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.endDate|dateTimeFormat }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="10%" label="出发地" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.startLocation }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="10%" label="目的地" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.targetLocation }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="25%" label="行程安排" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.arrangement }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column min-width="10%" label="说明" align="center" show-overflow-tooltip>
+              <template slot-scope="{ row }">
+                <span>{{ row.description }}</span>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+      <el-divider></el-divider>
+      <div class="section-title">审批信息</div>
+      <div class="section-sub-title">财务意见 </div>
+      <el-input v-model="financeOfficeOpinion" disabled> </el-input>
+      <div class="section-sub-title"></div>
+      <el-button type="primary" size="small" icon="el-icon-download" @click.native="downloadExpenseTable">下载</el-button>
+    </el-card>
     <el-dialog title="报销明细" :visible.sync="dialogVisibleExpense" :close-on-click-modal="false" width="60%">
       <el-form ref="expenseForm" :model="expenseForm" :rules="rules" label-width="60px">
         <el-form-item label="id" v-if="false" prop="id">
@@ -817,47 +806,51 @@ export default {
 </style>
 <style lang="scss">
 .workflow-detail-page {
-  padding: 30px 40px;
-  .detail-div {
-    .el-card {
-      padding-bottom: 20px;
-      .el-card__header {
-        padding: 14px 10px;
-        color: #fff;
-        text-align: center;
-        letter-spacing: 5px;
-        background-color: #409eff;
-      }
-      .section-title {
-        color: #1d8eff;
-        font-size: 1.1rem;
-        margin-bottom: 15px;
-      }
-      .section-sub-title {
+  padding: 20px 40px;
+  .top-op-btns {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+  .el-card {
+    padding-bottom: 20px;
+    .el-card__header {
+      padding: 14px 10px;
+      color: #fff;
+      text-align: center;
+      letter-spacing: 5px;
+      background-color: #409eff;
+    }
+    .section-title {
+      color: #1d8eff;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+    }
+    .section-sub-title {
+      font-weight: 700;
+      margin: 16px 0px 6px 0;
+    }
+    .base-info {
+      margin-top: 10px;
+      .label {
         font-weight: 700;
-        margin: 16px 0px 6px 0;
-      }
-      .base-info {
-        margin-top: 10px;
-        .label {
-          font-weight: 700;
-        }
-      }
-      .sum {
-        font-size: 1.2rem;
-        margin: 0 10px;
-        color: #ff0000;
-      }
-
-      .el-input.is-disabled .el-input__inner,
-      .el-textarea.is-disabled .el-textarea__inner {
-        background-color: #f5f7fa;
-        border-color: #fff;
-        border-bottom: 1px solid #ccc;
-        color: #303133;
       }
     }
+    .sum {
+      font-size: 1.2rem;
+      margin: 0 10px;
+      color: #ff0000;
+    }
+
+    .el-input.is-disabled .el-input__inner,
+    .el-textarea.is-disabled .el-textarea__inner {
+      background-color: #f5f7fa;
+      border-color: #fff;
+      border-bottom: 1px solid #ccc;
+      color: #303133;
+    }
   }
+
   .op-div {
     .el-card {
       text-align: center;
