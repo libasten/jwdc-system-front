@@ -372,7 +372,7 @@ export default {
   data() {
     return {
       loading: true,
-      activeNames: ['1', '2'],
+      activeNames: ['1', '2', '3', '4'],
       allDisabled: false,
       canAddProjectNote: true,
       canAddProjectArchive: true,

@@ -111,7 +111,7 @@ export default {
   data() {
     return {
       loading: true,
-      activeNames: ['2'],
+      activeNames: ['1', '2'],
       allDisabled: false,
       postForm: {
         id: '', //当前项目的id，也是路由入参

@@ -227,7 +227,7 @@ export default {
   data() {
     return {
       loading: true,
-      activeNames: ['3'],
+      activeNames: ['1', '2', '3'],
       allDisabled: false,
       postForm: {
         id: '',
@@ -296,7 +296,7 @@ export default {
       this.loading = true;
       this.list = [];
       fetchBidDetail(this.postForm.id).then((res) => {
-        this.postForm = res.data
+        this.postForm = res.data.bid
         // TODO: 后台更新后修改由后台赋值
         this.postForm.bidType = 1
         this.postForm.progress = 1
@@ -584,7 +584,8 @@ export default {
       border-left: 5px solid #0a76e2;
     }
   }
-  .el-input.is-disabled .el-input__inner {
+  .el-input.is-disabled .el-input__inner,
+  .el-textarea.is-disabled .el-textarea__inner {
     background-color: #f5f7fa;
     border-color: #fff;
     border-bottom: 1px solid #ccc;
