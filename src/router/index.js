@@ -293,15 +293,34 @@ export const asyncRoutes = [
     ]
   },
   {
-    path: '/icon',
+    path: '/cost',
     component: Layout,
+    meta: { title: '财务统计', icon: 'el-icon-money', auth: '33-1' },
     children: [
       {
-        path: 'index',
-        component: () => import('@/views/icons/index'),
-        name: 'Icons',
-        meta: { title: 'Icons', icon: 'icon', noCache: true }
-      }
+        path: 'staffSingle',
+        component: () => import('@/views/cost/staff-single'),
+        name: 'StaffSingleCost',
+        meta: { title: '单人费用', icon: 'documentation' }
+      },
+      {
+        path: 'projects',
+        component: () => import('@/views/bid/bid-list'),
+        name: 'ProjectCost',
+        meta: { title: '项目费用', icon: 'documentation' }
+      },
+      {
+        path: 'staff',
+        component: () => import('@/views/bid/bid-list'),
+        name: 'StaffCost',
+        meta: { title: '所有人员费用', icon: 'documentation' }
+      },
+      {
+        path: 'projectStaff',
+        component: () => import('@/views/bid/bid-list'),
+        name: 'projectStaffCost',
+        meta: { title: '人员项目分摊', icon: 'documentation' }
+      },
     ]
   },
   /** when your routing map is too long, you can split it into small modules **/
