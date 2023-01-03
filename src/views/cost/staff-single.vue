@@ -1,29 +1,30 @@
 <template>
   <!-- 单个员工费用统计 -->
   <div class="app-container">
+    <div class="page-title">单个人员费用归集</div>
     <div class="query-form">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-position="right" label-width="60px">
         <el-row>
-          <el-col :span="12">
+          <el-col :sm="12">
             <el-form-item label="人员" prop="staffId">
               <el-select v-model="postForm.staffId" placeholder="请选择人员" filterable>
                 <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :sm="12">
             <el-form-item label="项目" prop="projectId">
               <el-select v-model="postForm.projectId" placeholder="请选择项目" filterable>
                 <el-option v-for="(item,idx) in projects" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :sm="12">
             <el-form-item label="时间" prop="seDate">
               <el-date-picker v-model="postForm.seDate" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :clearable="false"></el-date-picker>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :sm="12">
             <el-form-item>
               <el-button type="primary" size="small" icon="el-icon-search" @click.native="doSearch">查询</el-button>
               <el-button type="primary" size="small" icon="el-icon-refresh-left" @click.native="clearParams">重置</el-button>
@@ -130,15 +131,16 @@ export default {
           // 获取拆分开的行动日志起始时间
           this.postForm.startDate = this.postForm.seDate[0]
           this.postForm.endDate = this.postForm.seDate[1]
+          this.list = []
           this.listLoading = true
           queryStaffSingleCost(this.postForm).then(res => {
             this.queryResult = res.data
             this.list = res.data.datas
             this.listLoading = false
-            if (res.data.datas.length < 1) {
-              this.$message.info('当前条件下无数据。')
-            }
-          }).catch(err => { this.$message.error('查询失败：' + err) })
+          }).catch(err => {
+            this.$message.error('查询失败：' + err)
+            this.listLoading = false
+          })
         }
       })
     },
@@ -249,6 +251,13 @@ export default {
 <style scoped>
 </style>
 <style lang="scss">
+.page-title {
+  font-size: 1.4rem;
+  border-bottom: 1px solid #dcdcdc;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+  text-align: center;
+}
 .query-form {
   .el-select,
   .el-date-editor {

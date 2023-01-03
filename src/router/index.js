@@ -305,7 +305,7 @@ export const asyncRoutes = [
       },
       {
         path: 'projects',
-        component: () => import('@/views/bid/bid-list'),
+        component: () => import('@/views/cost/projects'),
         name: 'ProjectCost',
         meta: { title: '项目费用', icon: 'documentation' }
       },

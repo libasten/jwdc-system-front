@@ -7,7 +7,6 @@ export function fetchQueryStaffParams() {
     method: 'get',
   })
 }
-
 // 获取费用归集查询项目初始化信息
 export function fetchQueryProjectParams() {
   return request({
@@ -15,7 +14,7 @@ export function fetchQueryProjectParams() {
     method: 'get',
   })
 }
-
+// 获取单个人员费用统计
 export function queryStaffSingleCost(pa) {
   return request({
     url: '/Workflows/GetExpensesByStaff',
@@ -23,5 +22,14 @@ export function queryStaffSingleCost(pa) {
     params: pa
   })
 }
+// 进行项目经费归集统计
+export function queryProjectsCost(pa) {
+  return request({
+    url: '/Workflows/GetExpensesGroupProject',
+    method: 'post',
+    params: pa
+  })
+}
+
 
 //#endregion
