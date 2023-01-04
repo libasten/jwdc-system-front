@@ -316,9 +316,9 @@ export const asyncRoutes = [
         meta: { title: '所有人员费用', icon: 'documentation' }
       },
       {
-        path: 'projectStaff',
-        component: () => import('@/views/bid/bid-list'),
-        name: 'projectStaffCost',
+        path: 'staffProject',
+        component: () => import('@/views/cost/staff-project'),
+        name: 'staffProjectCost',
         meta: { title: '人员项目分摊', icon: 'documentation' }
       },
     ]

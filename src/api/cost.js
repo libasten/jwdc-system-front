@@ -22,14 +22,6 @@ export function queryStaffSingleCost(pa) {
     params: pa
   })
 }
-// 进行项目经费归集统计
-export function queryProjectsCost(pa) {
-  return request({
-    url: '/Workflows/GetExpensesGroupProject',
-    method: 'post',
-    params: pa
-  })
-}
 
 // 进行人员费用归集统计
 export function queryStaffCost(pa) {
@@ -39,4 +31,24 @@ export function queryStaffCost(pa) {
     params: pa
   })
 }
+
+// 进行项目下挂人员经费归集统计
+export function queryProjectCost(pa) {
+  return request({
+    url: '/Workflows/GetExpensesGroupProject',
+    method: 'post',
+    params: pa
+  })
+}
+
+// 进行人员下挂项目经费归集统计
+export function queryStaffProjectCost(pa) {
+  return request({
+    url: '/Workflows/GetExpensesGroupStaff',
+    method: 'post',
+    params: pa
+  })
+}
+
+
 //#endregion

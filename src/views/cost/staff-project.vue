@@ -1,7 +1,7 @@
 <template>
-  <!-- 项目费用明细归集 -->
+  <!-- 人员项目费用分摊明细 -->
   <div class="app-container">
-    <div class="page-title">项目费用明细归集</div>
+    <div class="page-title">人员项目费用分摊明细</div>
     <div class="query-form">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-position="right" label-width="60px">
         <el-row>
@@ -31,13 +31,13 @@
 
 <script>
 
-import { queryProjectCost } from '@/api/cost';
+import { queryStaffProjectCost } from '@/api/cost';
 import { headerCellStyle } from '@/utils/commonFunction'
 const ExcelJS = require("exceljs");
 import { saveAs } from "file-saver";
 
 export default {
-  name: 'ProjectsCost',
+  name: 'StaffProjectCost',
   components: {},
   data() {
     return {
@@ -66,8 +66,9 @@ export default {
           this.postForm.endDate = this.postForm.seDate[1]
           this.listLoading = true
           this.list = []
-          queryProjectCost(this.postForm).then(res => {
+          queryStaffProjectCost(this.postForm).then(res => {
             this.queryResult = res.data
+            console.log(res.data)
             res.data.datas.forEach(e => {
               this.list.push(e.row)
             })
@@ -88,29 +89,28 @@ export default {
 
     // 特殊的合计行和项目行，添加一个样式类
     tableAddRowClass({ row, rowIndex }) {
-      let prjRowIdx = []
+      let subSumRowIdx = []
       for (let index = 0; index < this.queryResult.datas.length; index++) {
         const element = this.queryResult.datas[index]
         if (element.style === 1) {
-          prjRowIdx.push(index)
+          subSumRowIdx.push(index)
         }
       }
       // 第一行
       if (rowIndex == 0) {
         return 'sum-tr';
       }
-      if (prjRowIdx.find(a => a === rowIndex)) {
-        return 'prj-tr';
+      if (subSumRowIdx.find(a => a === rowIndex)) {
+        return 'subSum-tr';
       }
       return '';
     },
 
     downloadResult() {
-
       const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, };
       const contentCenter = { vertical: "middle", horizontal: "center" };
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("项目费用明细", { views: [{ showGridLines: true }], });
+      const worksheet = workbook.addWorksheet("人员费用明细", { views: [{ showGridLines: true }], });
 
       let headerEx = [];
       this.queryResult.headers.forEach(element => {
@@ -155,7 +155,7 @@ export default {
         }
       }
       // 保存到本地
-      workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "项目费用明细.xlsx")).catch((err) => console.log("Error writing excel export", err));
+      workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "人员费用明细.xlsx")).catch((err) => console.log("Error writing excel export", err));
     },
 
     headerCellStyle,
@@ -186,7 +186,7 @@ export default {
       font-size: 1.05rem;
       font-weight: 700;
     }
-    .prj-tr {
+    .subSum-tr {
       background-color: #efefef;
       font-weight: 700;
     }
