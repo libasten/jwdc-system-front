@@ -31,5 +31,12 @@ export function queryProjectsCost(pa) {
   })
 }
 
-
+// 进行人员费用归集统计
+export function queryStaffCost(pa) {
+  return request({
+    url: '/Workflows/GetAllStaffExpenses',
+    method: 'post',
+    params: pa
+  })
+}
 //#endregion
