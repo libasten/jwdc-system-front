@@ -37,7 +37,7 @@ const ExcelJS = require("exceljs");
 import { saveAs } from "file-saver";
 
 export default {
-  name: 'ProjectsCost',
+  name: 'ProjectCost',
   components: {},
   data() {
     return {
