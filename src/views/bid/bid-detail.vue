@@ -22,9 +22,9 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="投标类型" prop="bidType">
-                <el-select v-model="postForm.bidType" placeholder="请选择投标类型">
-                  <el-option v-for="(item,idx) in bidTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+              <el-form-item label="投标类型" prop="category">
+                <el-select v-model="postForm.category" placeholder="请选投标类型">
+                  <el-option v-for="(item,idx) in categories" :key="idx" :label="item.text" :value="item.id"></el-option>
                 </el-select>
               </el-form-item>
             </el-col>
@@ -39,23 +39,27 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="投标负责人" prop="charge">
-                <el-input v-model="postForm.charge"></el-input>
+              <el-form-item label="投标负责人" prop="adminIds">
+                <el-select v-model="postForm.adminIds" placeholder="请选择投标负责人" filterable multiple>
+                  <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="市场负责人" prop="charge">
-                <el-input v-model="postForm.charge"></el-input>
+              <el-form-item label="市场负责人" prop="marketAdminIds">
+                <el-select v-model="postForm.marketAdminIds" placeholder="请选择市场负责人" filterable multiple>
+                  <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="采购方式" prop="procurement ">
-                <el-input v-model="postForm.procurement"></el-input>
+              <el-form-item label="采购方式" prop="procurementMethod ">
+                <el-input v-model="postForm.procurementMethod"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="投标进度" prop="progress ">
-                <el-select v-model="postForm.progress" placeholder="请选择投标类型">
+              <el-form-item label="投标进度" prop="progress">
+                <el-select v-model="postForm.progress" placeholder="请选择投标进度">
                   <el-option v-for="(item,idx) in progresses" :key="idx" :label="item.text" :value="item.id"></el-option>
                 </el-select>
               </el-form-item>
@@ -233,15 +237,17 @@ export default {
         id: '',
         code: '',
         name: '',
-        bidType: '',
+        category: '',
         progress: '',
+        marketAdminIds: '',
+        adminIds: '',
         regDeadline: new Date(),
         openTime: new Date(),
         description: ''
       },
-      bidTypes: [{ id: 1, text: '竞争性项目' }, { id: 2, text: '参与性项目' }, { id: 3, text: '拓展性项目' }],
-      progresses: [{ id: 1, text: '立项（10%）' }, { id: 2, text: '报名（20%）' }, { id: 3, text: '开标（50%）' },
-      { id: 4, text: '合同签订（90 %）' }, { id: 5, text: '合同归档（100 %）' }],
+      staffs: [],
+      categories: [],
+      progresses: [],
       // 投标附件部分
       bidArchiveFileList: [], // 绑定在文件列表上的数据源
       bidArchiveFile: '', // 上传操作中的文件
@@ -295,11 +301,9 @@ export default {
     getBidDetail() {
       this.loading = true;
       this.list = [];
-      fetchBidDetail(this.postForm.id).then((res) => {
+      fetchBidDetail(this.postForm.id).then(res => {
         this.postForm = res.data.bid
-        // TODO: 后台更新后修改由后台赋值
-        this.postForm.bidType = 1
-        this.postForm.progress = 1
+        // TODO：请问后台能否把名字发过来，如果可以，前端直接用input组件显示。
         this.loading = false
       }).catch((err) => { this.$message.error('错误信息：' + err) });
     },

@@ -28,9 +28,9 @@
           </template>
         </el-table-column>
         <el-table-column min-width="10%" label="投标类型" header-align="center" show-overflow-tooltip>
-          <!-- <template slot-scope="{ row }">
-            <span>{{ row.partA }}</span>
-          </template> -->
+          <template slot-scope="{ row }">
+            <span>{{ row.categoryName }}</span>
+          </template>
         </el-table-column>
         <el-table-column min-width="15%" label="报名截止时间" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
@@ -43,14 +43,19 @@
           </template>
         </el-table-column>
         <el-table-column min-width="10%" label="负责人" header-align="center" show-overflow-tooltip>
-          <!-- <template slot-scope="{ row }">
-            <span>{{ row.description }}</span>
-          </template> -->
+          <template slot-scope="{ row }">
+            <span>{{ row.adminNamesFormat }}</span>
+          </template>
         </el-table-column>
         <el-table-column min-width="10%" label="投标进度" header-align="center" show-overflow-tooltip>
-          <!-- <template slot-scope="{ row }">
-            <span>{{ row.projectCode }}</span>
-          </template> -->
+          <template slot-scope="{ row }">
+            <span>{{ row.progressName }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="10%" label="录入时间" header-align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
+            <span>{{ row.createTimeFormat }}</span>
+          </template>
         </el-table-column>
       </el-table>
     </div>
@@ -73,9 +78,9 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="投标类型" prop="bidType">
-              <el-select v-model="postForm.bidType" placeholder="请选择投标类型">
-                <el-option v-for="(item,idx) in bidTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+            <el-form-item label="投标类型" prop="category">
+              <el-select v-model="postForm.category" placeholder="请选投标类型">
+                <el-option v-for="(item,idx) in categories" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
@@ -90,23 +95,27 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="投标负责人" prop="charge">
-              <el-input v-model="postForm.charge"></el-input>
+            <el-form-item label="投标负责人" prop="adminIds">
+              <el-select v-model="postForm.adminIds" placeholder="请选择投标负责人" filterable multiple>
+                <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="市场负责人" prop="charge">
-              <el-input v-model="postForm.charge"></el-input>
+            <el-form-item label="市场负责人" prop="marketAdminIds">
+              <el-select v-model="postForm.marketAdminIds" placeholder="请选择市场负责人" filterable multiple>
+                <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="采购方式" prop="procurement ">
-              <el-input v-model="postForm.procurement"></el-input>
+            <el-form-item label="采购方式" prop="procurementMethod">
+              <el-input v-model="postForm.procurementMethod"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="投标进度" prop="progress ">
-              <el-select v-model="postForm.progress" placeholder="请选择投标类型">
+            <el-form-item label="投标进度" prop="progress">
+              <el-select v-model="postForm.progress" placeholder="请选择投标进度">
                 <el-option v-for="(item,idx) in progresses" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
@@ -128,8 +137,8 @@
 
 <script>
 
-import { fetchBids, editBid, createBid, deleteBid } from '@/api/bid';
-import { headerCellStyle } from '@/utils/commonFunction'
+import { fetchBids, newBid, editBid, createBid, deleteBid } from '@/api/bid';
+import { headerCellStyle, array2myString, myString2Array } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 export default {
   name: 'BidList',
@@ -147,15 +156,17 @@ export default {
         id: '',
         code: '',
         name: '',
-        bidType: '',
+        category: '',
         progress: '',
+        marketAdminIds: '',
+        adminIds: '',
         regDeadline: new Date(),
         openTime: new Date(),
         description: ''
       },
-      bidTypes: [{ id: 1, text: '竞争性项目' }, { id: 2, text: '参与性项目' }, { id: 3, text: '拓展性项目' }],
-      progresses: [{ id: 1, text: '立项（10%）' }, { id: 2, text: '报名（20%）' }, { id: 3, text: '开标（50%）' },
-      { id: 4, text: '合同签订（90 %）' }, { id: 5, text: '合同归档（100 %）' }],
+      staffs: [],
+      categories: [],
+      progresses: [],
       rules: {
         code: [{ required: true, message: '请输入编号', trigger: 'blur' }],
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -170,49 +181,66 @@ export default {
     getList() {
       this.listLoading = true;
       this.list = [];
-      fetchBids().then((res) => {
+      fetchBids().then(res => {
         this.total = res.data.length
         this.list = res.data.filter(a => a.status === 1)
         this.listLoading = false
-      }).catch((err) => {
-        this.$message.error('错误信息：' + err);
-      });
+      }).catch(err => { this.$message.error('错误信息：' + err); });
     },
     goAdd() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      // 这个方法用于重置data属性中的值。
-      Object.assign(this.$data.postForm, this.$options.data().postForm)
-      this.dialogVisible = true
+      newBid().then(res => {
+        if (this.$refs.postForm !== undefined) {
+          this.$refs.postForm.resetFields()
+        }
+        Object.assign(this.$data.postForm, this.$options.data().postForm)
+        this.staffs = res.data.staffs
+        this.categories = res.data.categories
+        this.progresses = res.data.progresses
+        this.dialogVisible = true
+      }).catch(err => { this.$message.error('错误信息：' + err) })
     },
     goEdit() {
-      if (this.$refs.postForm !== undefined) {
-        this.$refs.postForm.clearValidate()
-      }
-      this.postForm = deepClone(this.currentRow)
-      this.dialogVisible = true
+      newBid().then(res => {
+        if (this.$refs.postForm !== undefined) {
+          this.$refs.postForm.clearValidate()
+        }
+        this.postForm = deepClone(this.currentRow)
+        this.staffs = res.data.staffs
+        this.categories = res.data.categories
+        this.progresses = res.data.progresses
+        this.postForm.adminIds = this.myString2Array(this.postForm.adminIds)
+        this.postForm.marketAdminIds = this.myString2Array(this.postForm.marketAdminIds)
+        this.postForm.progress = this.postForm.progress === 0 ? null : this.postForm.progress
+        this.postForm.category = this.postForm.category === 0 ? null : this.postForm.category
+        this.dialogVisible = true
+      }).catch(err => { this.$message.error('错误信息：' + err) })
     },
     submit() {
       this.$refs.postForm.validate((valid) => {
         if (valid) {
+          let that = this
+          that.postForm.adminIds = that.array2myString(that.postForm.adminIds)
+          that.postForm.marketAdminIds = that.array2myString(that.postForm.marketAdminIds)
           // 新建
-          if (this.postForm.id === '') {
-            createBid(this.postForm).then((res) => {
-              this.list.unshift(res.data)
-              this.$message.success('新建成功！')
-              this.dialogVisible = false
-            }).catch((err) => { this.$message.error('新建失败：' + err) })
+          if (that.postForm.id === '') {
+            createBid(that.postForm).then((res) => {
+              // that.list.unshift(res.data)
+              that.getList()
+              that.$message.success('新建成功！')
+              that.dialogVisible = false
+            }).catch((err) => { that.$message.error('新建失败：' + err) })
           }
           // 编辑更新
           else {
-            editBid(this.postForm).then((res) => {
-              const idx = this.list.findIndex(a => a.id === this.currentRow.id)
-              this.list[idx] = res.data
-              this.$refs.vTable.setCurrentRow(this.list[idx]);
-              this.$message.success('更新成功！')
-              this.dialogVisible = false
-            }).catch((err) => { this.$message.error('更新失败：' + err) })
+            editBid(that.postForm).then(res => {
+              that.getList()
+              //TODO:问后台能否在更新成功后把负责人名字返回，目前是空。如果能返回则可以直接修改界面，不要getList了。
+              // const idx = this.list.findIndex(a => a.id === this.currentRow.id)
+              // this.list[idx] = res.data
+              // this.$refs.vTable.setCurrentRow(this.list[idx]);
+              that.$message.success('更新成功！')
+              that.dialogVisible = false
+            }).catch((err) => { that.$message.error('更新失败：' + err) })
           }
         }
       })
@@ -243,13 +271,12 @@ export default {
             message: '删除成功!',
           });
         });
-      })
-        .catch((err) => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除',
-          });
+      }).catch((err) => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除',
         });
+      });
     },
     // 每页显示数目变动
     handleSizeChange(val) {
@@ -259,7 +286,7 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
-    headerCellStyle
+    headerCellStyle, array2myString, myString2Array
   },
 };
 </script>

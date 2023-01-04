@@ -16,6 +16,13 @@ export function fetchBidDetail(id) {
   })
 }
 
+// 初始化新建投标
+export function newBid() {
+  return request({
+    url: '/Bids/NewBid?',
+    method: 'get',
+  })
+}
 // 新增投标
 export function createBid(pa) {
   return request({
