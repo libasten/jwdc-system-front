@@ -61,8 +61,8 @@
     </div>
     <div style="height:20px;width:100%;" />
     <el-pagination :current-page="currentPage" :page-sizes="[10, 20, 30]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="parseInt(total)" @size-change="handleSizeChange" @current-change="handleCurrentPageChange" />
-    <el-dialog title="投标信息" :visible.sync="dialogVisible" :close-on-click-modal="false" width="66%">
-      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="100px">
+    <el-dialog title="投标信息" :visible.sync="dialogVisible" :close-on-click-modal="false" width="80%" top="10vh">
+      <el-form ref="postForm" :model="postForm" :rules="rules" label-width="110px">
         <el-row>
           <el-form-item label="id" v-if="false" prop="id">
             <el-input v-model="postForm.id"></el-input>
@@ -72,52 +72,87 @@
               <el-input v-model="postForm.name"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="编号" prop="code">
               <el-input v-model="postForm.code"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="投标类型" prop="category">
               <el-select v-model="postForm.category" placeholder="请选投标类型">
                 <el-option v-for="(item,idx) in categories" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="截止日期" prop="regDeadline">
               <el-date-picker v-model="postForm.regDeadline" :clearable="false"></el-date-picker>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="开标时间" prop="openTime">
               <el-date-picker v-model="postForm.openTime" :clearable="false"></el-date-picker>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
+            <el-form-item label="开标地点" prop="bidOpeningPlace">
+              <el-input v-model="postForm.bidOpeningPlace"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
             <el-form-item label="投标负责人" prop="adminIds">
               <el-select v-model="postForm.adminIds" placeholder="请选择投标负责人" filterable multiple>
                 <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="市场负责人" prop="marketAdminIds">
               <el-select v-model="postForm.marketAdminIds" placeholder="请选择市场负责人" filterable multiple>
                 <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="采购方式" prop="procurementMethod">
               <el-input v-model="postForm.procurementMethod"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="8">
             <el-form-item label="投标进度" prop="progress">
               <el-select v-model="postForm.progress" placeholder="请选择投标进度">
                 <el-option v-for="(item,idx) in progresses" :key="idx" :label="item.text" :value="item.id"></el-option>
               </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="代理机构" prop="agency">
+              <el-input v-model="postForm.agency"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="代理联系人" prop="agencyContact">
+              <el-input v-model="postForm.agencyContact"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="代理联系方式" prop="agencyPhone">
+              <el-input v-model="postForm.agencyPhone"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="甲方名称" prop="partA">
+              <el-input v-model="postForm.partA"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="甲方联系人" prop="partAContact">
+              <el-input v-model="postForm.partAContact"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="甲方联系方式" prop="partAPhone">
+              <el-input v-model="postForm.partAPhone"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -163,6 +198,13 @@ export default {
         adminIds: '',
         regDeadline: new Date(),
         openTime: new Date(),
+        bidOpeningPlace: '',
+        agency: '',
+        agencyContact: '',
+        agencyPhone: '',
+        partA: '',
+        partAContact: '',
+        partAPhone: '',
         description: ''
       },
       staffs: [],
@@ -305,11 +347,14 @@ export default {
 </style>
 <style lang="scss">
 .app-container {
-  .el-select {
-    width: 100%;
-  }
-  .el-date-editor {
-    width: 100%;
+  .el-dialog__body {
+    padding-bottom: 0px;
+    .el-select {
+      width: 100%;
+    }
+    .el-date-editor {
+      width: 100%;
+    }
   }
 }
 </style>

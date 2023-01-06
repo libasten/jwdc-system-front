@@ -27,7 +27,7 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="类型" prop="type">
-            <el-select v-model="postForm.projectTypeId" placeholder="请选择类型" @change="typeChanged">
+            <el-select v-model="postForm.projectTypeId" placeholder="请选择类型" @visible-change="beforeTypeChange" @change="typeChanged">
               <el-option v-for="(item,idx) in projectTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
@@ -95,14 +95,14 @@
         </el-col>
         <el-col :span="24">
           <el-form-item label="项目合同" prop="contractIds">
-            <el-select v-model="postForm.contractIds" placeholder="请选择合同" multiple>
+            <el-select v-model="postForm.contractIds" placeholder="请选择合同" filterable multiple>
               <el-option v-for="(item,idx) in contracts" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="24">
           <el-form-item label="项目投标" prop="bidIds">
-            <el-select v-model="postForm.bidIds" placeholder="请选择投标" multiple>
+            <el-select v-model="postForm.bidIds" placeholder="请选择投标" filterable multiple>
               <el-option v-for="(item,idx) in bids" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
@@ -162,6 +162,7 @@ export default {
       projectTypeStages: '',
       bids: [],
       contracts: [],
+      oldProjectTypeId: '', //旧的项目类型ID，用于用户想修改之前的记录，因为修改后会触发进度变动，给用户提醒时候用。
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
         start: [{ required: true, message: '请选择开始时间', trigger: 'blur' }],
@@ -194,7 +195,6 @@ export default {
         if (valid) {
           this.postForm.bidIds = this.array2myString(this.postForm.bidIds)
           this.postForm.contractIds = this.array2myString(this.postForm.contractIds)
-          console.log(this.postForm)
           // 新建
           if (this.postForm.id === undefined) {
             createProject(this.postForm).then((res) => {
@@ -220,6 +220,7 @@ export default {
     getProjectBase() {
       this.loading = true
       fetchProjectBase(this.postForm.id).then((res) => {
+        console.log(res.data)
         this.citys = res.data.citys
         this.departments = res.data.departments
         this.projectTypes = res.data.projectTypes
@@ -263,9 +264,20 @@ export default {
         this.$message.error('错误信息：' + err)
       })
     },
+    beforeTypeChange(co) {
+      if (co) { this.oldProjectTypeId = this.postForm.projectTypeId }
+    },
     // 项目类型变换
     typeChanged() {
-      this.postForm.projectStages = 1;
+      console.log(this.postForm.projectTypeId)
+      this.$confirm('修改项目类型会影响项目进度, 是否确认修改?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => { this.postForm.progress = 1 }).catch(err => {
+        this.$message.info('操作已取消')
+        this.postForm.projectTypeId = this.oldProjectTypeId
+      });
     },
     myString2Array, array2myString
   },

@@ -291,6 +291,7 @@ export default {
       border-left: 5px solid #0a76e2;
     }
   }
+  .el-textarea.is-disabled .el-textarea__inner,
   .el-input.is-disabled .el-input__inner {
     background-color: #f5f7fa;
     border-color: #fff;

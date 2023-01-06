@@ -4,7 +4,7 @@
     <div class="title">{{postForm.name}}</div>
     <el-collapse v-model="activeNames">
       <el-collapse-item title="1. 基本信息" name="1">
-        <el-form ref="postForm" :loading="loading" :model="postForm" label-width="100px" :disabled="allDisabled">
+        <el-form ref="postForm" :loading="loading" :model="postForm" label-width="110px" :disabled="allDisabled">
           <el-row>
             <el-col :span="24">
               <el-form-item label="id" v-if="false" prop="id">
@@ -16,44 +16,79 @@
                 <el-input v-model="postForm.name"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="投标编号" prop="code">
                 <el-input v-model="postForm.code"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="投标类型" prop="categoryName">
                 <el-input v-model="postForm.categoryName"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="截止日期" prop="regDeadline">
                 <el-date-picker v-model="postForm.regDeadline" :clearable="false"></el-date-picker>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="开标时间" prop="openTime">
                 <el-date-picker v-model="postForm.openTime" :clearable="false"></el-date-picker>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
+              <el-form-item label="开标地点" prop="bidOpeningPlace">
+                <el-input v-model="postForm.bidOpeningPlace"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="投标负责人" prop="adminNamesFormat">
                 <el-input v-model="postForm.adminNamesFormat"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="市场负责人" prop="marketAdminNamesFormat">
                 <el-input v-model="postForm.marketAdminNamesFormat"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="采购方式" prop="procurementMethod ">
                 <el-input v-model="postForm.procurementMethod"></el-input>
               </el-form-item>
             </el-col>
-            <el-col :span="12">
+            <el-col :span="8">
               <el-form-item label="投标进度" prop="progressName">
                 <el-input v-model="postForm.progressName"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="代理机构" prop="agency">
+                <el-input v-model="postForm.agency"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="代理联系人" prop="agencyContact">
+                <el-input v-model="postForm.agencyContact"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="代理联系方式" prop="agencyPhone">
+                <el-input v-model="postForm.agencyPhone"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="甲方名称" prop="partA">
+                <el-input v-model="postForm.partA"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="甲方联系人" prop="partAContact">
+                <el-input v-model="postForm.partAContact"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="甲方联系方式" prop="partAPhone">
+                <el-input v-model="postForm.partAPhone"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="24">
@@ -228,15 +263,7 @@ export default {
       allDisabled: false,
       postForm: {
         id: '',
-        code: '',
         name: '',
-        category: '',
-        progress: '',
-        marketAdminIds: '',
-        adminIds: '',
-        regDeadline: new Date(),
-        openTime: new Date(),
-        description: ''
       },
       staffs: [],
       categories: [],

@@ -3,56 +3,79 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员</el-button>
+        <!-- 授权参考这里 -->
+        <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate" v-if="checkAuth('7-3')">新建</el-button>
+        <el-button type="primary" size="small" icon="el-icon-download" @click="doSearch(1, pageSize)">下载表格</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑基本信息</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员任命</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-map-location" @click.native="showMilestone">里程碑</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click.native="showShare">分享</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click.native="deleteProject">删除</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('7-4')" type="danger" size="small" icon="el-icon-delete" @click.native="deleteProject">删除</el-button>
       </el-button-group>
     </div>
     <div class="query-box">
       <el-divider content-position="center"><span>项目筛选</span></el-divider>
-      <el-form :inline="true" :model="searchForm" ref="searchForm">
-        <el-form-item label="筛选类别" style="margin-right:20px;">
-          <el-select v-model="searchForm.searchType" placeholder="筛选类型">
-            <el-option v-for="(item,idx) in searchForm.searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="筛选过滤关键字" prop="keyword">
-          <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable style="width:500px;"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="doSearch(1, pageSize)">查询</el-button>
-        </el-form-item>
+      <el-form :model="searchForm" ref="searchForm" label-width="110px">
+        <el-row>
+          <el-col :span="10">
+            <el-form-item label="筛选类别" prop="searchType">
+              <el-select v-model="searchForm.searchType" placeholder="筛选类型">
+                <el-option v-for="(item,idx) in searchForm.searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="14">
+            <el-form-item label="筛选关键字" prop="keyword">
+              <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="10">
+            <el-form-item label="日期选项" prop="dateType">
+              <el-select v-model="searchForm.dateType" placeholder="筛选类型">
+                <el-option v-for="(item,idx) in searchForm.dateTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="14">
+            <el-form-item label="日期区间" prop="seDate">
+              <el-date-picker v-model="searchForm.seDate" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :clearable="false"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item style="float:right;">
+              <el-button type="primary" icon="el-icon-search" @click.native="doSearch(1, pageSize)">查询</el-button>
+              <el-button type="primary" icon="el-icon-refresh-left" @click.native="clearParams">重置</el-button>
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <el-divider class="bottom-divider"><span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{searchForm.keyword}} ”</span>的筛选结果</span></el-divider>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" :height="'calc(100vh - 350px)'" v-fit-columns>
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="编号" align="center" show-overflow-tooltip>
+        <el-table-column min-width="10%" label="编号" align="center">
           <template slot-scope="{ row }">
             <span>{{ row.code }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="20%" label="类型" align="center" show-overflow-tooltip>
+        <el-table-column min-width="20%" label="类型" align="center">
           <template slot-scope="{ row }">
             <span>{{ row.projectTypeName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="35%" label="名称" align="center" show-overflow-tooltip>
+        <el-table-column min-width="35%" label="名称" align="center">
           <template slot-scope="{ row }">
             <span>{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="15%" label="进度" align="center" show-overflow-tooltip>
+        <el-table-column min-width="15%" label="进度" align="center">
           <template slot-scope="{ row }">
             <span>{{ row.progressName }}</span>
           </template>
@@ -62,9 +85,29 @@
             <span>{{ row.departmentName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="负责人" align="center">
+        <el-table-column min-width="10%" label="技术负责人" align="center">
           <template slot-scope="{ row }">
-            <span>{{ row.manager }}</span>
+            <span>{{ row.techniqueAdminsFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="10%" label="市场负责人" align="center">
+          <template slot-scope="{ row }">
+            <span>{{ row.marketAdminNamesFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="10%" label="开始时间" align="center">
+          <template slot-scope="{ row }">
+            <span>{{ row.startFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="10%" label="结束时间" align="center">
+          <template slot-scope="{ row }">
+            <span>{{ row.completionFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="10%" label="录入时间" align="center">
+          <template slot-scope="{ row }">
+            <span>{{ row.createTimeFormat }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -102,9 +145,10 @@ import { headerCellStyle, columnStyle } from '@/utils/commonFunction'
 import ProjectAppoint from '@/views/project/components/project-appoint'
 import ProjectMilestone from '@/views/project/components/project-milestone'
 import ProjectShare from '@/views/project/components/project-share'
+import { checkAuth } from '@/utils/permission'
 export default {
   name: 'ProjectList',
-  components: { ProjectAppoint, ProjectMilestone,ProjectShare },
+  components: { ProjectAppoint, ProjectMilestone, ProjectShare },
   data() {
     return {
       rules: {},
@@ -124,19 +168,24 @@ export default {
       // 当前选中的项目ID,传递给子组件
       pCurPrjId: '',
       searchForm: {
-        searchType: 1,
+        searchType: 3,
         keyword: '',
         // value为0的时候，返回全部，无需关键字，在getList方法中使用。
         searchTypeOpts: [
-          { text: '项目类型', value: 1 },
           { text: '项目名称', value: 3 },
+          { text: '项目类型', value: 1 },
           { text: '承担部门', value: 2 },
           { text: '项目负责', value: 4 },
           { text: '市场负责', value: 5 },
           { text: '技术负责', value: 6 },],
+        // 日期过滤的枚举， 0 创建日期 1 开始日期  2 结束日期 ，落在下面的区间内
+        dateType: -1,
+        dateTypes: [{ id: -1, text: '不作限制' }, { id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
+        seDate: '',
+        startDate: new Date(),
+        endDate: new Date(),
       },
       showQueryTip: false,
-
     };
   },
   computed: {
@@ -153,10 +202,16 @@ export default {
       let that = this
       that.listLoading = true
       that.list = []
-      const param = { skpCount: (cPage - 1) * this.pageSize, maxCount: pSize, searchType: 0, searchValue: '' }
+      const param = {
+        skpCount: (cPage - 1) * this.pageSize,
+        maxCount: pSize,
+        searchType: 0, searchValue: '',
+        dateType: 0, steartDate: '2021-21-1', endDate: '2022-1-1'
+      }
       fetchProjectListPaged(param).then((res) => {
         that.total = res.data.totalCount
         that.list = res.data.items
+        console.log(that.list)
         that.listLoading = false
       }).catch((err) => {
         that.$message({
@@ -177,7 +232,8 @@ export default {
         skpCount: (cPage - 1) * this.pageSize,
         maxCount: pSize,
         searchType: that.searchForm.searchType,
-        searchValue: that.searchForm.keyword
+        searchValue: that.searchForm.keyword,
+        dateType: 0, steartDate: '2023-1-1', endDate: '2023-1-11'
       }
       fetchProjectListPaged(param).then((res) => {
         that.total = res.data.totalCount
@@ -194,6 +250,11 @@ export default {
     // 清空关键字
     clearKW() {
       this.getList(1, this.pageSize);
+      this.showQueryTip = false;
+    },
+    clearParams() {
+      this.getList(1, this.pageSize);
+      Object.assign(this.$data.searchForm, this.$options.data().searchForm)
       this.showQueryTip = false;
     },
     goEdit() {
@@ -297,7 +358,8 @@ export default {
       }
     },
     headerCellStyle,
-    columnStyle
+    columnStyle,
+    checkAuth
   },
 };
 </script>
@@ -305,6 +367,10 @@ export default {
 <style lang="scss" scoped>
 .query-box {
   margin-top: 20px;
+  .el-select,
+  .el-date-editor {
+    width: 100%;
+  }
   .bottom-divider {
     margin-top: 0px;
     margin-bottom: 30px;

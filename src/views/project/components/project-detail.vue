@@ -30,8 +30,8 @@
               </el-form-item>
             </el-col>
             <el-col :span="8">
-              <el-form-item label="负责人" prop="managerName">
-                <el-input v-model="postForm.managerName"></el-input>
+              <el-form-item label="负责人" prop="projectManager">
+                <el-input v-model="projectManager"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -65,6 +65,16 @@
               </el-form-item>
             </el-col>
             <el-col :span="8">
+              <el-form-item label="技术负责" prop="projectTechniqueAdmins">
+                <el-input v-model="projectTechniqueAdmins"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label="市场负责" prop="projectMarketAdmins">
+                <el-input v-model="projectMarketAdmins"></el-input>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
               <el-form-item label="甲方名称" prop="partA">
                 <el-input v-model="postForm.partA"></el-input>
               </el-form-item>
@@ -91,14 +101,14 @@
         <!-- 用时间线实现节点信息，timestamp是阶段名称 -->
         <el-timeline>
           <el-timeline-item v-for="(stage, index) in stages" :key="index" :timestamp="stage.name" placement="top" size="large" icon="el-icon-location-information" type="primary" class="node-item-container">
-            <el-card v-for="(node, idx) in stage.nodes" :key="idx" :class="[{leftNote: node.nodeType==2},{leftArchive:node.nodeType===1}]">
+            <el-card v-for="(node, idx) in stage.nodes" :key="idx" :class="[{leftNote: node.nodeType==2},{leftArchive:node.nodeType===1}]" v-loading="nodeLoading" element-loading-text="获取中...">
               <div v-if="node.nodeType===2">
                 <div class="type-name">{{node.noteTypeName}}</div>
                 <div class="node-content">{{node.content}}</div>
               </div>
               <div v-if="node.nodeType===1">
                 <div class="type-name">{{node.archiveTypeName}}</div>
-                <div class="node-content archive" title="点击下载该文件"><i class="el-icon-tickets"></i> {{node.name}}</div>
+                <div class="node-content archive" title="点击下载该文件2" @click="downloadNodeFile(node)"><i class="el-icon-tickets"></i> {{node.name}}</div>
               </div>
               <div class="edit-info">{{node.updaterName}} @ {{node.updateTimeFormat}} <span v-if="node.nodeType===1"> | {{node.location}}</span></div>
               <div class="right-btns">
@@ -113,7 +123,7 @@
           <el-button v-if="canAddProjectArchive" type="primary" icon="el-icon-document" plain @click.native="addArchive">添加附件</el-button>
         </div>
       </el-collapse-item>
-      <el-collapse-item title="3. 项目合同" name="3">
+      <el-collapse-item title="3. 项目合同" name="3" v-if="checkAuth('16-1')">
         <div v-if="contracts.length===0">该项目还没有合同</div>
         <div v-else>
           <el-table :data="contracts" border size="small" :header-cell-style="headerCellStyle">
@@ -124,7 +134,7 @@
             </el-table-column>
             <el-table-column label="操作" align="center" min-width="25">
               <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain @click="viewContract(scope.$index, scope.row)">查看合同详情</el-button>
+                <el-button size="mini" type="primary" plain @click="viewContract(scope.row)">查看合同详情</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -238,7 +248,7 @@
           </el-col>
         </el-row>
       </el-collapse-item>
-      <el-collapse-item title="4. 招投标" name="4">
+      <el-collapse-item title="4. 招投标" name="4" v-if="checkAuth('18-1')">
         <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
         <div v-else>
           <el-table :data="bids" border size="small" :header-cell-style="headerCellStyle">
@@ -249,7 +259,7 @@
             </el-table-column>
             <el-table-column label="操作" align="center" min-width="25">
               <template slot-scope="scope">
-                <el-button size="mini" type="primary" plain @click="viewBid(scope.$index, scope.row)">查看招投标详情</el-button>
+                <el-button size="mini" type="primary" plain @click="viewBid(scope.row)">查看招投标详情</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -366,7 +376,9 @@ import {
   fetchInvoices, createInvoicingProgress, editInvoicingProgress, delInvoicingProgress,
   fetchCollections, createCollectionProgress, editCollectionProgress, delCollectionProgress
 } from '@/api/project';
+import { downloadFile } from '@/utils/req-down'
 import { deepClone } from '@/utils/index'
+import { checkAuth } from '@/utils/permission'
 export default {
   name: 'ProjectDetail',
   data() {
@@ -394,7 +406,14 @@ export default {
         projectStage: [],
         invoicingProgressName: '',
         collectionProgressName: '',
+        contractAmount: 0,
+        invoicingTotal: 0,
+        collectionTotal: 0,
+        unCollectionTotal: 0,
       },
+      projectManager: '', //项目负责人
+      projectTechniqueAdmins: '', // 技术负责人
+      projectMarketAdmins: '', // 市场负责人
       dialogVisibleNote: false,
       noteForm: {
         id: '',
@@ -413,6 +432,7 @@ export default {
         location: '',
         name: '',
       },
+      nodeLoading: false,
       stages: [],
       noteTypes: [],
       archiveTypes: [],
@@ -447,8 +467,12 @@ export default {
     getProjectDetail() {
       this.loading = true;
       this.list = [];
-      fetchProjectDetail(this.postForm.id).then((res) => {
+      fetchProjectDetail(this.postForm.id).then(res => {
+        console.log(res.data)
         this.postForm = res.data.project
+        this.projectManager = res.data.projectManager
+        this.projectTechniqueAdmins = res.data.projectTechniqueAdmins.toString()
+        this.projectMarketAdmins = res.data.projectMarketAdmins.toString()
         this.stages = res.data.project.projectStages
         this.canAddProjectNote = res.data.canAddProjectNote
         this.canAddProjectArchive = res.data.canAddProjectArchive
@@ -460,12 +484,7 @@ export default {
         this.getInvoices()
         this.getCollections()
         this.loading = false
-      }).catch((err) => {
-        this.$message({
-          message: '错误信息：' + err,
-          type: 'error'
-        });
-      });
+      }).catch(err => { this.$message.error({ message: '错误信息：' + err }) })
     },
     addNote() {
       newProjectNote().then((res) => {
@@ -511,7 +530,9 @@ export default {
           this.noteForm.projectId = this.postForm.id
           // 新建
           if (this.noteForm.id === '') {
-            createProjectNote(this.noteForm).then((res) => {
+            createProjectNote(this.noteForm).then(res => {
+              res.data.canEdit = true
+              res.data.canDelete = true
               const idx = this.stages.findIndex(x => x.id === this.noteForm.projectStageId)
               if (this.stages[idx].nodes === null) {
                 this.stages[idx].nodes = [res.data]
@@ -521,17 +542,19 @@ export default {
               }
               this.$message.success('新建成功！')
               this.dialogVisibleNote = false
-            }).catch((err) => { this.$message.error('新建失败：' + err) })
+            }).catch(err => { this.$message.error('新建失败：' + err) })
           }
           // 编辑更新
           else {
             editProjectNote(this.noteForm).then((res) => {
               const idx = this.stages.findIndex(x => x.id === this.noteForm.projectStageId)
               const idy = this.stages[idx].nodes.findIndex(y => y.id === this.noteForm.id)
+              res.data.canEdit = true
+              res.data.canDelete = true
               this.stages[idx].nodes[idy] = res.data
               this.$message.success('更新成功！')
               this.dialogVisibleNote = false
-            }).catch((err) => { this.$message.error('更新失败：' + err) })
+            }).catch(err => { this.$message.error('更新失败：' + err) })
           }
         }
       })
@@ -599,6 +622,8 @@ export default {
             formData.append('file', this.archiveFile.raw)
             this.archiveForm.projectId = this.postForm.id
             createProjectArchive(this.archiveForm, formData).then(res => {
+              res.data.canEdit = true
+              res.data.canDelete = true
               const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
               if (this.stages[idx].nodes === null) {
                 this.stages[idx].nodes = [res.data]
@@ -618,12 +643,44 @@ export default {
             editProjectArchive(this.archiveForm, formData).then(res => {
               const idx = this.stages.findIndex(x => x.id === this.archiveForm.projectStageId)
               const idy = this.stages[idx].nodes.findIndex(y => y.id === this.archiveForm.id)
+              res.data.canEdit = true
+              res.data.canDelete = true
               this.stages[idx].nodes[idy] = res.data
               this.$message.success('更新成功！')
               this.dialogVisibleArchive = false
             }).catch(err => { this.$message.error("编辑失败！") })
           }
         }
+      })
+    },
+    // 下载节点上的文件
+    downloadNodeFile(data) {
+      this.nodeLoading = true
+      const pConfig = {
+        url: process.env.VUE_APP_BASE_API + '/Projects/DownloadProjectArchive?id=' + data.id
+      }
+      downloadFile(pConfig).then(res => {
+        let blob = new Blob([res.data])
+        const dotIdx = data.guid.lastIndexOf('.')
+        const suffix = data.guid.substring(dotIdx)
+        let fileName = data.name + suffix
+        if ('download' in document.createElement('a')) { // 不是IE浏览器
+          let url = window.URL.createObjectURL(blob)
+          let link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.setAttribute('download', fileName)
+          document.body.appendChild(link)
+          link.click()
+          this.nodeLoading = false
+          document.body.removeChild(link) // 下载完成移除元素
+          window.URL.revokeObjectURL(url) // 释放掉blob对象
+        } else { // IE 10+
+          window.navigator.msSaveBlob(blob, fileName)
+        }
+      }).catch(err => {
+        this.$message.error("获取下载文件失败" + err)
+        this.nodeLoading = false
       })
     },
 
@@ -637,8 +694,8 @@ export default {
         }
       }
     },
-    viewContract() {
-      // 路由到合同管理详情
+    viewContract(data) {
+      this.$router.push({ path: '/contract/detail/' + data.id })
     },
 
     // 填招投标同信息
@@ -651,7 +708,8 @@ export default {
         }
       }
     },
-    viewBid() {
+    viewBid(data) {
+      this.$router.push({ path: '/bid/detail/' + data.id })
     },
     // 获取开票信息
     getInvoices() {
@@ -659,6 +717,11 @@ export default {
         this.invoiceList = res.data.filter(a => a.status === 1)
         if (this.invoiceList.length > 0) {
           this.postForm.invoicingProgressName = '2'
+          // 计算界面上的开票汇总信息
+          this.postForm.invoicingTotal = 0
+          this.invoiceList.forEach(e => {
+            this.postForm.invoicingTotal += e.amount
+          })
         }
         else {
           this.postForm.invoicingProgressName = '1'
@@ -722,17 +785,19 @@ export default {
     },
     // 获取回款信息
     getCollections() {
-      fetchCollections(this.postForm.id).then((res) => {
+      fetchCollections(this.postForm.id).then(res => {
         this.collectionList = res.data.filter(a => a.status === 1)
         if (this.collectionList.length > 0) {
           this.postForm.collectionProgressName = '2'
+          this.postForm.collectionTotal = 0
+          this.collectionList.forEach(e => {
+            this.postForm.collectionTotal += e.amount
+          })
+          this.postForm.invoicingTotal
+          this.postForm.unCollectionTotal = this.postForm.contractAmount - this.postForm.collectionTotal
         }
-        else {
-          this.postForm.collectionProgressName = '1'
-        }
-      }).catch((err) => {
-        this.$message.error("获取回款信息失败！");
-      });
+        else { this.postForm.collectionProgressName = '1' }
+      }).catch(err => { this.$message.error("获取回款信息失败！") });
     },
     // 新增回款信息
     addCollection() {
@@ -789,7 +854,8 @@ export default {
     },
     headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
-    }
+    },
+    checkAuth,
   },
 };
 </script>
@@ -813,6 +879,7 @@ export default {
       border-left: 5px solid #0a76e2;
     }
   }
+  .el-textarea.is-disabled .el-textarea__inner,
   .el-input.is-disabled .el-input__inner {
     background-color: #f5f7fa;
     border-color: #fff;

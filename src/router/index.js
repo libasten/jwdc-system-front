@@ -160,7 +160,7 @@ export const asyncRoutes = [
   {
     path: '/organization',
     component: Layout,
-    meta: { title: '组织管理', icon: 'el-icon-office-building', auth: '8-1' },
+    meta: { title: '组织管理', icon: 'el-icon-office-building' },
     children: [
       {
         path: 'staff',
