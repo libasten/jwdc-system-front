@@ -22,10 +22,8 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="投标类型" prop="category">
-                <el-select v-model="postForm.category" placeholder="请选投标类型">
-                  <el-option v-for="(item,idx) in categories" :key="idx" :label="item.text" :value="item.id"></el-option>
-                </el-select>
+              <el-form-item label="投标类型" prop="categoryName">
+                <el-input v-model="postForm.categoryName"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -39,17 +37,13 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="投标负责人" prop="adminIds">
-                <el-select v-model="postForm.adminIds" placeholder="请选择投标负责人" filterable multiple>
-                  <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
-                </el-select>
+              <el-form-item label="投标负责人" prop="adminNamesFormat">
+                <el-input v-model="postForm.adminNamesFormat"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="市场负责人" prop="marketAdminIds">
-                <el-select v-model="postForm.marketAdminIds" placeholder="请选择市场负责人" filterable multiple>
-                  <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id"></el-option>
-                </el-select>
+              <el-form-item label="市场负责人" prop="marketAdminNamesFormat">
+                <el-input v-model="postForm.marketAdminNamesFormat"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -58,10 +52,8 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="投标进度" prop="progress">
-                <el-select v-model="postForm.progress" placeholder="请选择投标进度">
-                  <el-option v-for="(item,idx) in progresses" :key="idx" :label="item.text" :value="item.id"></el-option>
-                </el-select>
+              <el-form-item label="投标进度" prop="progressName">
+                <el-input v-model="postForm.progressName"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="24">
@@ -74,7 +66,7 @@
       </el-collapse-item>
       <el-collapse-item title="2. 投标附件文件" name="2">
         <div class="top-btns">
-          <el-button size="mini" type="primary" @click="addBidArchive">上传投标附件</el-button>
+          <el-button size="mini" type="primary" v-if="checkAuth('19-3')" @click.native="addBidArchive">上传投标附件</el-button>
         </div>
         <el-table :data="bidArchiveFileList" border :header-cell-style="headerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
           <el-table-column label="文件名称" min-width="40" show-overflow-tooltip>
@@ -95,9 +87,9 @@
           <el-table-column label="操作" align="center" min-width="25">
             <template slot-scope="scope">
               <el-button-group>
-                <el-button size="mini" type="primary" plain @click="editBidArchive(scope.row)">编辑</el-button>
-                <el-button size="mini" type="primary" plain @click="downloadBidArchive(scope.row)">下载</el-button>
-                <el-button size="mini" type="danger" plain @click="deleteBidArchive(scope.row)">删除</el-button>
+                <el-button size="mini" type="primary" plain v-if="checkAuth('19-2')" @click="editBidArchive(scope.row)">编辑</el-button>
+                <el-button size="mini" type="primary" plain v-if="checkAuth('19-5')" @click="downloadBidArchive(scope.row)">下载</el-button>
+                <el-button size="mini" type="danger" plain v-if="checkAuth('19-4')" @click="deleteBidArchive(scope.row)">删除</el-button>
               </el-button-group>
             </template>
           </el-table-column>
@@ -105,8 +97,8 @@
       </el-collapse-item>
       <el-collapse-item title="3. 投标保证金" name="3">
         <div class="top-btns">
-          <el-button size="mini" type="primary" @click="saveSecurity">保存保证金信息</el-button>
-          <el-button size="mini" type="danger" @click="deleteSecurity">清空保证金信息</el-button>
+          <el-button size="mini" type="primary" v-if="checkAuth('20-2')" @click.native="saveSecurity">保存保证金信息</el-button>
+          <el-button size="mini" type="danger" v-if="checkAuth('20-4')" @click.native="deleteSecurity">清空保证金信息</el-button>
         </div>
         <el-form ref="securityForm" :rules="rules" :model="securityForm" label-width="110px">
           <el-card>
@@ -147,7 +139,7 @@
         <div v-if="this.securityForm.id!==''">
           <el-divider content-position="center">保证金附件</el-divider>
           <div class="top-btns">
-            <el-button size="mini" type="primary" @click="addSecurityArchive">新增保证金附件</el-button>
+            <el-button size="mini" type="primary" v-if="checkAuth('21-3')" @click.native="addSecurityArchive">新增保证金附件</el-button>
           </div>
           <el-table :data="securityArchiveFileList" border :header-cell-style="headerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
             <el-table-column label="文件名称" min-width="40" show-overflow-tooltip>
@@ -168,9 +160,9 @@
             <el-table-column label="操作" align="center" min-width="25">
               <template slot-scope="scope">
                 <el-button-group>
-                  <el-button size="mini" type="primary" plain @click="editSecurityArchive(scope.row)">编辑</el-button>
-                  <el-button size="mini" type="primary" plain @click="downloadSecurityArchive(scope.row)">下载</el-button>
-                  <el-button size="mini" type="danger" plain @click="deleteSecurityArchive(scope.row)">删除</el-button>
+                  <el-button size="mini" type="primary" plain v-if="checkAuth('21-2')" @click.native="editSecurityArchive(scope.row)">编辑</el-button>
+                  <el-button size="mini" type="primary" plain v-if="checkAuth('20-5')" @click.native="downloadSecurityArchive(scope.row)">下载</el-button>
+                  <el-button size="mini" type="danger" plain v-if="checkAuth('20-4')" @click.native="deleteSecurityArchive(scope.row)">删除</el-button>
                 </el-button-group>
               </template>
             </el-table-column>
@@ -225,6 +217,7 @@ import {
 } from '@/api/bid';
 import { deepClone } from '@/utils/index'
 import { downloadFile } from '@/utils/req-down'
+import { checkAuth } from "@/utils/permission";
 
 export default {
   name: 'BidDetail',
@@ -303,9 +296,8 @@ export default {
       this.list = [];
       fetchBidDetail(this.postForm.id).then(res => {
         this.postForm = res.data.bid
-        // TODO：请问后台能否把名字发过来，如果可以，前端直接用input组件显示。
         this.loading = false
-      }).catch((err) => { this.$message.error('错误信息：' + err) });
+      }).catch(err => { this.$message.error('错误信息：' + err) })
     },
     // 获取附件列表
     getBidArchive() {
@@ -408,11 +400,11 @@ export default {
         cancelButtonText: '取消',
         type: 'warning',
       }).then(() => {
-        delBidArchive(data).then((res) => {
+        delBidArchive(data).then(res => {
           this.getBidArchive()
-          this.$message.success('删除成功！');
-        });
-      }).catch((err) => { this.$message.info('删除操作已取消'); });
+          this.$message.success('删除成功！')
+        })
+      }).catch(err => { this.$message.info('删除操作已取消') })
     },
     // 保证金部分
     getSecurity() {
@@ -449,10 +441,21 @@ export default {
       })
     },
     deleteSecurity() {
-      deleteBidSecurity(this.securityForm).then(res => {
-        Object.assign(this.$data.securityForm, this.$options.data().securityForm)
-        this.$message.success('删除成功！')
-      }).catch(err => { this.$message.error('错误信息：' + err) })
+      if (this.securityForm.id === '') {
+        this.$message.info('暂无保证金信息！')
+        return
+      }
+      this.$confirm('删除后无法恢复, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }).then(() => {
+        deleteBidSecurity(this.securityForm).then(res => {
+          Object.assign(this.$data.securityForm, this.$options.data().securityForm)
+          this.$message.success('删除成功！')
+        }).catch(err => { this.$message.error('错误信息：' + err) })
+      }).catch((err) => { this.$message.info('删除操作已取消') })
+
     },
     // 保证金附件
     // 获取附件列表
@@ -564,7 +567,8 @@ export default {
     },
     headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
-    }
+    },
+    checkAuth
   },
 };
 </script>

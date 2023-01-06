@@ -3,11 +3,11 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="goAdd">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="goEdit">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="goView">查看</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="goDelete">删除</el-button>
+        <el-button type="primary" v-if="checkAuth('18-3')" size="small" icon="el-icon-plus" @click="goAdd">新建</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('18-2')" type="primary" size="small" icon="el-icon-edit" @click="goEdit">编辑</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('18-1')" type="primary" size="small" icon="el-icon-view" @click="goView">查看</el-button>
+        <el-button v-if="currentRow!=null " type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('18-4')" type="danger" size="small" icon="el-icon-delete" @click="goDelete">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
@@ -140,6 +140,7 @@
 import { fetchBids, newBid, editBid, createBid, deleteBid } from '@/api/bid';
 import { headerCellStyle, array2myString, myString2Array } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
+import { checkAuth } from "@/utils/permission";
 export default {
   name: 'BidList',
   components: {},
@@ -219,28 +220,37 @@ export default {
       this.$refs.postForm.validate((valid) => {
         if (valid) {
           let that = this
+          if (new Date(that.postForm.openTime).getTime() < new Date(that.postForm.regDeadline).getTime()) {
+            that.$message.warning('开标时间要在报名截止日期后面！')
+            return
+          }
           that.postForm.adminIds = that.array2myString(that.postForm.adminIds)
           that.postForm.marketAdminIds = that.array2myString(that.postForm.marketAdminIds)
           // 新建
           if (that.postForm.id === '') {
-            createBid(that.postForm).then((res) => {
-              // that.list.unshift(res.data)
-              that.getList()
+            createBid(that.postForm).then(res => {
+              that.list.unshift(res.data)
+              const idx = that.list.findIndex(a => a.id === res.data.id)
+              that.$refs.vTable.setCurrentRow(that.list[idx]);
               that.$message.success('新建成功！')
               that.dialogVisible = false
-            }).catch((err) => { that.$message.error('新建失败：' + err) })
+            }).catch(err => {
+              that.$message.error('新建失败：' + err)
+              that.dialogVisible = false
+            })
           }
           // 编辑更新
           else {
             editBid(that.postForm).then(res => {
-              that.getList()
-              //TODO:问后台能否在更新成功后把负责人名字返回，目前是空。如果能返回则可以直接修改界面，不要getList了。
-              // const idx = this.list.findIndex(a => a.id === this.currentRow.id)
-              // this.list[idx] = res.data
-              // this.$refs.vTable.setCurrentRow(this.list[idx]);
+              const idx = that.list.findIndex(a => a.id === that.currentRow.id)
+              that.list[idx] = res.data
+              that.$refs.vTable.setCurrentRow(that.list[idx]);
               that.$message.success('更新成功！')
               that.dialogVisible = false
-            }).catch((err) => { that.$message.error('更新失败：' + err) })
+            }).catch(err => {
+              that.$message.error('更新失败：' + err)
+              that.dialogVisible = false
+            })
           }
         }
       })
@@ -286,7 +296,7 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
-    headerCellStyle, array2myString, myString2Array
+    headerCellStyle, checkAuth, array2myString, myString2Array
   },
 };
 </script>
