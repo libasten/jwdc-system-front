@@ -5,7 +5,6 @@
       <el-button-group>
         <!-- 授权参考这里 -->
         <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate" v-if="checkAuth('7-3')">新建</el-button>
-        <el-button type="primary" size="small" icon="el-icon-download" @click="doSearch(1, pageSize)">下载表格</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑基本信息</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员任命</el-button>
@@ -46,9 +45,10 @@
                 </el-form-item>
               </el-col>
               <el-col :span="24">
-                <el-form-item style="float:right;">
+                <el-form-item style="float:right;margin-bottom:25px;">
                   <el-button type="primary" icon="el-icon-search" @click.native="doSearch(1, pageSize)">查询</el-button>
                   <el-button type="primary" icon="el-icon-refresh-left" @click.native="clearParams">重置</el-button>
+                  <el-button type="primary" icon="el-icon-download" v-if="canDownload" @click.native="downloadProjects">下载</el-button>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -195,13 +195,13 @@ export default {
       },
       keywordDisabled: false,
       showQueryTip: false,
+      canDownload: false,
     };
   },
   computed: {
     queryTypeTip() {
       return this.searchForm.searchTypeOpts.find(a => a.value === this.searchForm.searchType).text
     },
-
   },
   created() {
     this.getList(1, this.pageSize);
@@ -221,7 +221,7 @@ export default {
       fetchProjectListPaged(param).then((res) => {
         that.total = res.data.totalCount
         that.list = res.data.items
-        console.log(that.list)
+        that.canDownload = res.data.canDownloadProjects
         that.listLoading = false
       }).catch((err) => {
         that.$message({
@@ -249,7 +249,8 @@ export default {
         that.total = res.data.totalCount
         that.list = res.data.items
         that.listLoading = false
-        this.showQueryTip = true;
+        that.canDownload = res.data.canDownloadProjects
+        that.showQueryTip = true
       }).catch((err) => {
         that.$message({
           message: '错误信息：' + err,
@@ -348,6 +349,9 @@ export default {
           message: '已取消删除',
         });
       });
+    },
+    downloadProjects() {
+      console.log('todo')
     },
     // 选中行
     handleCurrentChange(val) {
