@@ -4,6 +4,7 @@
     <div class="top-btns">
       <el-button-group>
         <el-button type="primary" v-if="checkAuth('18-3')" size="small" icon="el-icon-plus" @click="goAdd">新建</el-button>
+        <el-button v-if="canDownload" type="primary" size="small" icon="el-icon-download" @click.native="downloadBids">下载</el-button>
         <el-button v-if="currentRow!=null && checkAuth('18-2')" type="primary" size="small" icon="el-icon-edit" @click="goEdit">编辑</el-button>
         <el-button v-if="currentRow!=null && checkAuth('18-1')" type="primary" size="small" icon="el-icon-view" @click="goView">查看</el-button>
         <el-button v-if="currentRow!=null " type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
@@ -176,6 +177,8 @@ import { fetchBids, newBid, editBid, createBid, deleteBid } from '@/api/bid';
 import { headerCellStyle, array2myString, myString2Array } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 import { checkAuth } from "@/utils/permission";
+const ExcelJS = require("exceljs");
+import { saveAs } from "file-saver";
 export default {
   name: 'BidList',
   components: {},
@@ -210,6 +213,7 @@ export default {
       staffs: [],
       categories: [],
       progresses: [],
+      canDownload: false,
       rules: {
         code: [{ required: true, message: '请输入编号', trigger: 'blur' }],
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -225,8 +229,9 @@ export default {
       this.listLoading = true;
       this.list = [];
       fetchBids().then(res => {
-        this.total = res.data.length
-        this.list = res.data.filter(a => a.status === 1)
+        this.total = res.data.bids.length
+        this.list = res.data.bids.filter(a => a.status === 1)
+        this.canDownload = res.data.canDownloadBids
         this.listLoading = false
       }).catch(err => { this.$message.error('错误信息：' + err); });
     },
@@ -299,6 +304,52 @@ export default {
     },
     goView() {
       this.$router.push({ path: '/bid/detail/' + this.currentRow.id })
+    },
+    downloadBids() {
+      const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, };
+      const contentCenter = { vertical: "middle", horizontal: "center" };
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("投标信息列表", { views: [{ showGridLines: true }], });
+      worksheet.addRow(["投标信息列表"]).height = 25;
+      worksheet.getCell("A1").border = borderStyle;
+      // 样式-对齐
+      worksheet.getCell("A1").alignment = contentCenter;
+      // 样式-字体
+      worksheet.getCell("A1").font = { size: 12, bold: true };
+      // 填充表头 - 用refs获取表头列表
+      let headerEx = []
+      this.$refs.vTable.$children.forEach(obj => { obj.label !== undefined ? headerEx.push(obj.label) : '' })
+      const headerRow = worksheet.addRow(headerEx);
+      headerRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle;
+        cell.alignment = contentCenter;
+        cell.font = { bold: true, size: 11 }
+      });
+      // 按开始行，开始列，结束行，结束列合并 - 根据第一行的列数对第一行大标题进行合并
+      worksheet.mergeCells(1, 1, 1, headerEx.length);
+      // 填充数据行
+      this.list.forEach(e => {
+        let arrTemp = new Array(headerEx.length).fill('-');
+        arrTemp[0] = e.code === null ? '' : e.code
+        arrTemp[1] = e.name === null ? '' : e.name
+        arrTemp[2] = e.categoryName === null ? '' : e.categoryName
+        arrTemp[3] = e.regDeadlineFormat === null ? '' : e.regDeadlineFormat
+        arrTemp[4] = e.openTimeFormat === null ? '' : e.openTimeFormat
+        arrTemp[5] = e.adminNamesFormat === null ? '' : e.adminNamesFormat
+        arrTemp[6] = e.progressName === null ? '' : e.progressName
+        arrTemp[7] = e.createTimeFormat === null ? '' : e.createTimeFormat
+        const tempRow = worksheet.addRow(arrTemp);
+        tempRow.eachCell(function (cell, colNumber) {
+          cell.border = borderStyle;
+          cell.alignment = contentCenter;
+        });
+      })
+      // 设置列属性 - 宽度
+      for (let i = 0; i < headerEx.length; i++) {
+        worksheet.getColumn(i + 1).width = 20;
+      }
+      // 保存到本地
+      workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "投标列表.xlsx")).catch((err) => console.log("Error writing excel export", err));
     },
     // 选中行
     handleCurrentChange(val) {

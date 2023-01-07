@@ -3,11 +3,12 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="goAdd">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="goEdit">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click="goView">查看</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click="goDelete">删除</el-button>
+        <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goAdd">新建</el-button>
+        <el-button v-if="canDownload" type="primary" size="small" icon="el-icon-download" @click.native="downloadContracts">下载</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
+        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click.native="goDelete">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
@@ -78,8 +79,8 @@
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submit">确 定</el-button>
+        <el-button @click.native="dialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click.native="submit">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -90,6 +91,8 @@
 import { fetchContracts, editContract, createContract, deleteContract } from '@/api/contract';
 import { headerCellStyle } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
+const ExcelJS = require("exceljs");
+import { saveAs } from "file-saver";
 export default {
   name: 'ContractList',
   components: {},
@@ -110,6 +113,7 @@ export default {
         partA: '',
         description: ''
       },
+      canDownload: false,
       rules: {
         code: [{ required: true, message: '请输入编号', trigger: 'blur' }],
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
@@ -124,11 +128,12 @@ export default {
     getList() {
       this.listLoading = true;
       this.list = [];
-      fetchContracts().then((res) => {
-        this.total = res.data.length
-        this.list = res.data
+      fetchContracts().then(res => {
+        this.total = res.data.contracts.length
+        this.list = res.data.contracts
+        this.canDownload = res.data.canDownloadContracts
         this.listLoading = false
-      }).catch((err) => {
+      }).catch(err => {
         this.$message.error('错误信息：' + err);
       });
     },
@@ -177,6 +182,52 @@ export default {
     },
     goView() {
       this.$router.push({ path: '/contract/detail/' + this.currentRow.id })
+    },
+    // 下载合同
+    downloadContracts() {
+      const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, };
+      const contentCenter = { vertical: "middle", horizontal: "center" };
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("合同信息列表", { views: [{ showGridLines: true }], });
+      worksheet.addRow(["合同信息列表"]).height = 25;
+      worksheet.getCell("A1").border = borderStyle;
+      // 样式-对齐
+      worksheet.getCell("A1").alignment = contentCenter;
+      // 样式-字体
+      worksheet.getCell("A1").font = { size: 12, bold: true };
+      // 填充表头 - 用refs获取表头列表
+      let headerEx = []
+      this.$refs.vTable.$children.forEach(obj => { obj.label !== undefined ? headerEx.push(obj.label) : '' })
+      const headerRow = worksheet.addRow(headerEx);
+      headerRow.eachCell(function (cell, colNumber) {
+        cell.border = borderStyle
+        cell.alignment = contentCenter
+        cell.font = { bold: true, size: 11 }
+      });
+      // 按开始行，开始列，结束行，结束列合并 - 根据第一行的列数对第一行大标题进行合并
+      worksheet.mergeCells(1, 1, 1, headerEx.length);
+      // 填充数据行
+      this.list.forEach(e => {
+        let arrTemp = new Array(headerEx.length).fill('-');
+        arrTemp[0] = e.code === null ? '' : e.code
+        arrTemp[1] = e.name === null ? '' : e.name
+        arrTemp[2] = e.partA === null ? '' : e.partA
+        arrTemp[3] = e.amount === null ? '' : e.amount
+        arrTemp[4] = e.createTimeFormat === null ? '' : e.createTimeFormat
+        arrTemp[5] = e.projectCode === null ? '' : e.projectCode
+        arrTemp[6] = e.description === null ? '' : e.description
+        const tempRow = worksheet.addRow(arrTemp);
+        tempRow.eachCell(function (cell, colNumber) {
+          cell.border = borderStyle;
+          cell.alignment = contentCenter;
+        });
+      })
+      // 设置列属性 - 宽度
+      for (let i = 0; i < headerEx.length; i++) {
+        worksheet.getColumn(i + 1).width = 20;
+      }
+      // 保存到本地
+      workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "合同列表.xlsx")).catch((err) => console.log("Error writing excel export", err));
     },
     // 选中行
     handleCurrentChange(val) {
