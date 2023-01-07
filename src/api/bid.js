@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取投标列表
 export function fetchBids() {
   return request({
-    url: '/Bids/GetBids',
+    url: '/Bids/GetBids1',
     method: 'get',
   })
 }

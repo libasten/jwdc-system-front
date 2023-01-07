@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 获取合同列表
 export function fetchContracts() {
   return request({
-    url: '/Contracts/GetContracts',
+    url: '/Contracts/GetContracts1',
     method: 'get',
   })
 }
