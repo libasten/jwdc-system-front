@@ -55,7 +55,7 @@
       </span>
     </el-dialog>
     <!-- 授权弹窗 -->
-    <el-dialog :title="authorizeDialogTitle" :visible.sync="dialogVisibleAuthorize" :close-on-click-modal="false" width="50%" class="authorize-form-div">
+    <el-dialog :title="authorizeDialogTitle" :visible.sync="dialogVisibleAuthorize" :close-on-click-modal="false" width="70%" class="authorize-form-div">
       <el-form ref="authorizeForm" :model="authorizeForm" :rules="rules" label-width="90px">
         <div v-for="(authItem ,index) in authorizeList" :key="index" class="authorizeItemLine">
           <span class="auth-idx">{{authItem.id}}.</span>
@@ -329,6 +329,10 @@ export default {
       border-bottom: 1px solid #ddd;
       padding-bottom: 8px;
       margin-bottom: 8px;
+      .auth-idx {
+        display: inline-block;
+        width: 20px;
+      }
       .auth-name {
         display: inline-block;
         width: 110px;
