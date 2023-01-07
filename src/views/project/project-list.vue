@@ -16,45 +16,52 @@
       </el-button-group>
     </div>
     <div class="query-box">
-      <el-divider content-position="center"><span>项目筛选</span></el-divider>
-      <el-form :model="searchForm" ref="searchForm" label-width="110px">
-        <el-row>
-          <el-col :span="10">
-            <el-form-item label="筛选类别" prop="searchType">
-              <el-select v-model="searchForm.searchType" placeholder="筛选类型">
-                <el-option v-for="(item,idx) in searchForm.searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="14">
-            <el-form-item label="筛选关键字" prop="keyword">
-              <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="10">
-            <el-form-item label="日期选项" prop="dateType">
-              <el-select v-model="searchForm.dateType" placeholder="筛选类型">
-                <el-option v-for="(item,idx) in searchForm.dateTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="14">
-            <el-form-item label="日期区间" prop="seDate">
-              <el-date-picker v-model="searchForm.seDate" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :clearable="false"></el-date-picker>
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item style="float:right;">
-              <el-button type="primary" icon="el-icon-search" @click.native="doSearch(1, pageSize)">查询</el-button>
-              <el-button type="primary" icon="el-icon-refresh-left" @click.native="clearParams">重置</el-button>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <el-divider class="bottom-divider"><span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{searchForm.keyword}} ”</span>的筛选结果</span></el-divider>
+      <el-collapse>
+        <el-collapse-item title=" " name="1">
+          <template slot="title"><i class="header-icon el-icon-s-operation"></i> 项目筛选框 </template>
+          <el-form :model="searchForm" ref="searchForm" label-width="100px">
+            <el-row>
+              <el-col :span="10">
+                <el-form-item label="筛选类别" prop="searchType">
+                  <el-select v-model="searchForm.searchType" placeholder="筛选类型" @change="searchTypeChange">
+                    <el-option v-for="(item,idx) in searchForm.searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="14">
+                <el-form-item label="筛选关键字" prop="keyword">
+                  <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable :disabled='keywordDisabled'></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="10">
+                <el-form-item label="日期选项" prop="dateType">
+                  <el-select v-model="searchForm.dateType" placeholder="筛选类型">
+                    <el-option v-for="(item,idx) in searchForm.dateTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="14">
+                <el-form-item label="日期区间" prop="seDate">
+                  <el-date-picker v-model="searchForm.seDate" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :clearable="false"></el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item style="float:right;">
+                  <el-button type="primary" icon="el-icon-search" @click.native="doSearch(1, pageSize)">查询</el-button>
+                  <el-button type="primary" icon="el-icon-refresh-left" @click.native="clearParams">重置</el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <el-divider class="bottom-divider">
+            <span v-if="!showQueryTip">无筛选条件，显示全部项目</span>
+            <span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{searchForm.keyword}} ”</span>的筛选结果</span>
+          </el-divider>
+        </el-collapse-item>
+      </el-collapse>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" :height="'calc(100vh - 350px)'" v-fit-columns>
+      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" :height="'calc(100vh - 280px)'" v-fit-columns>
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -177,14 +184,16 @@ export default {
           { text: '承担部门', value: 2 },
           { text: '项目负责', value: 4 },
           { text: '市场负责', value: 5 },
-          { text: '技术负责', value: 6 },],
+          { text: '技术负责', value: 6 },
+          { text: '全部', value: 0 },],
         // 日期过滤的枚举， 0 创建日期 1 开始日期  2 结束日期 ，落在下面的区间内
-        dateType: -1,
-        dateTypes: [{ id: -1, text: '不作限制' }, { id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
+        dateType: 0,
+        dateTypes: [{ id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
         seDate: '',
         startDate: new Date(),
         endDate: new Date(),
       },
+      keywordDisabled: false,
       showQueryTip: false,
     };
   },
@@ -192,6 +201,7 @@ export default {
     queryTypeTip() {
       return this.searchForm.searchTypeOpts.find(a => a.value === this.searchForm.searchType).text
     },
+
   },
   created() {
     this.getList(1, this.pageSize);
@@ -206,7 +216,7 @@ export default {
         skpCount: (cPage - 1) * this.pageSize,
         maxCount: pSize,
         searchType: 0, searchValue: '',
-        dateType: 0, steartDate: '2021-21-1', endDate: '2022-1-1'
+        dateType: 0, steartDate: '1900-1-1', endDate: '2099-12-31'
       }
       fetchProjectListPaged(param).then((res) => {
         that.total = res.data.totalCount
@@ -233,7 +243,7 @@ export default {
         maxCount: pSize,
         searchType: that.searchForm.searchType,
         searchValue: that.searchForm.keyword,
-        dateType: 0, steartDate: '2023-1-1', endDate: '2023-1-11'
+        dateType: that.searchForm.dateType, startDate: that.searchForm.seDate[0], endDate: that.searchForm.seDate[1]
       }
       fetchProjectListPaged(param).then((res) => {
         that.total = res.data.totalCount
@@ -256,6 +266,17 @@ export default {
       this.getList(1, this.pageSize);
       Object.assign(this.$data.searchForm, this.$options.data().searchForm)
       this.showQueryTip = false;
+    },
+    // 如果用户选择了全部，禁用关键字输入框
+    searchTypeChange() {
+      if (this.searchForm.searchType === 0) {
+        this.searchForm.keyword = ''
+        this.keywordDisabled = true
+        this.clearParams()
+      }
+      else {
+        this.keywordDisabled = false
+      }
     },
     goEdit() {
       this.$router.push({ path: '/project/edit/' + this.currentRow.id })
@@ -364,16 +385,27 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .query-box {
-  margin-top: 20px;
+  .el-collapse-item__header {
+    font-size: 1rem;
+    background-color: #f5f5f7;
+    border-top: 2px solid #72b8ff;
+    padding-left: 15px;
+    margin-bottom: 10px;
+    &.is-active {
+      border-top: 2px solid #0a76e2;
+    }
+    i {
+      margin-right: 10px;
+    }
+  }
   .el-select,
   .el-date-editor {
     width: 100%;
   }
   .bottom-divider {
     margin-top: 0px;
-    margin-bottom: 30px;
   }
 }
 .keyword-span {
