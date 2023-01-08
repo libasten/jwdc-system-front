@@ -4,7 +4,7 @@
     <div class="top-btns">
       <el-button-group>
         <el-button type="primary" v-if="checkAuth('18-3')" size="small" icon="el-icon-plus" @click="goAdd">新建</el-button>
-        <el-button v-if="canDownload" type="primary" size="small" icon="el-icon-download" @click.native="downloadBids">下载</el-button>
+        <el-button v-if="canDownload" type="primary" size="small" icon="el-icon-download" @click.native="downloadBids">下载列表</el-button>
         <el-button v-if="currentRow!=null && checkAuth('18-2')" type="primary" size="small" icon="el-icon-edit" @click="goEdit">编辑</el-button>
         <el-button v-if="currentRow!=null && checkAuth('18-1')" type="primary" size="small" icon="el-icon-view" @click="goView">查看</el-button>
         <el-button v-if="currentRow!=null " type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
