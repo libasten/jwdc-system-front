@@ -51,4 +51,14 @@ export function queryStaffProjectCost(pa) {
 }
 
 
+// 进行项目结款信息归集统计
+export function queryProjectCollection(pa) {
+  return request({
+    url: '/Workflows/GetProjectCollections',
+    method: 'post',
+    params: pa
+  })
+}
+
+
 //#endregion

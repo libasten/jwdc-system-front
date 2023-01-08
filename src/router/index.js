@@ -321,6 +321,12 @@ export const asyncRoutes = [
         name: 'staffProjectCost',
         meta: { title: '人员项目分摊', icon: 'documentation' }
       },
+      {
+        path: 'projectCollection',
+        component: () => import('@/views/cost/project-collection'),
+        name: 'ProjectCollection',
+        meta: { title: '项目结款信息', icon: 'documentation' }
+      },
     ]
   },
   /** when your routing map is too long, you can split it into small modules **/
