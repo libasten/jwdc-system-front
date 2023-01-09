@@ -68,7 +68,6 @@ export default {
           this.list = []
           queryStaffCost(this.postForm).then(res => {
             this.queryResult = res.data
-            console.log(res.data)
             this.list = res.data.datas
             this.listLoading = false
           }).catch(err => {

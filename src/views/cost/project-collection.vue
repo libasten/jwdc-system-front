@@ -26,86 +26,8 @@
       </el-form>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" border fit highlight-current-row :header-cell-style="headerCellStyle" :height="'calc(100vh - 300px)'" v-fit-columns element-loading-text="后台统计查询中...">
-        <el-table-column label="项目编号" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.code }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="项目类型" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.projectTypeName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="项目名称" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.name }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="甲方名称" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.partA }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="合同金额" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.contractAmount }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="项目进度" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.progressName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="开票进度" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.invoicingProgressName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="回款进度" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.collectionProgressName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="开票总金额" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.invoicingTotal }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="回款总金额" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.collectionTotal }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="未回款金额" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.unCollectionTotal }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="技术负责人" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.techniqueAdminsFormat }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="市场负责人" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.marketAdminNamesFormat }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="合同编号" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.contractIds }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="甲方联系人" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.partAContact }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="甲方电话" align="center">
-          <template slot-scope="{ row }">
-            <span>{{ row.partAPhone }}</span>
-          </template>
+      <el-table v-loading="listLoading" ref="vTable" :data="list" border fit highlight-current-row :header-cell-style="headerCellStyle" :height="'calc(100vh - 300px)'" element-loading-text="后台统计查询中...">
+        <el-table-column v-for="item in headerList" :prop="item.value" :key="item.value" :label="item.text" show-overflow-tooltip header-align="center" align="left">
         </el-table-column>
       </el-table>
     </div>
@@ -132,6 +54,7 @@ export default {
         startDate: '',
         endDate: '',
       },
+      headerList: [],
       rules: {
         seDate: [{ required: true, message: '请选择起止时间', trigger: 'blur' }]
       },
@@ -149,8 +72,24 @@ export default {
           this.postForm.endDate = this.postForm.seDate[1]
           this.listLoading = true
           this.list = []
-          console.log(this.postForm)
           queryProjectCollection(this.postForm).then(res => {
+            // todo: 动态生成表头,这样可以自动撑开表格
+            this.headerList = [{ value: 'code', text: '项目编号' },
+            { value: 'projectTypeName', text: '项目类型' },
+            { value: 'name', text: '项目名称' },
+            { value: 'partA', text: '甲方名称' },
+            { value: 'contractAmount', text: '合同金额' },
+            { value: 'progressName', text: '项目进度' },
+            { value: 'invoicingProgressName', text: '开票进度' },
+            { value: 'collectionProgressName', text: '回款进度' },
+            { value: 'invoicingTotal', text: '开票总金额' },
+            { value: 'collectionTotal', text: '回款总金额' },
+            { value: 'unCollectionTotal', text: '未回款金额' },
+            { value: 'techniqueAdminsFormat', text: '技术负责人' },
+            { value: 'marketAdminNamesFormat', text: '市场负责人' },
+            { value: 'contractIds', text: '合同编号' },
+            { value: 'partAContact', text: '甲方联系人' },
+            { value: 'partAPhone', text: '甲方电话' },]
             this.list = res.data
             this.listLoading = false
           }).catch(err => {
@@ -163,6 +102,7 @@ export default {
 
     clearParams() {
       Object.assign(this.$data.postForm, this.$options.data().postForm)
+      this.headerList = []
       this.list = []
       this.$refs.postForm.clearValidate()
     },
