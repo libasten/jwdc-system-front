@@ -22,14 +22,14 @@
             <el-row>
               <el-col :span="10">
                 <el-form-item label="筛选类别" prop="searchType">
-                  <el-select v-model="searchForm.searchType" placeholder="筛选类型" @change="searchTypeChange">
+                  <el-select v-model="searchForm.searchType" placeholder="筛选类型">
                     <el-option v-for="(item,idx) in searchForm.searchTypeOpts" :key="idx" :label="item.text" :value="item.value"></el-option>
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="14">
                 <el-form-item label="筛选关键字" prop="keyword">
-                  <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable :disabled='keywordDisabled'></el-input>
+                  <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable></el-input>
                 </el-form-item>
               </el-col>
               <el-col :span="10">
@@ -55,13 +55,13 @@
           </el-form>
           <el-divider class="bottom-divider">
             <span v-if="!showQueryTip">无筛选条件，显示全部项目</span>
-            <span v-if="showQueryTip">根据<span class="keyword-span">{{queryTypeTip}}</span>类别下，关键字<span class="keyword-span">“ {{searchForm.keyword}} ”</span>的筛选结果</span>
+            <span v-if="showQueryTip">根据上方条件的搜索结果</span>
           </el-divider>
         </el-collapse-item>
       </el-collapse>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" :height="'calc(100vh - 280px)'" v-fit-columns>
+      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle" v-fit-columns>
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
@@ -175,17 +175,16 @@ export default {
       // 当前选中的项目ID,传递给子组件
       pCurPrjId: '',
       searchForm: {
-        searchType: 3,
+        searchType: 0,
         keyword: '',
-        // value为0的时候，返回全部，无需关键字，在getList方法中使用。
         searchTypeOpts: [
+          { text: '全部', value: 0 },
           { text: '项目名称', value: 3 },
           { text: '项目类型', value: 1 },
           { text: '承担部门', value: 2 },
           { text: '项目负责', value: 4 },
           { text: '市场负责', value: 5 },
-          { text: '技术负责', value: 6 },
-          { text: '全部', value: 0 },],
+          { text: '技术负责', value: 6 },],
         // 日期过滤的枚举， 0 创建日期 1 开始日期  2 结束日期 ，落在下面的区间内
         dateType: 0,
         dateTypes: [{ id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
@@ -193,16 +192,11 @@ export default {
         startDate: new Date(),
         endDate: new Date(),
       },
-      keywordDisabled: false,
       showQueryTip: false,
       canDownload: false,
     };
   },
-  computed: {
-    queryTypeTip() {
-      return this.searchForm.searchTypeOpts.find(a => a.value === this.searchForm.searchType).text
-    },
-  },
+  computed: {},
   created() {
     this.getList(1, this.pageSize);
   },
@@ -218,24 +212,16 @@ export default {
         searchType: 0, searchValue: '',
         dateType: 0, steartDate: '1900-1-1', endDate: '2099-12-31'
       }
-      fetchProjectListPaged(param).then((res) => {
+      fetchProjectListPaged(param).then(res => {
         that.total = res.data.totalCount
         that.list = res.data.items
         that.canDownload = res.data.canDownloadProjects
         that.listLoading = false
-      }).catch((err) => {
-        that.$message({
-          message: '错误信息：' + err,
-          type: 'error'
-        });
-      });
+      }).catch(err => { that.$message.error('错误信息：' + err) })
     },
     // 执行搜索
     doSearch(cPage, pSize) {
       let that = this
-      if (that.searchForm.keyword.trim().length < 1) {
-        return
-      }
       that.listLoading = true
       that.list = []
       const param = {
@@ -245,18 +231,26 @@ export default {
         searchValue: that.searchForm.keyword,
         dateType: that.searchForm.dateType, startDate: that.searchForm.seDate[0], endDate: that.searchForm.seDate[1]
       }
-      fetchProjectListPaged(param).then((res) => {
-        that.total = res.data.totalCount
-        that.list = res.data.items
-        that.listLoading = false
-        that.canDownload = res.data.canDownloadProjects
-        that.showQueryTip = true
-      }).catch((err) => {
-        that.$message({
-          message: '错误信息：' + err,
-          type: 'error'
-        });
-      });
+      // 后台逻辑: 如果不输入关键字, 要把搜索类型设置为"全部"
+      if (param.searchValue === '') {
+        param.searchType = 0
+      }
+      if (param.startDate === undefined || param.endDate === undefined) {
+        if (param.searchValue === '') {
+          this.getList(1, this.pageSize);
+        } else {
+          // 因为日期区间是后台必填项,这里设置一个长期的时间段.
+          param.startDate = '1979-1-1'
+          param.endDate = '2099-12-31'
+          fetchProjectListPaged(param).then(res => {
+            that.total = res.data.totalCount
+            that.list = res.data.items
+            that.listLoading = false
+            that.canDownload = res.data.canDownloadProjects
+            that.showQueryTip = true
+          }).catch(err => { that.$message.error('错误信息：' + err) })
+        }
+      }
     },
     // 清空关键字
     clearKW() {
@@ -267,17 +261,6 @@ export default {
       this.getList(1, this.pageSize);
       Object.assign(this.$data.searchForm, this.$options.data().searchForm)
       this.showQueryTip = false;
-    },
-    // 如果用户选择了全部，禁用关键字输入框
-    searchTypeChange() {
-      if (this.searchForm.searchType === 0) {
-        this.searchForm.keyword = ''
-        this.keywordDisabled = true
-        this.clearParams()
-      }
-      else {
-        this.keywordDisabled = false
-      }
     },
     goEdit() {
       this.$router.push({ path: '/project/edit/' + this.currentRow.id })
@@ -411,12 +394,6 @@ export default {
   .bottom-divider {
     margin-top: 0px;
   }
-}
-.keyword-span {
-  font-size: 1.1rem;
-  margin: 0 8px;
-  font-weight: 700;
-  color: #2264f3;
 }
 </style>
 <style lang="scss">
