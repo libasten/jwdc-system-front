@@ -39,13 +39,13 @@
             </el-row>
           </el-form>
           <div class="bottom-btns">
-            <el-button size="mini" type="primary" @click="editCompanyInfo">更新公司信息</el-button>
+            <el-button size="mini" type="primary" v-if="checkAuth('1-2')" @click="editCompanyInfo">更新公司信息</el-button>
           </div>
         </el-card>
       </el-collapse-item>
       <el-collapse-item title="2. 附件文件" name="2">
         <div class="top-btns">
-          <el-button size="mini" type="primary" @click="addArchive">上传公司附件</el-button>
+          <el-button size="mini" type="primary" v-if="checkAuth('2-3')" @click="addArchive">上传公司附件</el-button>
         </div>
         <el-table :data="archiveFileList" border :header-cell-style="headerCellStyle" v-loading="loading" element-loading-text="获取文件中...">
           <el-table-column label="文件名称" min-width="50" show-overflow-tooltip>
@@ -61,9 +61,9 @@
           <el-table-column label="操作" align="center" min-width="25">
             <template slot-scope="scope">
               <el-button-group>
-                <el-button size="mini" type="primary" plain @click="editArchive(scope.row)">编辑</el-button>
-                <el-button size="mini" type="primary" plain @click="downloadArchive(scope.row)">下载</el-button>
-                <el-button size="mini" type="danger" plain @click="deleteArchive(scope.row)">删除</el-button>
+                <el-button size="mini" type="primary" v-if="checkAuth('2-3')" plain @click="editArchive(scope.row)">编辑</el-button>
+                <el-button size="mini" type="primary" v-if="checkAuth('2-5')" plain @click="downloadArchive(scope.row)">下载</el-button>
+                <el-button size="mini" type="danger" v-if="checkAuth('2-4')" plain @click="deleteArchive(scope.row)">删除</el-button>
               </el-button-group>
             </template>
           </el-table-column>
@@ -95,7 +95,7 @@
 import { fetchCompany, editCompany, fetchCompanyArchive, createCompanyArchive, editCompanyArchive, delCompanyArchive, } from '@/api/company';
 import { deepClone } from '@/utils/index'
 import { downloadFile } from '@/utils/req-down'
-
+import { checkAuth } from "@/utils/permission";
 export default {
   name: 'CompanyInfo',
   data() {
@@ -263,7 +263,8 @@ export default {
     },
     headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
-    }
+    },
+    checkAuth
   },
 };
 </script>
