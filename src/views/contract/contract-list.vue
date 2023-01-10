@@ -93,6 +93,7 @@ import { headerCellStyle } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 const ExcelJS = require("exceljs");
 import { saveAs } from "file-saver";
+import { checkAuth } from '@/utils/permission'
 export default {
   name: 'ContractList',
   components: {},
@@ -269,7 +270,7 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
-    headerCellStyle
+    headerCellStyle, checkAuth
   },
 };
 </script>
