@@ -5,13 +5,20 @@
     <div class="query-form">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-position="right" label-width="120px">
         <el-row>
-          <el-col :sm="12">
+          <el-col :sm="8">
             <el-form-item label="项目名称" prop="projectName">
               <el-input v-model="postForm.projectName"></el-input>
             </el-form-item>
           </el-col>
-          <el-col :sm="12">
-            <el-form-item label="项目开始时间" prop="seDate">
+          <el-col :span="6">
+            <el-form-item label="日期选项" prop="dateType">
+              <el-select v-model="postForm.dateType" placeholder="筛选类型">
+                <el-option v-for="(item,idx) in postForm.dateTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :sm="10">
+            <el-form-item label="时间范围" prop="seDate">
               <el-date-picker v-model="postForm.seDate" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :clearable="false"></el-date-picker>
             </el-form-item>
           </el-col>
@@ -50,6 +57,9 @@ export default {
       listLoading: false,
       postForm: {
         projectName: '',
+        // 日期过滤的枚举， 0 创建日期 1 开始日期  2 结束日期 ，落在下面的区间内
+        dateType: 0,
+        dateTypes: [{ id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
         seDate: '',
         startDate: '',
         endDate: '',
@@ -73,7 +83,6 @@ export default {
           this.listLoading = true
           this.list = []
           queryProjectCollection(this.postForm).then(res => {
-            // todo: 动态生成表头,这样可以自动撑开表格
             this.headerList = [{ value: 'code', text: '项目编号' },
             { value: 'projectTypeName', text: '项目类型' },
             { value: 'name', text: '项目名称' },
@@ -178,8 +187,9 @@ export default {
 }
 .query-form {
   .el-select,
-  .el-date-editor {
-    width: 100%;
+  .el-date-editor,
+  .el-range-editor {
+    width: 100% !important;
   }
 }
 .table-view {
