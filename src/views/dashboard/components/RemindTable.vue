@@ -89,6 +89,7 @@ export default {
       // this.listLoading = false;
       //#endregion
       getRemindList().then((res) => {
+        console.log(res)
         this.total = res.data.length;
         res.data.forEach(ele => {
           const element = {
