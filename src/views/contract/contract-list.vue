@@ -3,12 +3,12 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goAdd">新建</el-button>
+        <el-button type="primary" v-if="checkAuth('16-3')" size="small" icon="el-icon-plus" @click.native="goAdd">新建</el-button>
         <el-button v-if="canDownload" type="primary" size="small" icon="el-icon-download" @click.native="downloadContracts">下载列表</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
-        <el-button v-if="currentRow!=null" type="danger" size="small" icon="el-icon-delete" @click.native="goDelete">删除</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('16-2')" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑</el-button>
+        <el-button v-if="currentRow!=null  && checkAuth('16-1')" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看</el-button>
+        <el-button v-if="currentRow!=null " type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
+        <el-button v-if="currentRow!=null  && checkAuth('16-4')" type="danger" size="small" icon="el-icon-delete" @click.native="goDelete">删除</el-button>
       </el-button-group>
     </div>
     <div class="table-view">
