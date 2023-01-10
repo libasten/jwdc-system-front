@@ -1,6 +1,6 @@
 <template>
   <!-- 项目费用明细归集 -->
-  <div class="app-container">
+  <div class="app-container" v-if="checkAuth('33-1')">
     <div class="page-title">项目费用明细归集</div>
     <div class="query-form">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-position="right" label-width="60px">
@@ -35,6 +35,7 @@ import { queryProjectCost } from '@/api/cost';
 import { headerCellStyle } from '@/utils/commonFunction'
 const ExcelJS = require("exceljs");
 import { saveAs } from "file-saver";
+import { checkAuth } from "@/utils/permission";
 
 export default {
   name: 'ProjectCost',
@@ -158,7 +159,7 @@ export default {
       workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "项目费用明细.xlsx")).catch((err) => console.log("Error writing excel export", err));
     },
 
-    headerCellStyle,
+    headerCellStyle, checkAuth
   },
 };
 </script>

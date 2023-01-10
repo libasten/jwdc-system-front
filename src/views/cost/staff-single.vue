@@ -1,6 +1,6 @@
 <template>
   <!-- 单个员工费用统计 -->
-  <div class="app-container">
+  <div class="app-container" v-if="checkAuth('33-1')">
     <div class="page-title">单个人员费用归集</div>
     <div class="query-form">
       <el-form ref="postForm" :model="postForm" :rules="rules" label-position="right" label-width="60px">
@@ -87,6 +87,7 @@ import { fetchQueryStaffParams, fetchQueryProjectParams, queryStaffSingleCost } 
 import { headerCellStyle } from '@/utils/commonFunction'
 const ExcelJS = require("exceljs");
 import { saveAs } from "file-saver";
+import { checkAuth } from "@/utils/permission";
 export default {
   name: 'StaffSingleCost',
   components: {},
@@ -243,7 +244,7 @@ export default {
       // 保存到本地
       workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), this.queryResult.staffName + "-报销汇总.xlsx")).catch((err) => console.log("Error writing excel export", err));
     },
-    headerCellStyle,
+    headerCellStyle, checkAuth
   },
 };
 </script>
