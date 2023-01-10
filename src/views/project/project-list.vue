@@ -4,12 +4,13 @@
     <div class="top-btns">
       <el-button-group>
         <!-- 授权参考这里 -->
+        <!-- 人员只能看到系统允许看到的项目，所以编辑、分享等功能不要再做权限控制 -->
         <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate" v-if="checkAuth('7-3')">新建</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑基本信息</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员任命</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-map-location" @click.native="showMilestone">里程碑</el-button>
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-share" @click.native="showShare">分享</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('7-2')" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑基本信息</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('7-1')" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('25-1')" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员任命</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('1-1')" type="primary" size="small" icon="el-icon-map-location" @click.native="showMilestone">里程碑</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('30-1')" type="primary" size="small" icon="el-icon-share" @click.native="showShare">分享</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click.native="cancelSelected">取消选中</el-button>
         <el-button v-if="currentRow!=null && checkAuth('7-4')" type="danger" size="small" icon="el-icon-delete" @click.native="deleteProject">删除</el-button>
       </el-button-group>
