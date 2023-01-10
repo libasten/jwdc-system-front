@@ -501,3 +501,12 @@ export function delCollectionProgress(data) {
   })
 }
 //#endregion
+
+// 下载项目列表
+export function downProjects(pa) {
+  return request({
+    url: '/Projects/GetProjects2',
+    method: 'get',
+    params: pa,
+  })
+}

@@ -6,6 +6,7 @@
         <!-- 授权参考这里 -->
         <!-- 人员只能看到系统允许看到的项目，所以编辑、分享等功能不要再做权限控制 -->
         <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate" v-if="checkAuth('7-3')">新建</el-button>
+        <el-button type="primary" size="small" icon="el-icon-download" v-if="canDownload" @click.native="goDownload">下载</el-button>
         <el-button v-if="currentRow!=null && checkAuth('7-2')" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑基本信息</el-button>
         <el-button v-if="currentRow!=null && checkAuth('7-1')" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
         <el-button v-if="currentRow!=null && checkAuth('25-1')" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员任命</el-button>
@@ -49,7 +50,6 @@
                 <el-form-item style="float:right;margin-bottom:25px;">
                   <el-button type="primary" icon="el-icon-search" @click.native="doSearch(1, pageSize)">查询</el-button>
                   <el-button type="primary" icon="el-icon-refresh-left" @click.native="clearParams">重置</el-button>
-                  <el-button type="primary" icon="el-icon-download" v-if="canDownload" @click.native="downloadProjects">下载</el-button>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -143,23 +143,46 @@
         <el-button @click="shareDialogVisible = false">关 闭</el-button>
       </span>
     </el-dialog>
+    <!-- 下载列表 -->
+    <el-dialog title="下载项目列表" :visible.sync="downloadDialogVisible" :close-on-click-modal="false" width="40%" v-loading="downloadLoading" element-loading-text="后台统计查询中...">
+      <el-form label-width="90px" ref="downloadForm" :model="downloadForm" :rules="downRules">
+        <el-form-item label="日期选项" prop="dateType">
+          <el-select v-model="downloadForm.dateType" placeholder="筛选类型">
+            <el-option v-for="(item,idx) in downloadForm.dateTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="日期区间" prop="seDate">
+          <el-date-picker v-model="downloadForm.seDate" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :clearable="false"></el-date-picker>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="downloadProjects">开始下载</el-button>
+        <el-button @click="downloadDialogVisible = false">关 闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 
-import { fetchProjectListPaged, delProject } from '@/api/project';
+import { fetchProjectListPaged, delProject, downProjects } from '@/api/project';
 import { headerCellStyle, columnStyle } from '@/utils/commonFunction'
 import ProjectAppoint from '@/views/project/components/project-appoint'
 import ProjectMilestone from '@/views/project/components/project-milestone'
 import ProjectShare from '@/views/project/components/project-share'
 import { checkAuth } from '@/utils/permission'
+const ExcelJS = require("exceljs");
+import { saveAs } from "file-saver";
+
 export default {
   name: 'ProjectList',
   components: { ProjectAppoint, ProjectMilestone, ProjectShare },
   data() {
     return {
       rules: {},
+      downRules: {
+        seDate: [{ required: true, message: '请选择时间段', trigger: 'blur' }],
+      },
       list: [],
       listLoading: true,
       pageSize: 10,
@@ -194,7 +217,17 @@ export default {
         endDate: new Date(),
       },
       showQueryTip: false,
+      // 下载项目列表
       canDownload: false,
+      downloadDialogVisible: false,
+      downloadLoading: false,
+      downloadForm: {
+        dateType: 0,
+        dateTypes: [{ id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
+        seDate: '',
+        startDate: new Date(),
+        endDate: new Date(),
+      }
     };
   },
   computed: {},
@@ -214,6 +247,7 @@ export default {
         dateType: 0, steartDate: '1900-1-1', endDate: '2099-12-31'
       }
       fetchProjectListPaged(param).then(res => {
+        console.log(res)
         that.total = res.data.totalCount
         that.list = res.data.items
         that.canDownload = res.data.canDownloadProjects
@@ -334,8 +368,79 @@ export default {
         });
       });
     },
+    // 打开下载弹窗体
+    goDownload() {
+      this.downloadDialogVisible = true
+    },
+    // 下载项目列表
     downloadProjects() {
-      console.log('todo')
+      this.$refs.downloadForm.validate(valid => {
+        this.downloadLoading = true
+        let params = {
+          dateType: this.downloadForm.dateType,
+          dateType: this.downloadForm.dateType,
+          startDate: this.downloadForm.seDate[0],
+          endDate: this.downloadForm.seDate[1]
+        }
+        this.downloadLoading = true
+        downProjects(params).then(res => {
+          if (res.data.length < 1) {
+            this.$message.info('当前时间内无项目信息！')
+            this.downloadLoading = false
+            return
+          }
+          const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, };
+          const contentCenter = { vertical: "middle", horizontal: "center" };
+          const workbook = new ExcelJS.Workbook();
+          const worksheet = workbook.addWorksheet("项目列表", { views: [{ showGridLines: true }], });
+
+          // 填充表头 - 用refs获取表头列表
+          let headerEx = []
+          this.$refs.vTable.$children.forEach(obj => { obj.label !== undefined ? headerEx.push(obj.label) : '' })
+          const headerRow = worksheet.addRow(headerEx);
+          headerRow.eachCell(function (cell, colNumber) {
+            cell.border = borderStyle
+            cell.alignment = contentCenter
+            cell.font = { bold: true, size: 11 }
+          });
+
+          // 填充数据行
+          res.data.forEach(e => {
+            let arrTemp = new Array(headerEx.length).fill('-');
+            arrTemp[0] = e.code === null ? '' : e.code
+            arrTemp[1] = e.projectTypeName === null ? '' : e.projectTypeName
+            arrTemp[2] = e.name === null ? '' : e.name
+            arrTemp[3] = e.progressName === null ? '' : e.progressName
+            arrTemp[4] = e.departmentName === null ? '' : e.departmentName
+            arrTemp[5] = e.techniqueAdminsFormat === null ? '' : e.techniqueAdminsFormat
+            arrTemp[6] = e.marketAdminNamesFormat === null ? '' : e.marketAdminNamesFormat
+            arrTemp[7] = e.startFormat === null ? '' : e.startFormat
+            arrTemp[8] = e.completionFormat === null ? '' : e.completionFormat
+            arrTemp[9] = e.createTimeFormat === null ? '' : e.createTimeFormat
+            const tempRow = worksheet.addRow(arrTemp);
+            tempRow.eachCell(function (cell, colNumber) {
+              cell.border = borderStyle;
+              cell.alignment = contentCenter;
+            });
+          })
+          // 设置列属性 - 宽度
+          for (let i = 0; i < headerEx.length; i++) {
+            if (i == 2) {
+              worksheet.getColumn(i + 1).width = 45;
+            }
+            else {
+              worksheet.getColumn(i + 1).width = 20;
+            }
+          }
+          // 保存到本地
+          workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "项目列表.xlsx")).catch((err) => console.log("Error writing excel export", err));
+          this.$message.success('数据查询完成，即将开始下载！')
+          this.downloadLoading = false
+        }).catch(err => {
+          this.$message.error('获取下载内容出错：' + err)
+          this.downloadLoading = false
+        })
+      })
     },
     // 选中行
     handleCurrentChange(val) {
@@ -388,14 +493,13 @@ export default {
       margin-right: 10px;
     }
   }
-  .el-select,
-  .el-date-editor {
-    width: 100%;
-  }
   .bottom-divider {
     margin-top: 0px;
   }
 }
-</style>
-<style lang="scss">
+.el-select,
+.el-date-editor,
+.el-range-editor {
+  width: 100% !important;
+}
 </style>
