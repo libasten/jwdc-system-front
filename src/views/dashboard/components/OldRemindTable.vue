@@ -1,4 +1,5 @@
 <template>
+<!-- 已经过期的提醒 -->
   <div class="component-container">
     <div class="table">
       <el-table v-loading="listLoading" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" border fit stripe highlight-current-row :header-cell-style="{color: '#444', fontSize: '16px', backgroundColor: '#F3F6FC' }" :cell-style="columnStyle">ele
