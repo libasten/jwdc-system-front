@@ -11,6 +11,7 @@
         <template slot="title">
           <i class="header-icon el-icon-files"></i>历史提醒
         </template>
+        <history-remind-table v-if="historyFlag" />
       </el-collapse-item>
       <el-collapse-item name="3" v-if="checkAuth('29-1')">
         <template slot="title">
@@ -39,13 +40,14 @@
 import { checkAuth } from '@/utils/permission'
 import { getProjectStatistics } from '@/api/dashboard'
 import RemindTable from './components/RemindTable.vue'
+import HistoryRemindTable from './components/HistroyRemindTable.vue'
 import PanelGroup from './components/PanelGroup'
 import BarChart from './components/BarChart'
 import LineChart from './components/LineChart'
 export default {
   name: 'DashboardAdmin',
   components: {
-    RemindTable,
+    RemindTable, HistoryRemindTable,
     PanelGroup,
     BarChart,
     LineChart
@@ -57,6 +59,7 @@ export default {
       lineChart: {},
       barChart: {},
       chartFlag: false,
+      historyFlag: false,
     }
   },
   computed: {
@@ -65,6 +68,12 @@ export default {
     activeNames(newVal, oldVal) {
       // console.log('newVal', newVal);
       // console.log('oldVal', oldVal);
+      // 监听第三个面板是否打开
+      if (oldVal.findIndex(a => a === '2') === -1 && newVal.findIndex(a => a === '2') > -1) {
+        if (this.historyFlag === false) {
+          this.historyFlag = true
+        }
+      }
       // 监听第三个面板是否打开
       if (oldVal.findIndex(a => a === '3') === -1 && newVal.findIndex(a => a === '3') > -1) {
         if (this.chartFlag === false) {
