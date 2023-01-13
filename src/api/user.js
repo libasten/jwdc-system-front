@@ -15,6 +15,8 @@ export function login(pa) {
 //     params: { token }
 //   })
 // }
+// 测试： 18900658032  /  1985 -- 13913004242 / gk110110
+// 18351965589 / 138995 
 
 // 重写经纬地诚系统后台获取用户信息的方法-无需token
 export function getInfo() {
