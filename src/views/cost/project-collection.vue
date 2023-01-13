@@ -96,7 +96,7 @@ export default {
             { value: 'unCollectionTotal', text: '未回款金额' },
             { value: 'techniqueAdminsFormat', text: '技术负责人' },
             { value: 'marketAdminNamesFormat', text: '市场负责人' },
-            { value: 'contractIds', text: '合同编号' },
+            { value: 'ContractCodeNames', text: '合同编号' },
             { value: 'partAContact', text: '甲方联系人' },
             { value: 'partAPhone', text: '甲方电话' },]
             this.list = res.data
