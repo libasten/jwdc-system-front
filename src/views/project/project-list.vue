@@ -496,10 +496,10 @@ export default {
   .bottom-divider {
     margin-top: 0px;
   }
-}
-.el-select,
-.el-date-editor,
-.el-range-editor {
-  width: 100% !important;
+  .el-select,
+  .el-date-editor,
+  .el-range-editor {
+    width: 100% !important;
+  }
 }
 </style>
