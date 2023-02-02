@@ -471,8 +471,8 @@ export default {
         console.log(res.data)
         this.postForm = res.data.project
         this.projectManager = res.data.projectManager
-        this.projectTechniqueAdmins = res.data.projectTechniqueAdmins.toString()
-        this.projectMarketAdmins = res.data.projectMarketAdmins.toString()
+        this.projectTechniqueAdmins = res.data.projectTechniqueAdmins === null ? '' : res.data.projectTechniqueAdmins.toString()
+        this.projectMarketAdmins = res.data.projectMarketAdmins === null ? '' : res.data.projectMarketAdmins.toString()
         this.stages = res.data.project.projectStages
         this.canAddProjectNote = res.data.canAddProjectNote
         this.canAddProjectArchive = res.data.canAddProjectArchive
