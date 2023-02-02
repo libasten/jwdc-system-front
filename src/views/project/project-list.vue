@@ -145,7 +145,7 @@
     </el-dialog>
     <!-- 下载列表 -->
     <el-dialog title="下载项目列表" :visible.sync="downloadDialogVisible" :close-on-click-modal="false" width="40%" v-loading="downloadLoading" element-loading-text="后台统计查询中...">
-      <el-form label-width="90px" ref="downloadForm" :model="downloadForm" :rules="downRules">
+      <el-form label-width="90px" ref="downloadForm" :model="downloadForm" :rules="downRules" class="download-config">
         <el-form-item label="日期选项" prop="dateType">
           <el-select v-model="downloadForm.dateType" placeholder="筛选类型">
             <el-option v-for="(item,idx) in downloadForm.dateTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
@@ -263,7 +263,7 @@ export default {
         skpCount: (cPage - 1) * this.pageSize,
         maxCount: pSize,
         searchType: that.searchForm.searchType,
-        searchValue: that.searchForm.keyword,
+        searchValue: that.searchForm.keyword.trim(),
         dateType: that.searchForm.dateType, startDate: that.searchForm.seDate[0], endDate: that.searchForm.seDate[1]
       }
       // 后台逻辑: 如果不输入关键字, 要把搜索类型设置为"全部"
@@ -271,21 +271,17 @@ export default {
         param.searchType = 0
       }
       if (param.startDate === undefined || param.endDate === undefined) {
-        if (param.searchValue === '') {
-          this.getList(1, this.pageSize);
-        } else {
-          // 因为日期区间是后台必填项,这里设置一个长期的时间段.
-          param.startDate = '1979-1-1'
-          param.endDate = '2099-12-31'
-          fetchProjectListPaged(param).then(res => {
-            that.total = res.data.totalCount
-            that.list = res.data.items
-            that.listLoading = false
-            that.canDownload = res.data.canDownloadProjects
-            that.showQueryTip = true
-          }).catch(err => { that.$message.error('错误信息：' + err) })
-        }
+        // 因为日期区间是后台必填项,这里设置一个长期的时间段.
+        param.startDate = '1979-1-1'
+        param.endDate = '2099-12-31'
       }
+      fetchProjectListPaged(param).then(res => {
+        that.total = res.data.totalCount
+        that.list = res.data.items
+        that.listLoading = false
+        that.canDownload = res.data.canDownloadProjects
+        that.showQueryTip = true
+      }).catch(err => { that.$message.error('错误信息：' + err) })
     },
     // 清空关键字
     clearKW() {
@@ -434,7 +430,7 @@ export default {
           }
           // 保存到本地
           workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "项目列表.xlsx")).catch((err) => console.log("Error writing excel export", err));
-          this.$message.success('数据查询完成，即将开始下载！')
+          this.$message.success('数据查询完成，即将开始下载，请稍候...')
           this.downloadLoading = false
         }).catch(err => {
           this.$message.error('获取下载内容出错：' + err)
@@ -496,6 +492,13 @@ export default {
   .bottom-divider {
     margin-top: 0px;
   }
+  .el-select,
+  .el-date-editor,
+  .el-range-editor {
+    width: 100% !important;
+  }
+}
+.download-config {
   .el-select,
   .el-date-editor,
   .el-range-editor {
