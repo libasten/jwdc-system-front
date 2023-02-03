@@ -23,7 +23,7 @@
             <span>{{ row.code }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="25%" label="合同名称" header-align="center" show-overflow-tooltip>
+        <el-table-column min-width="20%" label="合同名称" header-align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.name }}</span>
           </template>
@@ -40,6 +40,11 @@
         </el-table-column>
         <el-table-column min-width="10%" label="录入时间" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
+            <span>{{ row.createTimeFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="10%" label="更新时间" align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
             <span>{{ row.updateTimeFormat }}</span>
           </template>
         </el-table-column>
@@ -48,7 +53,7 @@
             <span>{{ row.projectCode }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="15%" label="描述" header-align="center" show-overflow-tooltip>
+        <el-table-column min-width="10%" label="描述" header-align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.description }}</span>
           </template>
@@ -208,6 +213,7 @@ export default {
       // 按开始行，开始列，结束行，结束列合并 - 根据第一行的列数对第一行大标题进行合并
       worksheet.mergeCells(1, 1, 1, headerEx.length);
       // 填充数据行
+      console.log(this.list)
       this.list.forEach(e => {
         let arrTemp = new Array(headerEx.length).fill('-');
         arrTemp[0] = e.code === null ? '' : e.code
@@ -215,8 +221,9 @@ export default {
         arrTemp[2] = e.partA === null ? '' : e.partA
         arrTemp[3] = e.amount === null ? '' : e.amount
         arrTemp[4] = e.createTimeFormat === null ? '' : e.createTimeFormat
-        arrTemp[5] = e.projectCode === null ? '' : e.projectCode
-        arrTemp[6] = e.description === null ? '' : e.description
+        arrTemp[5] = e.updateTimeFormat === null ? '' : e.updateTimeFormat
+        arrTemp[6] = e.projectCode === null ? '' : e.projectCode
+        arrTemp[7] = e.description === null ? '' : e.description
         const tempRow = worksheet.addRow(arrTemp);
         tempRow.eachCell(function (cell, colNumber) {
           cell.border = borderStyle;
