@@ -6,7 +6,7 @@
       <el-collapse-item title="1. 基本信息" name="1">
         <el-form ref="postForm" :loading="loading" :model="postForm" :rules="rules" label-width="100px" :disabled="allDisabled">
           <el-row>
-            <el-col :span="24">
+            <el-col :span="16">
               <el-form-item label="id" v-if="false" prop="id">
                 <el-input v-model="postForm.id"></el-input>
               </el-form-item>
@@ -27,6 +27,18 @@
             <el-col :span="8">
               <el-form-item label="类型" prop="projectTypeName">
                 <el-input v-model="postForm.projectTypeName"></el-input>
+              </el-form-item>
+            </el-col>
+            <!-- 该处的合同金额单独权限控制 -->
+            <el-col :span="8" v-if="showContractAmount">
+              <el-form-item label="合同金额" prop="contractAmount">
+                <el-input v-model="postForm.contractAmount" style="width:calc(100% - 70px)"></el-input>
+                <!-- 单独开一个form只是为了控制按钮的可用性 -->
+                <el-form :disabled="!canEditContractAmount" class="btnContractAmount">
+                  <el-form-item>
+                    <el-button type="primary" plain @click.prevent="openContractAmount()">设置 </el-button>
+                  </el-form-item>
+                </el-form>
               </el-form-item>
             </el-col>
             <el-col :span="8">
@@ -355,13 +367,26 @@
         <el-form-item label="回款日期" prop="date">
           <el-date-picker v-model="collectionForm.date" :clearable="false"></el-date-picker>
         </el-form-item>
-        <el-form-item label="回款金额" prop="amount ">
+        <el-form-item label="回款金额" prop="amount">
           <el-input-number v-model="collectionForm.amount " :precision="2" :step="0.01"></el-input-number>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleCollection = false">取 消</el-button>
         <el-button type="primary" @click="collectionSubmit">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog title="编辑合同金额（单位：元）" :visible.sync="dialogVisibleEditContractAmount" :close-on-click-modal="false" width="40%">
+      <el-form ref="contractAmountForm" :model="contractAmountForm" :rules="rules" label-position="right" label-width="0px">
+        <el-form-item label="" prop="amount">
+          <el-input-number v-model="contractAmountForm.amount" :precision="2" :step="0.01" :controls="false">
+          </el-input-number>
+        </el-form-item>
+        <div>系统只接受数字，请不要输入其他字符。</div>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleEditContractAmount = false">取 消</el-button>
+        <el-button type="primary" @click="contractAmountSubmit">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -374,7 +399,8 @@ import {
   newProjectNote, fetchProjectNote, createProjectNote, editProjectNote, delProjectNote,
   newProjectArchive, fetchProjectArchive, createProjectArchive, editProjectArchive, delProjectArchive,
   fetchInvoices, createInvoicingProgress, editInvoicingProgress, delInvoicingProgress,
-  fetchCollections, createCollectionProgress, editCollectionProgress, delCollectionProgress
+  fetchCollections, createCollectionProgress, editCollectionProgress, delCollectionProgress,
+  editProjectContractAmount
 } from '@/api/project';
 import { downloadFile } from '@/utils/req-down'
 import { deepClone } from '@/utils/index'
@@ -411,6 +437,14 @@ export default {
         collectionTotal: 0,
         unCollectionTotal: 0,
       },
+      // 单独编辑的项目基本信息中的合同金额
+      contractAmountForm: { amount: 0 },
+      // 显示项目基本信息中的合同金额
+      showContractAmount: false,
+      // 控制项目基本信息中的合同金额可否编辑
+      canEditContractAmount: true,
+      // 编辑项目金额的弹窗
+      dialogVisibleEditContractAmount: false,
       projectManager: '', //项目负责人
       projectTechniqueAdmins: '', // 技术负责人
       projectMarketAdmins: '', // 市场负责人
@@ -470,6 +504,8 @@ export default {
       fetchProjectDetail(this.postForm.id).then(res => {
         console.log(res.data)
         this.postForm = res.data.project
+        this.showContractAmount = res.data.showAmount
+        this.canEditContractAmount = res.data.canEditAmount
         this.projectManager = res.data.projectManager
         this.projectTechniqueAdmins = res.data.projectTechniqueAdmins === null ? '' : res.data.projectTechniqueAdmins.toString()
         this.projectMarketAdmins = res.data.projectMarketAdmins === null ? '' : res.data.projectMarketAdmins.toString()
@@ -852,6 +888,22 @@ export default {
         });
       }).catch((err) => { this.$message.info('删除操作已取消'); });
     },
+    openContractAmount() {
+      this.contractAmountForm.amount = this.postForm.contractAmount
+      this.dialogVisibleEditContractAmount = true
+    },
+    // 编辑和金额
+    contractAmountSubmit() {
+      const param = {
+        projectId: this.postForm.id,
+        contractAmount: this.contractAmountForm.amount,
+      }
+      editProjectContractAmount(param).then(res => {
+        this.postForm.contractAmount = this.contractAmountForm.amount
+        this.$message.success('更新成功！')
+        this.dialogVisibleEditContractAmount = false
+      }).catch(err => { this.$message.error('更新失败：' + err) })
+    },
     headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
     },
@@ -983,5 +1035,10 @@ export default {
       color: #0e82f5;
     }
   }
+}
+.btnContractAmount {
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 </style>

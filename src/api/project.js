@@ -61,6 +61,16 @@ export function delProject(data) {
     params: { id: data.id }
   })
 }
+
+// 在详情页面单独编辑项目的合同金额
+export function editProjectContractAmount(pa) {
+  return request({
+    url: '/Projects/EditProjectContractAmount',
+    method: 'post',
+    params: pa,
+  })
+}
+
 //#endregion
 
 //#region 项目人员任命
