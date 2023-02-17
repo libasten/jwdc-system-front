@@ -3,7 +3,7 @@
   <div class="app-container project-base" v-loading="loading">
     <el-form ref="postForm" :loading="loading" :model="postForm" :rules="rules" label-width="100px">
       <el-row>
-        <el-col :span="24">
+        <el-col :span="16">
           <el-form-item label="id" v-if="false" prop="id">
             <el-input v-model="postForm.id"></el-input>
           </el-form-item>
@@ -46,7 +46,8 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <!-- 合同金额因为要控制权限移动到详情页面弹窗编辑 2023-2-16 -->
+        <el-col :span="8" v-if="false">
           <el-form-item label="合同金额" prop="contractAmount">
             <el-input v-model="postForm.contractAmount"></el-input>
           </el-form-item>
@@ -109,7 +110,7 @@
         </el-col>
         <el-col :span="24">
           <el-form-item label="项目评价" prop="evaluation">
-            <el-input type="textarea" v-model="postForm.evaluation"></el-input>
+            <el-input type="textarea" :rows="6" v-model="postForm.evaluation"></el-input>
           </el-form-item>
         </el-col>
         <el-col :span="24">
