@@ -516,9 +516,13 @@ export default {
         this.fillContracts()
         // 显示招投标信息
         this.fillBids()
-        // 获取开票和回款信息列表
-        this.getInvoices()
-        this.getCollections()
+        // 获取开票和回款信息列表-先检查权限，没有权限就不执行
+        if (checkAuth('34-1')) {
+          this.getInvoices()
+        }
+        if (checkAuth('35-1')) {
+          this.getCollections()
+        }
         this.loading = false
       }).catch(err => { this.$message.error({ message: '错误信息：' + err }) })
     },
@@ -763,6 +767,7 @@ export default {
           this.postForm.invoicingProgressName = '1'
         }
       }).catch((err) => {
+        console.log(err)
         this.$message.error("获取开票信息失败！");
       });
     },
