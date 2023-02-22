@@ -8,7 +8,7 @@
         <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate" v-if="checkAuth('7-3')">新建</el-button>
         <el-button type="primary" size="small" icon="el-icon-download" v-if="canDownload" @click.native="goDownload">下载</el-button>
         <el-button v-if="currentRow!=null && checkAuth('7-2')" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑基本信息</el-button>
-        <el-button v-if="currentRow!=null && checkAuth('7-1')" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
+        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
         <el-button v-if="currentRow!=null && checkAuth('25-1')" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员任命</el-button>
         <el-button v-if="currentRow!=null && checkAuth('1-1')" type="primary" size="small" icon="el-icon-map-location" @click.native="showMilestone">里程碑</el-button>
         <el-button v-if="currentRow!=null && checkAuth('30-1')" type="primary" size="small" icon="el-icon-share" @click.native="showShare">分享</el-button>
