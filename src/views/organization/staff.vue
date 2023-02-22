@@ -3,10 +3,10 @@
   <div class="app-container">
     <div class="top-btns">
       <el-button-group>
-        <el-button type="primary" size="small" icon="el-icon-plus" @click="createStaff">新建</el-button>
+        <el-button v-if="checkAuth('4-2')" type="primary" size="small" icon="el-icon-plus" @click="createStaff">新建</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-edit" @click="editStaff">编辑</el-button>
         <!-- <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-picture" @click="editStaff">附件</el-button> -->
-        <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-news" @click="leaveStaff">离职</el-button>
+        <el-button v-if="currentRow!=null && checkAuth('4-5')" type="primary" size="small" icon="el-icon-news" @click="leaveStaff">离职</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-reading" @click="cancelSelected">取消选中</el-button>
       </el-button-group>
     </div>
@@ -168,6 +168,7 @@
 import { fetchStaffs, editStaff, createStaff, resignStaff, getStaffEnum, getStaff } from '@/api/organization'
 import { headerCellStyle, columnStyle, myString2Array, array2myString } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
+import { checkAuth } from '@/utils/permission'
 export default {
   name: 'Staff',
   components: {},
@@ -342,6 +343,7 @@ export default {
     handleCurrentPageChange(val) {
       this.currentPage = val
     },
+    checkAuth,
     headerCellStyle,
     columnStyle
   }
