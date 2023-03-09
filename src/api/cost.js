@@ -23,7 +23,7 @@ export function queryStaffSingleCost(pa) {
   })
 }
 
-// 进行人员费用归集统计
+// 进行所有人员费用归集统计
 export function queryStaffCost(pa) {
   return request({
     url: '/Workflows/GetAllStaffExpenses',
@@ -41,7 +41,7 @@ export function queryProjectCost(pa) {
   })
 }
 
-// 进行人员下挂项目经费归集统计
+// 进行所有人员下挂项目经费归集统计
 export function queryStaffProjectCost(pa) {
   return request({
     url: '/Workflows/GetExpensesGroupStaff',
