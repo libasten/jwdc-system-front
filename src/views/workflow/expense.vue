@@ -340,8 +340,11 @@ export default {
   },
   filters: {
     dateFormat(val) {
-      let temp = new Date(val).toLocaleDateString()
-      return temp.replace(/\//g, '-') // 利用正则可以将/换成-的分隔符
+      let ojbDate = new Date(val)
+      let temp = ojbDate.toLocaleDateString()
+      const weekArr = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
+      let wkIdx = ojbDate.getDay()
+      return temp.replace(/\//g, '-') + '\xa0\xa0' + weekArr[wkIdx] // 利用正则可以将/换成-的分
     },
     dateTimeFormat(val) {
       let tempDate = new Date(val).toLocaleDateString().replace(/\//g, '-')
