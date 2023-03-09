@@ -3,7 +3,7 @@
   <div class="app-container project-detail">
     <div class="prj-title">{{postForm.name}}</div>
     <el-collapse v-model="activeNames">
-      <el-collapse-item title="1. 基本信息" name="1">
+      <el-collapse-item title="基本信息" name="1">
         <el-form ref="postForm" :loading="loading" :model="postForm" :rules="rules" label-width="100px" :disabled="allDisabled">
           <el-row>
             <el-col :span="16">
@@ -109,7 +109,7 @@
           </el-row>
         </el-form>
       </el-collapse-item>
-      <el-collapse-item title="2. 进度节点" name="2">
+      <el-collapse-item title="进度节点" name="2">
         <!-- 用时间线实现节点信息，timestamp是阶段名称 -->
         <el-timeline>
           <el-timeline-item v-for="(stage, index) in stages" :key="index" :timestamp="stage.name" placement="top" size="large" icon="el-icon-location-information" type="primary" class="node-item-container">
@@ -135,7 +135,7 @@
           <el-button v-if="canAddProjectArchive" type="primary" icon="el-icon-document" plain @click.native="addArchive">添加附件</el-button>
         </div>
       </el-collapse-item>
-      <el-collapse-item title="3. 项目合同" name="3" v-if="checkAuth('16-1')">
+      <el-collapse-item title="项目合同" name="3" v-if="checkAuth('16-1')">
         <div v-if="contracts.length===0">该项目还没有合同</div>
         <div v-else>
           <el-table :data="contracts" border size="small" :header-cell-style="headerCellStyle">
@@ -260,7 +260,7 @@
           </el-col>
         </el-row>
       </el-collapse-item>
-      <el-collapse-item title="4. 招投标" name="4" v-if="checkAuth('18-1')">
+      <el-collapse-item title="招投标" name="4" v-if="checkAuth('18-1')">
         <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
         <div v-else>
           <el-table :data="bids" border size="small" :header-cell-style="headerCellStyle">
