@@ -13,14 +13,19 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="发起人员" min-width="20" align="center" show-overflow-tooltip>
+      <el-table-column label="发起人员" min-width="15" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.starterName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="主题" min-width="30" align="center" show-overflow-tooltip>
+      <el-table-column label="主题" min-width="15" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.workflowCategoryName }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="关联项目" min-width="30" align="center" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <span>{{ row.projectName }}</span>
         </template>
       </el-table-column>
       <el-table-column label="当前状态" min-width="20" align="center" show-overflow-tooltip>
@@ -28,7 +33,7 @@
           <span>{{ row.currentStatus }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="完成时间" min-width="30" align="center" show-overflow-tooltip>
+      <el-table-column label="完成时间" min-width="20" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.updateTimeFormat }}</span>
         </template>
