@@ -153,7 +153,7 @@
         </div>
         <el-divider content-position="center">开票回款信息</el-divider>
         <el-row :gutter="40">
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;" v-if="checkAuth('34-1')">
             <el-col :span="16">
               <el-form label-width="70px" label-position="left" :disabled="allDisabled">
                 <el-form-item label="开票进度">
@@ -193,7 +193,7 @@
               </el-table-column>
             </el-table>
           </el-col>
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;" v-if="checkAuth('35-1')">
             <el-col :span="16">
               <el-form label-width="70px" label-position="left" :disabled="allDisabled">
                 <el-form-item label="回款进度">
