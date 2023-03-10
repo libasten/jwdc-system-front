@@ -197,7 +197,7 @@ export const asyncRoutes = [
   {
     path: '/contract',
     component: Layout,
-    meta: { title: '合同管理', icon: 'el-icon-c-scale-to-original', auth: '16-1' },
+    meta: { title: '合同管理', icon: 'el-icon-c-scale-to-original' },
     children: [
       {
         path: 'list',
@@ -217,7 +217,7 @@ export const asyncRoutes = [
   {
     path: '/bid',
     component: Layout,
-    meta: { title: '投标管理', icon: 'el-icon-wallet', auth: '18-1' },
+    meta: { title: '投标管理', icon: 'el-icon-wallet'},
     children: [
       {
         path: 'list',
