@@ -1,6 +1,15 @@
 import request from '@/utils/request'
 //#region 投标管理
-// 获取投标列表
+// 分页检索获取投标对象
+export function fetchBidsPaged(pa) {
+  return request({
+    url: '/Bids/GetBids2',
+    params: pa,
+    method: 'get',
+  })
+}
+
+// 获取投标列表 不分页
 export function fetchBids() {
   return request({
     url: '/Bids/GetBids1',
