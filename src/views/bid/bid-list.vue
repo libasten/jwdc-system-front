@@ -259,7 +259,7 @@ export default {
       // 搜索表单
       searchForm: {
         keyword: '',
-        // 日期过滤的枚举， 0 创建日期 1 开始日期  2 结束日期 ，落在下面的区间内
+        // 日期过滤的枚举， 0 创建日期 落在下面的区间内
         dateType: 0,
         dateTypes: [{ id: 0, text: '录入时间' }],
         seDate: '',

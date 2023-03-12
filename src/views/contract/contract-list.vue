@@ -11,6 +11,44 @@
         <el-button v-if="currentRow!=null  && checkAuth('16-4')" type="danger" size="small" icon="el-icon-delete" @click.native="goDelete">删除</el-button>
       </el-button-group>
     </div>
+    <div class="contract-query-box">
+      <el-collapse>
+        <el-collapse-item title=" " name="1">
+          <template slot="title"><i class="header-icon el-icon-s-operation"></i> 投标筛选框 </template>
+          <el-form :model="searchForm" ref="searchForm" label-width="100px">
+            <el-row>
+              <el-col :span="10">
+                <el-form-item label="日期选项" prop="dateType">
+                  <el-select v-model="searchForm.dateType" placeholder="筛选类型">
+                    <el-option v-for="(item,idx) in searchForm.dateTypes" :key="idx" :label="item.text" :value="item.id"></el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="14">
+                <el-form-item label="日期区间" prop="seDate">
+                  <el-date-picker v-model="searchForm.seDate" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" :clearable="false"></el-date-picker>
+                </el-form-item>
+              </el-col>
+              <el-col :span="16">
+                <el-form-item label="筛选关键字" prop="keyword">
+                  <el-input v-model="searchForm.keyword" placeholder="请输入关键字（不输入关键字返回全部）" @clear="clearKW" clearable></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item style="margin-left:10px;">
+                  <el-button type="primary" icon="el-icon-search" @click.native="doSearch(1, pageSize)">查询</el-button>
+                  <el-button type="primary" icon="el-icon-refresh-left" @click.native="clearParams">重置</el-button>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <el-divider class="bottom-divider">
+            <span v-if="!showQueryTip">无筛选条件，显示全部项目</span>
+            <span v-if="showQueryTip">根据上方条件的搜索结果</span>
+          </el-divider>
+        </el-collapse-item>
+      </el-collapse>
+    </div>
     <div class="table-view">
       <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle">
         <el-table-column label="id" v-if="false">
@@ -93,7 +131,7 @@
 
 <script>
 
-import { fetchContracts, editContract, createContract, deleteContract } from '@/api/contract';
+import { fetchContractsPaged, fetchContracts, editContract, createContract, deleteContract } from '@/api/contract';
 import { headerCellStyle } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
 const ExcelJS = require("exceljs");
@@ -123,25 +161,41 @@ export default {
       rules: {
         code: [{ required: true, message: '请输入编号', trigger: 'blur' }],
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-      }
+      },
+      // 搜索表单
+      searchForm: {
+        keyword: '',
+        // 日期过滤的枚举， 0 创建日期 ，落在下面的区间内
+        dateType: 0,
+        dateTypes: [{ id: 0, text: '录入时间' }],
+        seDate: '',
+        startDate: new Date(),
+        endDate: new Date(),
+      },
+      showQueryTip: false,
     };
   },
   created() {
-    this.getList();
+    this.getList(1, this.pageSize);
   },
   methods: {
-    // 获取数据列表
-    getList() {
-      this.listLoading = true;
-      this.list = [];
-      fetchContracts().then(res => {
-        this.total = res.data.contracts.length
-        this.list = res.data.contracts
+    // 分页获取
+    getList(cPage, pSize) {
+      let that = this
+      that.listLoading = true
+      that.list = []
+      const param = {
+        skpCount: (cPage - 1) * this.pageSize,
+        maxCount: pSize,
+        searchType: 0, searchValue: '',
+        dateType: 0, steartDate: '1900-1-1', endDate: '2099-12-31'
+      }
+      fetchContractsPaged(param).then(res => {
+        that.total = res.data.totalCount
+        that.list = res.data.items
         this.canDownload = res.data.canDownloadContracts
-        this.listLoading = false
-      }).catch(err => {
-        this.$message.error('错误信息：' + err);
-      });
+        that.listLoading = false
+      }).catch(err => { that.$message.error('错误信息：' + err) })
     },
     goAdd() {
       if (this.$refs.postForm !== undefined) {
@@ -188,6 +242,45 @@ export default {
     },
     goView() {
       this.$router.push({ path: '/contract/detail/' + this.currentRow.id })
+    },
+    // 执行搜索
+    doSearch(cPage, pSize) {
+      let that = this
+      that.listLoading = true
+      that.list = []
+      const param = {
+        skpCount: (cPage - 1) * this.pageSize,
+        maxCount: pSize,
+        searchType: that.searchForm.searchType,
+        searchValue: that.searchForm.keyword.trim(),
+        dateType: that.searchForm.dateType, startDate: that.searchForm.seDate[0], endDate: that.searchForm.seDate[1]
+      }
+      // 后台逻辑: 如果不输入关键字, 要把搜索类型设置为"全部"
+      if (param.searchValue === '') {
+        param.searchType = 0
+      }
+      if (param.startDate === undefined || param.endDate === undefined) {
+        // 因为日期区间是后台必填项,这里设置一个长期的时间段.
+        param.startDate = '1979-1-1'
+        param.endDate = '2099-12-31'
+      }
+      fetchContractsPaged(param).then(res => {
+        that.total = res.data.totalCount
+        that.list = res.data.items
+        that.canDownload = res.data.canDownloadContracts
+        that.listLoading = false
+        that.showQueryTip = true
+      }).catch(err => { that.$message.error('错误信息：' + err) })
+    },
+    // 清空关键字
+    clearKW() {
+      this.getList(1, this.pageSize);
+      this.showQueryTip = false;
+    },
+    clearParams() {
+      this.getList(1, this.pageSize);
+      Object.assign(this.$data.searchForm, this.$options.data().searchForm)
+      this.showQueryTip = false;
     },
     // 下载合同
     downloadContracts() {
@@ -271,11 +364,23 @@ export default {
     },
     // 每页显示数目变动
     handleSizeChange(val) {
-      this.pageSize = val
+      this.pageSize = val;
+      if (this.searchForm.keyword.trim() === "") {
+        this.getList(this.currentPage, this.pageSize);
+      }
+      else {
+        this.doSearch(this.currentPage, this.pageSize)
+      }
     },
-    // 切换页码
+    // 切换页码-后台分页
     handleCurrentPageChange(val) {
-      this.currentPage = val
+      this.currentPage = val;
+      if (this.searchForm.keyword.trim() === "") {
+        this.getList(this.currentPage, this.pageSize);
+      }
+      else {
+        this.doSearch(this.currentPage, this.pageSize)
+      }
     },
     headerCellStyle, checkAuth
   },
@@ -285,4 +390,41 @@ export default {
 <style scoped>
 </style>
 <style lang="scss">
+.app-container {
+  .contract-query-box {
+    .el-collapse-item__header {
+      font-size: 1rem;
+      background-color: #f5f5f7;
+      border-top: 2px solid #72b8ff;
+      padding-left: 15px;
+      margin-bottom: 10px;
+      &.is-active {
+        border-top: 2px solid #0a76e2;
+      }
+      i {
+        margin-right: 10px;
+      }
+    }
+    .el-collapse-item__content {
+      padding-bottom: 0px;
+    }
+    .bottom-divider {
+      margin-top: 0px;
+    }
+    .el-select,
+    .el-date-editor,
+    .el-range-editor {
+      width: 100% !important;
+    }
+  }
+  .el-dialog__body {
+    padding-bottom: 0px;
+    .el-select {
+      width: 100%;
+    }
+    .el-date-editor {
+      width: 100%;
+    }
+  }
+}
 </style>
