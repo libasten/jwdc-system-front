@@ -68,7 +68,7 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleAuthorize = false">取 消</el-button>
         <el-button @click="checkAllAuthorize">全 选</el-button>
-        <el-button @click="clearAllAuthorize">清 空</el-button>
+        <el-button type="danger" @click="clearAllAuthorize">清 空</el-button>
         <el-button type="primary" @click="submitAuthorize">确 定</el-button>
       </span>
     </el-dialog>
