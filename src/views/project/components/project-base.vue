@@ -94,14 +94,14 @@
             <el-input v-model="postForm.partAPhone"></el-input>
           </el-form-item>
         </el-col>
-        <el-col :span="24">
+        <el-col :span="24" v-if="postForm.canAssociateContract">
           <el-form-item label="项目合同" prop="contractIds">
             <el-select v-model="postForm.contractIds" placeholder="请选择合同" filterable multiple>
               <el-option v-for="(item,idx) in contracts" :key="idx" :label="item.text" :value="item.id"></el-option>
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="24">
+        <el-col :span="24" v-if="postForm.canAssociateBid">
           <el-form-item label="项目投标" prop="bidIds">
             <el-select v-model="postForm.bidIds" placeholder="请选择投标" filterable multiple>
               <el-option v-for="(item,idx) in bids" :key="idx" :label="item.text" :value="item.id"></el-option>
@@ -153,7 +153,9 @@ export default {
         partAPhone: '',
         evaluation: '',
         bidIds: '',
-        contractIds: ''
+        contractIds: '',
+        canAssociateBid: '',
+        canAssociateContract: '',
       },
       citys: [],
       contracts: [],
@@ -237,6 +239,8 @@ export default {
         this.postForm.progress = this.postForm.progress === 0 ? '' : this.postForm.progress
         this.postForm.bidIds = this.myString2Array(this.postForm.bidIds)
         this.postForm.contractIds = this.myString2Array(this.postForm.contractIds)
+        this.postForm.canAssociateBid = res.data.canAssociateBid
+        this.postForm.canAssociateContract = res.data.canAssociateContract
         this.loading = false
       }).catch((err) => {
         this.$message({
@@ -248,7 +252,8 @@ export default {
     // 获取创建项目时候的枚举信息
     getNewProjectEnum() {
       this.loading = true
-      newProjectBase().then((res) => {
+      newProjectBase().then(res => {
+        console.log(res)
         this.postForm.start = new Date()
         this.postForm.completion = new Date()
         this.postForm.invoiceDate = new Date()
@@ -260,8 +265,10 @@ export default {
         this.importances = res.data.importances
         this.bids = res.data.bids
         this.contracts = res.data.contracts
+        this.postForm.canAssociateBid = res.data.canAssociateBid
+        this.postForm.canAssociateContract = res.data.canAssociateContract
         this.loading = false
-      }).catch((err) => {
+      }).catch(err => {
         this.$message.error('错误信息：' + err)
       })
     },

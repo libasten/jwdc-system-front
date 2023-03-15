@@ -23,9 +23,10 @@ export function fetchProjectBase(id) {
   })
 }
 // 获取新建项目（基本信息）时候一些枚举数据
+// NewProject1，后缀多了1，新增了合同和投标关联的权限-20220315
 export function newProjectBase(id) {
   return request({
-    url: '/Projects/NewProject',
+    url: '/Projects/NewProject1',
     method: 'get',
   })
 }
