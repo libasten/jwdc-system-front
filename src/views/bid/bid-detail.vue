@@ -3,7 +3,7 @@
   <div class="app-container bid-detail">
     <div class="title">{{postForm.name}}</div>
     <el-collapse v-model="activeNames">
-      <el-collapse-item title="1. 基本信息" name="1">
+      <el-collapse-item title="基本信息" name="1">
         <el-form ref="postForm" :loading="loading" :model="postForm" label-width="110px" :disabled="allDisabled">
           <el-row>
             <el-col :span="24">
@@ -99,7 +99,7 @@
           </el-row>
         </el-form>
       </el-collapse-item>
-      <el-collapse-item title="2. 投标附件文件" name="2">
+      <el-collapse-item title="投标附件文件" name="2" v-if="checkAuth('19-1')">
         <div class="top-btns">
           <el-button size="mini" type="primary" v-if="checkAuth('19-3')" @click.native="addBidArchive">上传投标附件</el-button>
         </div>
@@ -130,7 +130,7 @@
           </el-table-column>
         </el-table>
       </el-collapse-item>
-      <el-collapse-item title="3. 投标保证金" name="3">
+      <el-collapse-item title="投标保证金" name="3" v-if="checkAuth('20-1')">
         <div class="top-btns">
           <el-button size="mini" type="primary" v-if="checkAuth('20-2')" @click.native="saveSecurity">保存保证金信息</el-button>
           <el-button size="mini" type="danger" v-if="checkAuth('20-4')" @click.native="deleteSecurity">清空保证金信息</el-button>
@@ -196,7 +196,7 @@
               <template slot-scope="scope">
                 <el-button-group>
                   <el-button size="mini" type="primary" plain v-if="checkAuth('21-2')" @click.native="editSecurityArchive(scope.row)">编辑</el-button>
-                  <el-button size="mini" type="primary" plain v-if="checkAuth('20-5')" @click.native="downloadSecurityArchive(scope.row)">下载</el-button>
+                  <el-button size="mini" type="primary" plain v-if="checkAuth('19-5')" @click.native="downloadSecurityArchive(scope.row)">下载</el-button>
                   <el-button size="mini" type="danger" plain v-if="checkAuth('20-4')" @click.native="deleteSecurityArchive(scope.row)">删除</el-button>
                 </el-button-group>
               </template>
@@ -312,8 +312,12 @@ export default {
   created() {
     this.postForm.id = this.$route.params && this.$route.params.id
     this.getBidDetail()
-    this.getBidArchive()
-    this.getSecurity()
+    if (checkAuth('19-1')) {
+      this.getBidArchive()
+    }
+    if (checkAuth('20-1')) {
+      this.getSecurity()
+    }
     this.allDisabled = true
   },
   methods: {
@@ -437,7 +441,9 @@ export default {
     getSecurity() {
       fetchBidSecurity(this.postForm.id).then(res => {
         this.securityForm = deepClone(res.data)
-        this.getSecurityArchive()
+        if (checkAuth("21-1")) {
+          this.getSecurityArchive()
+        }
       }).catch(err => {
         if (err === '未找到投标保证金！') {
           Object.assign(this.$data.securityForm, this.$options.data().securityForm)

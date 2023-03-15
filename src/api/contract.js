@@ -1,6 +1,14 @@
 import request from '@/utils/request'
 //#region 合同管理
-// 获取合同列表
+// 分页获取合同列表
+export function fetchContractsPaged(pa) {
+  return request({
+    url: '/Contracts/GetContracts2',
+    params: pa,
+    method: 'get',
+  })
+}
+// 获取合同列表 不分页
 export function fetchContracts() {
   return request({
     url: '/Contracts/GetContracts1',

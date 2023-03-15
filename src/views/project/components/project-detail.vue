@@ -3,7 +3,7 @@
   <div class="app-container project-detail">
     <div class="prj-title">{{postForm.name}}</div>
     <el-collapse v-model="activeNames">
-      <el-collapse-item title="基本信息" name="1">
+      <el-collapse-item title="基本信息" name="1" v-if="showBase">
         <el-form ref="postForm" :loading="loading" :model="postForm" :rules="rules" label-width="100px" :disabled="allDisabled">
           <el-row>
             <el-col :span="16">
@@ -109,7 +109,7 @@
           </el-row>
         </el-form>
       </el-collapse-item>
-      <el-collapse-item title="进度节点" name="2">
+      <el-collapse-item title="进度节点" name="2" v-if="showProgress">
         <!-- 用时间线实现节点信息，timestamp是阶段名称 -->
         <el-timeline>
           <el-timeline-item v-for="(stage, index) in stages" :key="index" :timestamp="stage.name" placement="top" size="large" icon="el-icon-location-information" type="primary" class="node-item-container">
@@ -135,7 +135,7 @@
           <el-button v-if="canAddProjectArchive" type="primary" icon="el-icon-document" plain @click.native="addArchive">添加附件</el-button>
         </div>
       </el-collapse-item>
-      <el-collapse-item title="项目合同" name="3" v-if="checkAuth('16-1')">
+      <el-collapse-item title="项目合同" name="3" v-if="showContract">
         <div v-if="contracts.length===0">该项目还没有合同</div>
         <div v-else>
           <el-table :data="contracts" border size="small" :header-cell-style="headerCellStyle">
@@ -153,7 +153,7 @@
         </div>
         <el-divider content-position="center">开票回款信息</el-divider>
         <el-row :gutter="40">
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;" v-if="checkAuth('34-1')">
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
             <el-col :span="16">
               <el-form label-width="70px" label-position="left" :disabled="allDisabled">
                 <el-form-item label="开票进度">
@@ -193,7 +193,7 @@
               </el-table-column>
             </el-table>
           </el-col>
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;" v-if="checkAuth('35-1')">
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
             <el-col :span="16">
               <el-form label-width="70px" label-position="left" :disabled="allDisabled">
                 <el-form-item label="回款进度">
@@ -260,7 +260,7 @@
           </el-col>
         </el-row>
       </el-collapse-item>
-      <el-collapse-item title="招投标" name="4" v-if="checkAuth('18-1')">
+      <el-collapse-item title="招投标" name="4" v-if="showBid">
         <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
         <div v-else>
           <el-table :data="bids" border size="small" :header-cell-style="headerCellStyle">
@@ -411,6 +411,12 @@ export default {
     return {
       loading: true,
       activeNames: ['1', '2', '3', '4'],
+      // 控制分表可视性的参数
+      showBase: false,
+      showProgress: false,
+      showContract: false,
+      showBid: false,
+      showInvoicingCollectionTotal: false,
       allDisabled: false,
       canAddProjectNote: true,
       canAddProjectArchive: true,
@@ -512,15 +518,21 @@ export default {
         this.stages = res.data.project.projectStages
         this.canAddProjectNote = res.data.canAddProjectNote
         this.canAddProjectArchive = res.data.canAddProjectArchive
-        // 显示合同信息
-        this.fillContracts()
-        // 显示招投标信息
-        this.fillBids()
+        this.showBase = res.data.showBase
+        this.showProgress = res.data.showProgress
+        this.showContract = res.data.showContract
+        this.showBid = res.data.showBid
+        this.showInvoicingCollectionTotal = res.data.showInvoicingCollectionTotal
+
+        // 填充合同组件信息
+        if (this.showContract) { this.fillContracts() }
+
+        // 填充招投标组件信息
+        if (this.showBid) { this.fillBids() }
+
         // 获取开票和回款信息列表-先检查权限，没有权限就不执行
-        if (checkAuth('34-1')) {
+        if (this.showInvoicingCollectionTotal) {
           this.getInvoices()
-        }
-        if (checkAuth('35-1')) {
           this.getCollections()
         }
         this.loading = false

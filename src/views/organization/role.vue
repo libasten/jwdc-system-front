@@ -58,7 +58,7 @@
     <el-dialog :title="authorizeDialogTitle" :visible.sync="dialogVisibleAuthorize" :close-on-click-modal="false" width="70%" class="authorize-form-div">
       <el-form ref="authorizeForm" :model="authorizeForm" :rules="rules" label-width="90px">
         <div v-for="(authItem ,index) in authorizeList" :key="index" class="authorizeItemLine">
-          <span class="auth-idx">{{authItem.id}}.</span>
+          <!-- <span class="auth-idx">{{authItem.id}}.</span> -->
           <span class="auth-name">{{authItem.name}}</span>
           <el-checkbox-group v-model="authorizeValueList[index]" class="chkbox-goroup">
             <el-checkbox v-for="(item,idx) in authItem.authorize" :key="idx" :label="item.id">{{item.name}}</el-checkbox>
@@ -331,11 +331,13 @@ export default {
       margin-bottom: 8px;
       .auth-idx {
         display: inline-block;
-        width: 20px;
+        width: 0px;
       }
       .auth-name {
+        font-size: 1.05rem;
+        font-weight: 700;
         display: inline-block;
-        width: 110px;
+        width: 135px;
         text-align: right;
         margin-right: 25px;
       }
