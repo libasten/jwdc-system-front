@@ -1,7 +1,8 @@
 import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
-import { getToken } from '@/utils/auth'
+import { getToken, removeToken } from '@/utils/auth'
+import $router from '@/router'
 
 // create an axios instance
 const service = axios.create({
@@ -62,13 +63,28 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
-    Message({
-      message: error.message,
-      type: 'error',
-      duration: 5 * 1000
-    })
-    return Promise.reject(error)
+    console.log(error.response) // for debug
+    //登录过期
+    if (error.response.status == 401) {
+      Message({
+        message: '登录已过期，请重新登录！',
+        type: 'warning',
+        duration: 5 * 1000
+      })
+      removeToken()
+      // 这里之所以要清除token，是因为下在src/permission.js中判断hasToken就会直接跳转到起始页，会再次执行获取概览和提醒的方法，多次弹窗。
+      store.dispatch('user/logout')
+      $router.push({ path: '/login' })
+      // return Promise.reject(error)
+    }
+    else {
+      // Message({
+      //   message: error.message,
+      //   type: 'error',
+      //   duration: 5 * 1000
+      // })
+      return Promise.reject(error)
+    }
   }
 )
 
