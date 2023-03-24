@@ -158,7 +158,7 @@ export default {
       sums[0] = '合计';
       let colSum = 0;
       data.forEach(e => {
-        colSum += e.amount
+        colSum += e.total
       })
       sums[4] = colSum.toFixed(2);
       return sums;
