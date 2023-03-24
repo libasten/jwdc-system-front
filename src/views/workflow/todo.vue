@@ -106,11 +106,15 @@ export default {
       let filterKeywords = this.keywords.trim()
       let filerReasource = this.todoList.filter(item => { //过滤全部数据
         // 此处筛选方法可扩展成多个字段的
-        if (item.projectName.includes(filterKeywords)) {
+        if (item.starterName.includes(filterKeywords)
+          || item.projectName.includes(filterKeywords)
+          || item.currentHandler.includes(filterKeywords)
+          || item.updateTimeFormat.includes(filterKeywords)) {
           return item
         }
       })
-      this.filterDataShow = filerReasource; //将符合条件的内容赋给filterDataShow
+      this.filterDataShow = filerReasource //将符合条件的内容赋给filterDataShow
+      this.total = this.filterDataShow.length
     },
     rowClick(row, column, event) {
       this.$router.push({ path: '/workflow/expense/detail/' + row.id })
