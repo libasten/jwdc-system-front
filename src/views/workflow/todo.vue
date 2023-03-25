@@ -107,7 +107,7 @@ export default {
       let filerReasource = this.todoList.filter(item => { //过滤全部数据
         // 此处筛选方法可扩展成多个字段的
         if (item.starterName.includes(filterKeywords)
-          || item.projectName.includes(filterKeywords)
+          || (item.projectName !== null && item.projectName.includes(filterKeywords))
           || item.currentHandler.includes(filterKeywords)
           || item.updateTimeFormat.includes(filterKeywords)) {
           return item
