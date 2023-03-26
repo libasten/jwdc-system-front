@@ -151,9 +151,9 @@
             </el-table-column>
           </el-table>
         </div>
-        <el-divider content-position="center">开票回款信息</el-divider>
-        <el-row :gutter="40">
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
+        <el-divider content-position="center" v-if="checkAuth('34-1')||checkAuth('35-1')">开票回款信息</el-divider>
+        <el-row :gutter="40" style="margin-top:15px;">
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;" v-if="checkAuth('34-1')">
             <el-col :span="16">
               <el-form label-width="70px" label-position="left" :disabled="allDisabled">
                 <el-form-item label="开票进度">
@@ -165,7 +165,7 @@
                 </el-form-item>
               </el-form>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="6" v-if="checkAuth('34-3')">
               <el-form>
                 <el-form-item>
                   <el-button type="primary" size="small" plain @click="addInvoice">新增开票信息</el-button>
@@ -183,17 +183,17 @@
                   <span>{{ row.amount }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" align="center" min-width="40">
+              <el-table-column label="操作" align="center" min-width="40" v-if="checkAuth('34-2')||checkAuth('34-4')">
                 <template slot-scope="scope">
                   <el-button-group>
-                    <el-button size="mini" type="primary" plain @click="editInvoice(scope.row)">编辑</el-button>
-                    <el-button size="mini" type="danger" plain @click="deleteInvoice(scope.row)">删除</el-button>
+                    <el-button size="mini" type="primary" plain @click="editInvoice(scope.row)" v-if="checkAuth('34-2')">编辑</el-button>
+                    <el-button size="mini" type="danger" plain @click="deleteInvoice(scope.row)" v-if="checkAuth('34-4')">删除</el-button>
                   </el-button-group>
                 </template>
               </el-table-column>
             </el-table>
           </el-col>
-          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;">
+          <el-col :md="12" :xs="24" :sm="24" style="margin-bottom:15px;" v-if="checkAuth('35-1')">
             <el-col :span="16">
               <el-form label-width="70px" label-position="left" :disabled="allDisabled">
                 <el-form-item label="回款进度">
@@ -205,7 +205,7 @@
                 </el-form-item>
               </el-form>
             </el-col>
-            <el-col :span="6">
+            <el-col :span="6" v-if="checkAuth('35-3')">
               <el-form>
                 <el-form-item>
                   <el-button type="primary" size="small" plain @click="addCollection">新增回款信息</el-button>
@@ -223,42 +223,45 @@
                   <span>{{ row.amount }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" align="center" min-width="40">
+              <el-table-column label="操作" align="center" min-width="40" v-if="checkAuth('35-2')||checkAuth('35-4')">
                 <template slot-scope="scope">
                   <el-button-group>
-                    <el-button size="mini" type="primary" plain @click="editCollection(scope.row)">编辑</el-button>
-                    <el-button size="mini" type="danger" plain @click="deleteCollection(scope.row)">删除</el-button>
+                    <el-button size="mini" type="primary" plain @click="editCollection(scope.row)" v-if="checkAuth('35-2')">编辑</el-button>
+                    <el-button size="mini" type="danger" plain @click="deleteCollection(scope.row)" v-if="checkAuth('35-4')">删除</el-button>
                   </el-button-group>
                 </template>
               </el-table-column>
             </el-table>
           </el-col>
           <el-col :span="24">
-            <el-divider content-position="center">信息汇总</el-divider>
-            <el-form label-width="85px" label-position="left" :disabled="allDisabled">
-              <el-col :span="12">
-                <el-form-item label="合同金额">
-                  <el-input v-model="postForm.contractAmount"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="开票总金额">
-                  <el-input v-model="postForm.invoicingTotal"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="回款金额">
-                  <el-input v-model="postForm.collectionTotal"></el-input>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="未回款金额">
-                  <el-input v-model="postForm.unCollectionTotal"></el-input>
-                </el-form-item>
-              </el-col>
-            </el-form>
+            <div v-if="showInvoicingCollectionTotal">
+              <el-divider content-position="center">开票与回款信息汇总</el-divider>
+              <el-form label-width="85px" label-position="left" :disabled="allDisabled">
+                <el-col :span="12">
+                  <el-form-item label="合同金额">
+                    <el-input v-model="postForm.contractAmount"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="开票总金额">
+                    <el-input v-model="postForm.invoicingTotal"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="回款金额">
+                    <el-input v-model="postForm.collectionTotal"></el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="未回款金额">
+                    <el-input v-model="postForm.unCollectionTotal"></el-input>
+                  </el-form-item>
+                </el-col>
+              </el-form>
+            </div>
           </el-col>
         </el-row>
+
       </el-collapse-item>
       <el-collapse-item title="招投标" name="4" v-if="showBid">
         <div v-if="bids.length===0">该项目还没有关联招投标信息</div>
@@ -531,8 +534,10 @@ export default {
         if (this.showBid) { this.fillBids() }
 
         // 获取开票和回款信息列表-先检查权限，没有权限就不执行
-        if (this.showInvoicingCollectionTotal) {
+        if (this.checkAuth('34-1')) {
           this.getInvoices()
+        }
+        if (this.checkAuth('35-1')) {
           this.getCollections()
         }
         this.loading = false
@@ -548,7 +553,7 @@ export default {
         // 这个方法用于重置data属性中的值。
         Object.assign(this.$data.noteForm, this.$options.data().noteForm)
         this.dialogVisibleNote = true
-      }).catch((err) => { this.$message.error('错误信息：' + err,) })
+      }).catch(err => { this.$message.error('错误信息：' + err,) })
     },
     editNode(data) {
       const that = this
@@ -560,7 +565,7 @@ export default {
           }
           that.noteForm = res.data.projectNote
           that.dialogVisibleNote = true
-        }).catch((err) => { this.$message.error('错误信息：' + err,) })
+        }).catch(err => { this.$message.error('错误信息：' + err,) })
       }
       else {
         fetchProjectArchive(data.id).then((res) => {
@@ -573,7 +578,7 @@ export default {
           that.fileList = []
           that.archiveFile = ''
           that.dialogVisibleArchive = true
-        }).catch((err) => { this.$message.error('错误信息：' + err,) })
+        }).catch(err => { this.$message.error('错误信息：' + err,) })
       }
     },
     noteSubmit() {
@@ -634,7 +639,7 @@ export default {
             this.$message.success('删除成功！');
           });
         }
-      }).catch((err) => { this.$message.info('删除操作已取消'); });
+      }).catch(err => { this.$message.info('删除操作已取消'); });
     },
 
     addArchive() {
@@ -649,7 +654,7 @@ export default {
         this.fileList = []
         this.archiveFile = ''
         this.dialogVisibleArchive = true
-      }).catch((err) => { this.$message.error('错误信息：' + err,) })
+      }).catch(err => { this.$message.error('错误信息：' + err,) })
     },
     handleFileChange(file, fileList) {
       this.archiveForm.name = file.name
@@ -778,8 +783,7 @@ export default {
         else {
           this.postForm.invoicingProgressName = '1'
         }
-      }).catch((err) => {
-        console.log(err)
+      }).catch(err => {
         this.$message.error("获取开票信息失败！");
       });
     },
@@ -818,7 +822,7 @@ export default {
               this.$message.success('更新成功！')
               this.getInvoices()
               this.dialogVisibleInvoice = false
-            }).catch((err) => { this.$message.error('更新失败：' + err) })
+            }).catch(err => { this.$message.error('更新失败：' + err) })
           }
         }
       })
@@ -834,7 +838,7 @@ export default {
           this.getInvoices()
           this.$message.success('删除成功！');
         });
-      }).catch((err) => { this.$message.info('删除操作已取消'); });
+      }).catch(err => { this.$message.info('删除操作已取消'); });
     },
     // 获取回款信息
     getCollections() {
@@ -887,7 +891,7 @@ export default {
               this.$message.success('更新成功！')
               this.getCollections()
               this.dialogVisibleCollection = false
-            }).catch((err) => { this.$message.error('更新失败：' + err) })
+            }).catch(err => { this.$message.error('更新失败：' + err) })
           }
         }
       })
@@ -903,7 +907,7 @@ export default {
           this.getCollections()
           this.$message.success('删除成功！');
         });
-      }).catch((err) => { this.$message.info('删除操作已取消'); });
+      }).catch(err => { this.$message.info('删除操作已取消'); });
     },
     openContractAmount() {
       this.contractAmountForm.amount = this.postForm.contractAmount
