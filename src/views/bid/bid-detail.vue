@@ -252,7 +252,7 @@ import {
 } from '@/api/bid';
 import { deepClone } from '@/utils/index'
 import { downloadFile } from '@/utils/req-down'
-import { checkAuth } from "@/utils/permission";
+import { checkAuth } from "@/utils/permission"
 
 export default {
   name: 'BidDetail',
