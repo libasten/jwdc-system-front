@@ -663,7 +663,8 @@ export default {
         arrTmep[2] = e.amount
         arrTmep[3] = e.count
         arrTmep[4] = e.totalAmount
-        arrTmep[5] = new Date(e.date).toLocaleDateString()
+        // arrTmep[5] = new Date(e.date).toLocaleDateString()
+        arrTmep[5] = this.$options.filters['dateFormat'](e.date)
         arrTmep[6] = e.description === null ? '' : e.description
         rowDataList[i] = arrTmep
       }
