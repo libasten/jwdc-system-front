@@ -317,7 +317,8 @@ export default {
       rules: {
         category: [{ required: true, message: '请选择费用类别', trigger: 'blur' }],
         date: [{ required: true, message: '请选择时间', trigger: 'blur' }],
-        amount: [{ validator: checkAmount, trigger: 'blur' }],
+        // 取消报销单价的数值大于0的验证约束 - Leon@20230325
+        // amount: [{ validator: checkAmount, trigger: 'blur' }],
         seDate: [{ required: true, message: '请选择起止时间', trigger: 'blur' }]
       }
     }

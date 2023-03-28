@@ -3,7 +3,7 @@
   <div class="app-container contract-detail">
     <div class="title">{{postForm.name}}</div>
     <el-collapse v-model="activeNames">
-      <el-collapse-item title="1. 基本信息" name="1">
+      <el-collapse-item title="基本信息" name="1">
         <el-form ref="postForm" :loading="loading" :model="postForm" label-width="100px" :disabled="allDisabled">
           <el-row>
             <el-col :span="24">
@@ -45,7 +45,7 @@
           </el-row>
         </el-form>
       </el-collapse-item>
-      <el-collapse-item title="2. 合同文件" name="2">
+      <el-collapse-item title="合同文件" name="2">
         <div class="top-btns">
           <el-button size="mini" type="primary" @click="addArchive">上传文件</el-button>
         </div>
@@ -68,9 +68,9 @@
           <el-table-column label="操作" align="center" min-width="25">
             <template slot-scope="scope">
               <el-button-group>
-                <el-button size="mini" type="primary" plain @click="editArchive(scope.row)">编辑</el-button>
-                <el-button size="mini" type="primary" plain @click="downloadArchive(scope.row)">下载</el-button>
-                <el-button size="mini" type="danger" plain @click="deleteArchive(scope.row)">删除</el-button>
+                <el-button size="mini" type="primary" plain v-if="checkAuth('17-2')" @click="editArchive(scope.row)">编辑</el-button>
+                <el-button size="mini" type="primary" plain v-if="checkAuth('17-5')" @click="downloadArchive(scope.row)">下载</el-button>
+                <el-button size="mini" type="danger" plain v-if="checkAuth('17-4')" @click="deleteArchive(scope.row)">删除</el-button>
               </el-button-group>
             </template>
           </el-table-column>
@@ -105,7 +105,7 @@ import {
 } from '@/api/contract';
 import { deepClone } from '@/utils/index'
 import { downloadFile } from '@/utils/req-down'
-
+import { checkAuth } from "@/utils/permission"
 export default {
   name: 'ContractDetail',
   data() {
@@ -267,7 +267,8 @@ export default {
     },
     headerCellStyle() {
       return { color: '#444', fontSize: '14px', backgroundColor: '#F3F6FC' }
-    }
+    },
+    checkAuth
   },
 };
 </script>
