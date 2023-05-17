@@ -50,7 +50,7 @@
       </el-collapse>
     </div>
     <div class="table-view">
-      <el-table v-loading="listLoading" ref="vTable" :data="list.slice((currentPage-1)*pageSize,currentPage*pageSize)" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle">
+      <el-table v-loading="listLoading" ref="vTable" :data="list" @current-change="handleCurrentChange" border fit stripe highlight-current-row :header-cell-style="headerCellStyle">
         <el-table-column label="id" v-if="false">
           <template slot-scope="{ row }">
             <span>{{ row.id }}</span>
