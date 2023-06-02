@@ -14,7 +14,7 @@
     <div class="contract-query-box">
       <el-collapse>
         <el-collapse-item title=" " name="1">
-          <template slot="title"><i class="header-icon el-icon-s-operation"></i> 投标筛选框 </template>
+          <template slot="title"><i class="header-icon el-icon-s-operation"></i> 合同筛选框 </template>
           <el-form :model="searchForm" ref="searchForm" label-width="100px">
             <el-row>
               <el-col :span="10">
