@@ -75,7 +75,7 @@
         </el-table-column>
         <el-table-column min-width="20%" label="类型" align="center">
           <template slot-scope="{ row }">
-            <span>{{ row.projectTypeName }}</span>
+            <span>{{ row.projectTypeName|filterPrjType }}</span>
           </template>
         </el-table-column>
         <el-table-column min-width="35%" label="名称" align="center">
@@ -177,6 +177,16 @@ import { saveAs } from "file-saver";
 export default {
   name: 'ProjectList',
   components: { ProjectAppoint, ProjectMilestone, ProjectShare },
+  filters: {
+    filterPrjType(val) {
+      if (val === '0') {
+        return '暂未分类'
+      }
+      else {
+        return val
+      }
+    },
+  },
   data() {
     return {
       rules: {},
