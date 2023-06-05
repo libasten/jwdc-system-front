@@ -149,7 +149,7 @@ export default {
         arrTemp[10] = e.unCollectionTotal === null ? '' : e.unCollectionTotal
         arrTemp[11] = e.techniqueAdminsFormat === null ? '' : e.techniqueAdminsFormat
         arrTemp[12] = e.marketAdminNamesFormat === null ? '' : e.marketAdminNamesFormat
-        arrTemp[13] = e.contractIds === null ? '' : e.contractIds
+        arrTemp[13] = e.contractCodeNames === null ? '' : e.contractCodeNames
         arrTemp[14] = e.partAContact === null ? '' : e.partAContact
         arrTemp[15] = e.partAPhone === null ? '' : e.partAPhone
         const tempRow = worksheet.addRow(arrTemp);
