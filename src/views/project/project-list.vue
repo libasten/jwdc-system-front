@@ -6,7 +6,7 @@
         <!-- 授权参考这里 -->
         <!-- 人员只能看到系统允许看到的项目，所以编辑、分享等功能不要再做权限控制 -->
         <el-button type="primary" size="small" icon="el-icon-plus" @click.native="goCreate" v-if="checkAuth('7-3')">新建</el-button>
-        <el-button type="primary" size="small" icon="el-icon-download" v-if="canDownload" @click.native="goDownload">下载</el-button>
+        <el-button type="primary" size="small" icon="el-icon-download" v-if="canDownload" @click.native="goDownload">下载项目表</el-button>
         <el-button v-if="currentRow!=null && checkAuth('7-2')" type="primary" size="small" icon="el-icon-edit" @click.native="goEdit">编辑基本信息</el-button>
         <el-button v-if="currentRow!=null" type="primary" size="small" icon="el-icon-view" @click.native="goView">查看信息分表</el-button>
         <el-button v-if="currentRow!=null && checkAuth('25-1')" type="primary" size="small" icon="el-icon-user" @click.native="showAppoint">人员任命</el-button>
@@ -111,6 +111,11 @@
         <el-table-column min-width="10%" label="结束时间" align="center">
           <template slot-scope="{ row }">
             <span>{{ row.completionFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="10%" label="创建者" align="center">
+          <template slot-scope="{ row }">
+            <span>{{ row.createName }}</span>
           </template>
         </el-table-column>
         <el-table-column min-width="10%" label="录入时间" align="center">
