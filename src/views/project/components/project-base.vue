@@ -209,7 +209,7 @@ export default {
           }
           // 编辑更新
           else {
-            editProject(this.postForm).then((res) => {
+            editProject(this.postForm).then(res => {
               this.getProjectBase()
               this.$message.success('更新成功！')
             }).catch((err) => {
@@ -223,7 +223,6 @@ export default {
     getProjectBase() {
       this.loading = true
       fetchProjectBase(this.postForm.id).then((res) => {
-        console.log(res.data)
         this.citys = res.data.citys
         this.departments = res.data.departments
         this.projectTypes = res.data.projectTypes
@@ -253,7 +252,6 @@ export default {
     getNewProjectEnum() {
       this.loading = true
       newProjectBase().then(res => {
-        console.log(res)
         this.postForm.start = new Date()
         this.postForm.completion = new Date()
         this.postForm.invoiceDate = new Date()
@@ -277,7 +275,6 @@ export default {
     },
     // 项目类型变换
     typeChanged() {
-      console.log(this.postForm.projectTypeId)
       this.$confirm('修改项目类型会影响项目进度, 是否确认修改?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

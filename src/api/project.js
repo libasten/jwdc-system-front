@@ -1,4 +1,6 @@
 import request from '@/utils/request'
+import qs from 'qs'
+import { queryStaffCost } from './cost'
 //#region 项目管理
 // 获取项目列表（不分页，备用）
 export function fetchProjectList() {
@@ -35,7 +37,8 @@ export function createProject(pa) {
   return request({
     url: '/Projects/CreateProject',
     method: 'post',
-    params: pa,
+    // params: pa,
+    data: qs.stringify(pa)
   })
 }
 // 编辑项目基本信息
@@ -43,7 +46,8 @@ export function editProject(pa) {
   return request({
     url: '/Projects/EditProject',
     method: 'post',
-    params: pa,
+    // params: pa,
+    data: qs.stringify(pa)
   })
 }
 // 获取单个项目详情
@@ -68,7 +72,8 @@ export function editProjectContractAmount(pa) {
   return request({
     url: '/Projects/EditProjectContractAmount',
     method: 'post',
-    params: pa,
+    data: qs.stringify(pa)
+    // params: pa,
   })
 }
 
@@ -94,7 +99,8 @@ export function createPrjAppoint(pa) {
   return request({
     url: '/Projects/CreateProjectAppointment',
     method: 'post',
-    params: pa,
+    // params: pa,
+    data: qs.stringify(pa)
   })
 }
 // 编辑任命信息
@@ -102,7 +108,8 @@ export function editPrjAppoint(pa) {
   return request({
     url: '/Projects/EditProjectAppointment',
     method: 'post',
-    params: pa,
+    data: qs.stringify(pa)
+    // params: pa,
   })
 }
 // 删除任命信息
@@ -128,7 +135,8 @@ export function createPrjMilestone(pa) {
   return request({
     url: '/Projects/CreateProjectMilestone',
     method: 'post',
-    params: pa,
+    data: qs.stringify(pa)
+    // params: pa,
   })
 }
 // 编辑里程碑
@@ -136,7 +144,8 @@ export function editPrjMilestone(pa) {
   return request({
     url: '/Projects/EditProjectMilestone',
     method: 'post',
-    params: pa,
+    data: qs.stringify(pa)
+    // params: pa,
   })
 }
 // 删除里程碑
@@ -169,7 +178,8 @@ export function createPrjShare(pa) {
   return request({
     url: '/Projects/CreateProjectShare',
     method: 'post',
-    params: pa,
+    data: qs.stringify(pa)
+    // params: pa,
   })
 }
 // 编辑分享
@@ -177,7 +187,8 @@ export function editPrjShare(pa) {
   return request({
     url: '/Projects/EditProjectShare',
     method: 'post',
-    params: pa,
+    data: qs.stringify(pa)
+    // params: pa,
   })
 }
 // 删除分享

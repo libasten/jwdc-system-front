@@ -25,7 +25,9 @@ export function myString2Array(pString) {
     }
     let tempArray = pString.split(',')
     tempArray.forEach(element => {
-        retArray.push(Number(element))
+        if (element !== '') {
+            retArray.push(Number(element))
+        }
     })
     return retArray;
 }
