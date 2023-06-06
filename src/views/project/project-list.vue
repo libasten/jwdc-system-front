@@ -419,7 +419,7 @@ export default {
           res.data.forEach(e => {
             let arrTemp = new Array(headerEx.length).fill('-');
             arrTemp[0] = e.code === null ? '' : e.code
-            arrTemp[1] = e.projectTypeName === null ? '' : e.projectTypeName
+            arrTemp[1] = e.projectTypeName === '0' ? '暂未分类' : e.projectTypeName
             arrTemp[2] = e.name === null ? '' : e.name
             arrTemp[3] = e.progressName === null ? '' : e.progressName
             arrTemp[4] = e.departmentName === null ? '' : e.departmentName
@@ -427,7 +427,8 @@ export default {
             arrTemp[6] = e.marketAdminNamesFormat === null ? '' : e.marketAdminNamesFormat
             arrTemp[7] = e.startFormat === null ? '' : e.startFormat
             arrTemp[8] = e.completionFormat === null ? '' : e.completionFormat
-            arrTemp[9] = e.createTimeFormat === null ? '' : e.createTimeFormat
+            arrTemp[9] = e.createName === null ? '' : e.createName
+            arrTemp[10] = e.createTimeFormat === null ? '' : e.createTimeFormat
             const tempRow = worksheet.addRow(arrTemp);
             tempRow.eachCell(function (cell, colNumber) {
               cell.border = borderStyle;
