@@ -757,7 +757,7 @@ export default {
         const e = this.logList[i]
         let arrTmep = []
         arrTmep[0] = i + 1
-        arrTmep[1] = new Date(e.startDate).toLocaleDateString() + ' ' + new Date(e.endDate).toLocaleTimeString()
+        arrTmep[1] = new Date(e.startDate).toLocaleDateString() + ' ' + new Date(e.startDate).toLocaleTimeString()
         arrTmep[2] = new Date(e.endDate).toLocaleDateString() + ' ' + new Date(e.endDate).toLocaleTimeString()
         arrTmep[3] = e.startLocation === null ? '' : e.startLocation
         arrTmep[4] = e.targetLocation === null ? '' : e.targetLocation
