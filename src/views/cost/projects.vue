@@ -57,7 +57,16 @@ export default {
   },
 
   created() { },
-
+  computed: {
+    prjRowIdx() {
+      return this.queryResult.datas.reduce((acc, cur, index) => {
+        if (cur.style === 1) {
+          acc.push(index)
+        }
+        return acc
+      }, [])
+    }
+  },
   methods: {
     doSearch() {
       this.$refs.postForm.validate((valid) => {
@@ -88,26 +97,19 @@ export default {
     },
 
     // 特殊的合计行和项目行，添加一个样式类
+    // 这里使用计算属性prjRowIdx避免循环嵌套
     tableAddRowClass({ row, rowIndex }) {
-      let prjRowIdx = []
-      for (let index = 0; index < this.queryResult.datas.length; index++) {
-        const element = this.queryResult.datas[index]
-        if (element.style === 1) {
-          prjRowIdx.push(index)
-        }
-      }
       // 第一行
-      if (rowIndex == 0) {
+      if (rowIndex === 0) {
         return 'sum-tr';
       }
-      if (prjRowIdx.find(a => a === rowIndex)) {
+      if (this.prjRowIdx.includes(rowIndex)) {
         return 'prj-tr';
       }
       return '';
     },
 
     downloadResult() {
-
       const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, };
       const contentCenter = { vertical: "middle", horizontal: "center" };
       const workbook = new ExcelJS.Workbook();

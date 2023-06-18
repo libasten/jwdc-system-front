@@ -57,7 +57,16 @@ export default {
   },
 
   created() { },
-
+  computed: {
+    prjRowIdx() {
+      return this.queryResult.datas.reduce((acc, cur, index) => {
+        if (cur.style === 1) {
+          acc.push(index)
+        }
+        return acc
+      }, [])
+    }
+  },
   methods: {
     doSearch() {
       this.$refs.postForm.validate((valid) => {
@@ -89,20 +98,14 @@ export default {
     },
 
     // 特殊的合计行和项目行，添加一个样式类
+    // 这里使用计算属性prjRowIdx避免循环嵌套
     tableAddRowClass({ row, rowIndex }) {
-      let subSumRowIdx = []
-      for (let index = 0; index < this.queryResult.datas.length; index++) {
-        const element = this.queryResult.datas[index]
-        if (element.style === 1) {
-          subSumRowIdx.push(index)
-        }
-      }
       // 第一行
-      if (rowIndex == 0) {
+      if (rowIndex === 0) {
         return 'sum-tr';
       }
-      if (subSumRowIdx.find(a => a === rowIndex)) {
-        return 'subSum-tr';
+      if (this.prjRowIdx.includes(rowIndex)) {
+        return 'prj-tr';
       }
       return '';
     },
