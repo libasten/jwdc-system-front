@@ -147,8 +147,10 @@
       </div>
       <el-divider></el-divider>
       <div class="section-title">审批信息</div>
-      <div class="section-sub-title">财务意见 </div>
+      <div class="section-sub-title">财务专员意见 </div>
       <el-input v-model="financeOfficeOpinion" disabled> </el-input>
+      <div class="section-sub-title">财务经理意见 </div>
+      <el-input v-model="financeOpinion" disabled> </el-input>
       <div class="section-sub-title"></div>
       <el-button type="primary" size="small" icon="el-icon-download" @click.native="downloadExpenseTable">下载</el-button>
     </el-card>
@@ -313,11 +315,12 @@ export default {
         arrangement: '', remark: ''
       },
       // 审批信息
-      financeOfficeOpinion: '', //财务专员意见-目前只要审批到这里，只有一个节点。
+      financeOfficeOpinion: '', //财务专员意见
+      financeOpinion: '', //财务经理意见
       rules: {
         category: [{ required: true, message: '请选择费用类别', trigger: 'blur' }],
         date: [{ required: true, message: '请选择时间', trigger: 'blur' }],
-        // 取消报销单价的数值大于0的验证约束 - Leon@20230325
+        // 取消 报销单价的数值大于0的验证约束 - Leon@20230325
         // amount: [{ validator: checkAmount, trigger: 'blur' }],
         seDate: [{ required: true, message: '请选择起止时间', trigger: 'blur' }]
       }
@@ -380,7 +383,6 @@ export default {
       else {
         this.expenseLoading = true
         fetchExpenseDetail(this.flow.id).then(res => {
-          console.log(res.data)
           this.flow = res.data.expenseWorkflow
           this.staff = this.flow.starterName
           this.department = this.flow.departmentName
@@ -404,6 +406,7 @@ export default {
             this.logLoading = false
           })
           this.financeOfficeOpinion = this.flow.financeOfficeOpinion
+          this.financeOpinion = this.flow.financeOpinion
         }).catch(err => { this.$message.error('获取工作流详情失败：' + err) })
       }
     },
@@ -589,7 +592,7 @@ export default {
         amount: this.getExpenseSum,
         reason: this.reason,
         departmentOpinion: this.flow.canDepartmentOpinion ? "同意" : "",
-        financeOfficeOpinion: this.flow.canFinanceOfficeOpinion ? "同意" : "",
+        financeOfficeOpinion: this.flow.canFinanceOfficeOpinion ? "同意" : "",        
         generalManagerOpinion: this.flow.canGeneralManagerOpinion ? "同意" : "",
         financeOpinion: this.flow.canFinanceOpinion ? "同意" : "",
       };
@@ -829,11 +832,12 @@ export default {
     .section-title {
       color: #1d8eff;
       font-size: 1.1rem;
-      margin-bottom: 15px;
+      font-weight: bold;
+      margin-bottom: -6px;
     }
     .section-sub-title {
       font-weight: 700;
-      margin: 16px 0px 6px 0;
+      margin: 20px 0px 6px 0px;
     }
     .base-info {
       margin-top: 10px;
