@@ -70,9 +70,8 @@ export default {
     getList() {
       this.listLoading = true;
       this.list = [];
-      getRemindList().then((res) => {
-        console.log(res)
-        // 测试本地数据
+      getRemindList().then(res => {
+        //#region 测试本地数据
         // res.data = [{
         //   "typeId": 3,
         //   "id": 1,
@@ -119,6 +118,7 @@ export default {
         //   "isCompleted": false,
         //   "completeStatus": "未完成"
         // },]
+        //#endregion
         this.total = res.data.length;
         res.data.forEach(ele => {
           const element = {
