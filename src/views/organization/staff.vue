@@ -134,8 +134,8 @@
             </el-form-item>
           </el-col>
           <el-col :md="12">
-            <el-form-item label="入职日期" prop="emergencyPeople">
-              <el-date-picker v-model="postForm.emergencyPeople" />
+            <el-form-item label="入职日期" prop="entryTime">
+              <el-date-picker v-model="postForm.entryTime" />
             </el-form-item>
           </el-col>
           <el-col :md="12">
@@ -188,19 +188,19 @@ export default {
         id: '',
         name: '',
         sex: '',
-        birthday: '',
+        birthday: new Date(),
         password: '',
         phone: '',
         email: '',
         idNum: '',
         college: '',
         major: '',
-        graduation: '',
+        graduation: new Date(),
         departmentId: '',
         staffTypeId: '',
         roleIds: [],
         post: '',
-        entryTime: '',
+        entryTime: new Date(),
         emergencyPeople: '',
         emergencyRelationship: '',
         emergencyPhone: '',
@@ -229,25 +229,22 @@ export default {
           pa.phone = pa.telephone
           // 新建
           if (that.postForm.id === '') {
-            createStaff(pa).then((res) => {
+            createStaff(pa).then(res => {
               that.$message.success('新建成功！')
               that.list.unshift(res.data)
               that.total++
               that.dialogVisible = false
-            }).catch((err) => {
-              that.$message.error('新建失败：' + err)
-            })
+            }).catch(err => { that.$message.error('新建失败：' + err) })
           }
           // 编辑更新
           else {
-            editStaff(pa).then((res) => {
+            console.log(pa)
+            editStaff(pa).then(res => {
               that.$message.success('更新成功！')
               const idxTem = that.list.findIndex(x => x.id === res.data.id)
               that.list[idxTem] = res.data
               that.dialogVisible = false
-            }).catch((err) => {
-              that.$message.error('更新失败：' + err)
-            })
+            }).catch(err => { that.$message.error('更新失败：' + err) })
           }
         }
       })
@@ -264,19 +261,17 @@ export default {
     getList() {
       this.listLoading = true
       this.list = []
-      fetchStaffs().then((res) => {
+      fetchStaffs().then(res => {
         this.total = res.data.length
         this.list = res.data
         this.listLoading = false
-      }).catch((err) => {
-        this.$message({
-          message: '错误信息：' + err,
-          type: 'error'
-        })
+      }).catch(err => {
+        this.$message.error('错误信息：' + err)
       })
     },
     createStaff() {
-      getStaffEnum().then((res) => {
+      console.log(this.$refs.postForm)
+      getStaffEnum().then(res => {
         if (this.$refs.postForm !== undefined) {
           this.$refs.postForm.resetFields()
         }
@@ -284,31 +279,22 @@ export default {
         this.departments = res.data.departments
         this.staffTypes = res.data.staffTypes
         this.dialogVisible = true
-      }).catch((err) => {
-        this.$message({
-          message: '错误信息：' + err,
-          type: 'error'
-        })
-      })
+      }).catch(err => { this.$message.error('错误信息：' + err) })
     },
     editStaff() {
       const that = this
-      getStaff(that.currentRow.id).then((res) => {
+      getStaff(that.currentRow.id).then(res => {
         if (that.$refs.postForm !== undefined) {
           that.$refs.postForm.clearValidate()
         }
+        console.log(res)
         that.departments = res.data.departments
         that.staffTypes = res.data.staffTypes
         that.roles = res.data.roles
         that.postForm = deepClone(res.data.staff)
         that.postForm.roleIds = myString2Array(that.postForm.roleIds)
         that.dialogVisible = true
-      }).catch((err) => {
-        that.$message({
-          message: '错误信息：' + err,
-          type: 'error'
-        })
-      })
+      }).catch(err => { this.$message.error('错误信息：' + err) })
     },
     // 设置离职
     leaveStaff() {

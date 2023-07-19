@@ -57,7 +57,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="市场负责" prop="marketAdminIds">
+        <el-form-item label="市场负责" prop="marketAdminIds" v-if="checkAuth('25-5')">
           <el-select v-model="postForm.marketAdminIds" filterable placeholder="请选择" multiple>
             <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
             </el-option>
@@ -86,6 +86,7 @@
 import { fetchAppointList, fetchNewAppoint, createPrjAppoint, editPrjAppoint, deletePrjAppoint } from '@/api/project';
 import { headerCellStyle, columnStyle, array2myString, myString2Array } from '@/utils/commonFunction'
 import { deepClone } from '@/utils/index'
+import { checkAuth } from '@/utils/permission'
 
 export default {
   name: 'ProjectAppoint',
@@ -233,6 +234,7 @@ export default {
     cancelSelected() {
       this.$refs.vTable.setCurrentRow();
     },
+    checkAuth,
     array2myString, myString2Array,
     headerCellStyle, columnStyle
   },
