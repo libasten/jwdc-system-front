@@ -90,6 +90,10 @@
       <el-select v-model="projectId" filterable :clearable=false :disabled="!expenseEditable">
         <el-option v-for="(item,idx) in projects" :key="idx" :label="item.text" :value="item.id"></el-option>
       </el-select>
+      <!-- 新增流程完结后保存按钮 -->
+      <div class="completedSaveDiv" v-if="showCompletedSave">
+        <el-button type="primary" size="small" icon="el-icon-circle-check" @click="save()">更新保存</el-button>
+      </div>
       <div class="section-sub-title">行动日志</div>
       <div class="log-table-div">
         <div class="top-btns">
@@ -323,7 +327,9 @@ export default {
         // 取消 报销单价的数值大于0的验证约束 - Leon@20230325
         // amount: [{ validator: checkAmount, trigger: 'blur' }],
         seDate: [{ required: true, message: '请选择起止时间', trigger: 'blur' }]
-      }
+      },
+      // 控制完结流程保存按钮的可见性
+      showCompletedSave: false,
     }
   },
   computed: {
@@ -376,6 +382,7 @@ export default {
           this.showCommitBtn = false
           this.showAgreeBtn = false
           this.showDisAgreeBtn = false
+          this.showCompletedSave = false
         }
         ).catch(err => { this.$message.error('初始化失败：' + err) })
       }
@@ -391,6 +398,7 @@ export default {
           this.showCommitBtn = this.flow.canCommitWorkflow
           this.showAgreeBtn = this.flow.canApproveWorkflow
           this.showDisAgreeBtn = this.flow.canRejectWorkflow
+          this.showCompletedSave = this.flow.canCompletedSave
           this.expenseEditable = this.flow.canReason
           this.reason = this.flow.reason
           this.projects = res.data.projects
@@ -592,7 +600,7 @@ export default {
         amount: this.getExpenseSum,
         reason: this.reason,
         departmentOpinion: this.flow.canDepartmentOpinion ? "同意" : "",
-        financeOfficeOpinion: this.flow.canFinanceOfficeOpinion ? "同意" : "",        
+        financeOfficeOpinion: this.flow.canFinanceOfficeOpinion ? "同意" : "",
         generalManagerOpinion: this.flow.canGeneralManagerOpinion ? "同意" : "",
         financeOpinion: this.flow.canFinanceOpinion ? "同意" : "",
       };
@@ -849,6 +857,10 @@ export default {
       font-size: 1.2rem;
       margin: 0 10px;
       color: #ff0000;
+    }
+
+    .completedSaveDiv {
+      margin: 10px 0;
     }
 
     .el-input.is-disabled .el-input__inner,
