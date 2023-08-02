@@ -41,6 +41,11 @@
             <span>{{  scope.$index + 1 }}</span>
           </template>
         </el-table-column>
+        <el-table-column min-width="8%" label="人员" align="center" show-overflow-tooltip>
+          <template slot-scope="{ row }">
+            <span>{{ row.staffName }}</span>
+          </template>
+        </el-table-column>
         <el-table-column min-width="10%" label="科目" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.categoryName }}</span>
@@ -61,17 +66,17 @@
             <span>{{ row.total }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="15%" label="时间" align="center" show-overflow-tooltip>
+        <el-table-column min-width="12%" label="时间" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.date }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="20%" label="备注说明" align="center" show-overflow-tooltip>
+        <el-table-column min-width="18%" label="备注说明" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.description }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="25%" label="关联项目" align="center" show-overflow-tooltip>
+        <el-table-column min-width="22%" label="关联项目" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
             <span>{{ row.projectName }}</span>
           </template>
@@ -119,6 +124,8 @@ export default {
     initPage() {
       fetchQueryStaffParams().then(res => {
         this.staffs = res.data.staffs
+        this.staffs.unshift({ id: -1, text: '所有人员' })
+        this.postForm.staffId = -1
       }).catch(err => { this.$message.error('获取人员列表错误信息：' + err) })
       fetchQueryProjectParams().then(res => {
         this.projects = res.data.projects
@@ -137,6 +144,7 @@ export default {
           queryStaffSingleCost(this.postForm).then(res => {
             this.queryResult = res.data
             this.list = res.data.datas
+            console.log(this.list)
             this.listLoading = false
           }).catch(err => {
             this.$message.error('查询失败：' + err)
@@ -160,7 +168,7 @@ export default {
       data.forEach(e => {
         colSum += e.total
       })
-      sums[4] = colSum.toFixed(2);
+      sums[5] = colSum.toFixed(2);
       return sums;
     },
     downloadResult() {
@@ -170,7 +178,7 @@ export default {
       const worksheet = workbook.addWorksheet(this.queryResult.staffName + "-个人报销汇总", { views: [{ showGridLines: true }], });
       worksheet.addRow(["报销明细"]).height = 25;
       worksheet.getCell("A1").border = borderStyle;
-      worksheet.mergeCells("A1", "H1");
+      worksheet.mergeCells("A1", "I1");
       // 样式-对齐
       worksheet.getCell("A1").alignment = contentCenter;
       // 样式-字体
@@ -179,15 +187,15 @@ export default {
       worksheet.getCell("A2").value = "报销人：" + this.queryResult.staffName + strBlank + "部门：" + this.queryResult.departmentName;
       worksheet.getCell("A2").border = borderStyle;
       worksheet.getCell("A2").alignment = { vertical: "middle" };
-      worksheet.mergeCells("A2", "H2");
+      worksheet.mergeCells("A2", "I2");
       worksheet.getRow(2).height = 25;
       worksheet.getCell("A3").value = "报销时间段：" + this.queryResult.dateRange;
       worksheet.getCell("A3").border = borderStyle;
       worksheet.getCell("A3").alignment = { vertical: "middle" };
-      worksheet.mergeCells("A3", "H3");
+      worksheet.mergeCells("A3", "I3");
       worksheet.getRow(3).height = 25;
       // 行填充信息
-      let titles = ["序号", "科目", "单价（元）", "数量", "合计（元）", "时间", "备注说明", "关联项目名称"];
+      let titles = ["序号", "人员", "科目", "单价（元）", "数量", "合计（元）", "时间", "备注说明", "关联项目名称"];
       const titleRow = worksheet.addRow(titles);
       titleRow.eachCell(function (cell, colNumber) {
         cell.border = borderStyle;
@@ -199,13 +207,14 @@ export default {
         const e = this.list[i];
         let arrTmep = [];
         arrTmep[0] = i + 1;
-        arrTmep[1] = e.categoryName;
-        arrTmep[2] = e.amount;
-        arrTmep[3] = e.count;
-        arrTmep[4] = e.total;
-        arrTmep[5] = e.date;
-        arrTmep[6] = e.description === null ? '' : e.description;
-        arrTmep[7] = e.projectName;
+        arrTmep[1] = e.staffName;
+        arrTmep[2] = e.categoryName;
+        arrTmep[3] = e.amount;
+        arrTmep[4] = e.count;
+        arrTmep[5] = e.total;
+        arrTmep[6] = e.date;
+        arrTmep[7] = e.description === null ? '' : e.description;
+        arrTmep[8] = e.projectName;
         rowDataList[i] = arrTmep;
       }
       rowDataList.forEach((r) => {
@@ -216,31 +225,32 @@ export default {
         });
       });
       // 空行
-      let nullRow1 = worksheet.addRow(["", "", "", "", "", "", "", ""]);
+      let nullRow1 = worksheet.addRow(["", "", "", "", "", "", "", "", ""]);
       nullRow1.eachCell(function (cell, colNumber) {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFFFFFFF" }, };
       });
       nullRow1.height = 25;
       // 报销合计行
       var sumMoney = this.queryResult.totalTotal;
-      const sumRow = worksheet.addRow(["报销金额合计", "", "", "", sumMoney, "", "", ""]); // 前两个合并，只要6个
+      const sumRow = worksheet.addRow(["报销金额合计", "", "", "", "", sumMoney, "", "", ""]); // 前三个合并，只要6个
       // 获取新加行的行次 sumRow.number
-      worksheet.mergeCells("A" + sumRow.number, "B" + sumRow.number);
+      worksheet.mergeCells("A" + sumRow.number, "C" + sumRow.number);
       sumRow.eachCell(function (cell, colNumber) {
         cell.border = borderStyle;
         cell.alignment = contentCenter;
       });
       // 合计信息加粗
       worksheet.getCell("A" + sumRow.number).font = { bold: true };
-      worksheet.getCell("E" + sumRow.number).font = { bold: true };
+      worksheet.getCell("F" + sumRow.number).font = { bold: true };
       sumRow.height = 20;
       // 设置列属性 - 宽度
       worksheet.getColumn(2).width = 20;
-      worksheet.getColumn(3).width = 15;
-      worksheet.getColumn(5).width = 15;
-      worksheet.getColumn(6).width = 25;
-      worksheet.getColumn(7).width = 50;
-      worksheet.getColumn(8).width = 45;
+      worksheet.getColumn(3).width = 20;
+      worksheet.getColumn(4).width = 15;
+      worksheet.getColumn(6).width = 15;
+      worksheet.getColumn(7).width = 25;
+      worksheet.getColumn(8).width = 50;
+      worksheet.getColumn(9).width = 45;
       // 保存到本地
       workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), this.queryResult.staffName + "-报销汇总.xlsx")).catch((err) => console.log("Error writing excel export", err));
     },
@@ -267,7 +277,7 @@ export default {
 }
 .table-view .el-table__footer tbody tr {
   font-weight: 700;
-  & td:nth-child(5) {
+  & td:nth-child(6) {
     color: #ff0000;
   }
 }
