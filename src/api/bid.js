@@ -1,4 +1,5 @@
 import request from '@/utils/request'
+import qs from 'qs'
 //#region 投标管理
 // 分页检索获取投标对象
 export function fetchBidsPaged(pa) {
@@ -37,7 +38,8 @@ export function createBid(pa) {
   return request({
     url: '/Bids/CreateBid',
     method: 'post',
-    params: pa,
+    // params: pa,
+    data: qs.stringify(pa)
   })
 }
 
@@ -46,7 +48,8 @@ export function editBid(pa) {
   return request({
     url: '/Bids/EditBid',
     method: 'post',
-    params: pa,
+    // params: pa,
+    data: qs.stringify(pa)
   })
 }
 // 删除投标
@@ -110,7 +113,8 @@ export function createBidSecurity(pa) {
   return request({
     url: '/Bids/CreateBidSecurity',
     method: 'post',
-    params: pa,
+    // params: pa,
+    data: qs.stringify(pa)
   })
 }
 
@@ -119,7 +123,8 @@ export function editBidSecurity(pa) {
   return request({
     url: '/Bids/EditBidSecurity',
     method: 'post',
-    params: pa,
+    // params: pa,
+    data: qs.stringify(pa)
   })
 }
 

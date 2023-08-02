@@ -33,7 +33,6 @@
         </div>
       </div>
     </el-form>
-
   </div>
 </template>
 
@@ -201,15 +200,19 @@ $light_gray: #eee;
   width: 100%;
   overflow: hidden;
   background: #111c24 url("~@/assets/login-bg.jpg") no-repeat center center;
+  background-size: 100% 100%;
   .login-form {
+    position: fixed;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -45%);
     background-color: #283443;
-    position: relative;
-    width: 520px;
+    width: 560px;
     max-width: 100%;
     padding: 40px 35px 20px 35px;
-    margin: 150px auto 0 auto;
     overflow: hidden;
     border-radius: 10px;
+    box-shadow: 0 0 20px #ffffff66;
   }
 
   .tips {
@@ -228,7 +231,7 @@ $light_gray: #eee;
     padding: 6px 5px 6px 15px;
     color: $dark_gray;
     vertical-align: middle;
-    width: 30px;
+    width: 40px;
     display: inline-block;
   }
 
