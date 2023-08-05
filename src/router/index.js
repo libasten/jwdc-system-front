@@ -321,11 +321,18 @@ export const asyncRoutes = [
         name: 'staffProjectCost',
         meta: { title: '人员项目分摊', icon: 'documentation' }
       },
+    ]
+  },
+  {
+    path: '/collection',
+    component: Layout,
+    meta: { icon: 'el-icon-money', auth: '38-1' },
+    children: [
       {
-        path: 'projectCollection',
+        path: 'projects',
         component: () => import('@/views/cost/project-collection'),
         name: 'ProjectCollection',
-        meta: { title: '项目结款信息', icon: 'documentation' }
+        meta: { title: '项目结款信息', icon: 'el-icon-bank-card' }
       },
     ]
   },
