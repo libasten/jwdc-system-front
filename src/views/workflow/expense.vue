@@ -92,7 +92,7 @@
       </el-select>
       <!-- 新增流程完结后保存按钮 -->
       <div class="completedSaveDiv" v-if="showCompletedSave">
-        <el-button type="primary" size="small" icon="el-icon-circle-check" @click="save()">更新保存</el-button>
+        <el-button type="primary" size="small" icon="el-icon-circle-check" @click="saveCompleteWorkflow()">更新保存</el-button>
       </div>
       <div class="section-sub-title">行动日志</div>
       <div class="log-table-div">
@@ -255,7 +255,7 @@ import {
   saveExpense, fetchExpenseDetail, fetchLogList,
   newExpense, newExpenseCategory, fetchExpenseCategory, createExpenseCategory, editExpenseCategory, delExpenseCategory,
   createLog, editLog, delLog,
-  approveExpense, rejectExpense,
+  approveExpense, rejectExpense, saveCompleteFlow
 } from "@/api/workflow";
 import { goTodo } from "@/utils/commonFunction";
 import { deepClone } from "@/utils/index";
@@ -631,6 +631,21 @@ export default {
         }
       }).catch(err => { this.$message.error('同意操作失败！' + err) })
     },
+
+    // 更新保存已完结的流程
+    saveCompleteWorkflow() {
+      const paraTemp = {
+        id: this.flow.id,
+        projectId: this.projectId,
+        reason: this.reason,
+      };
+      saveCompleteFlow(paraTemp).then(res => {
+        if (res.status == 1) {
+          this.$message.success('更新保存成功！')
+        }
+      }).catch(err => { this.$message.error('更新保存完成的流程失败！' + err) })
+    },
+
     // 下载报销明细单据
     downloadExpenseTable() {
       const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, }
