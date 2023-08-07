@@ -87,7 +87,7 @@ export function editExpenseCategory(pa) {
 // 删除报销明细
 export function delExpenseCategory(data) {
   return request({
-    url: '/Workflows/SaveCompletedExpenseWorkflow',
+    url: '/Workflows/DeleteExpenseCategory',
     method: 'delete',
     params: { id: data.id }
   })
