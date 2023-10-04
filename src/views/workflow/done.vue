@@ -33,12 +33,12 @@
           <span>{{ row.projectName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="当前状态" min-width="20" align="center" show-overflow-tooltip>
+      <el-table-column label="当前状态" min-width="15" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.currentStatus }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="完成时间" min-width="20" align="center" show-overflow-tooltip>
+      <el-table-column label="完成（最后更新）时间" min-width="25" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.updateTimeFormat }}</span>
         </template>
@@ -94,6 +94,7 @@ export default {
         this.total = res.data.length
         this.searchResource()
         this.loading = false
+        console.log(this.doneList)
       }).catch(err => { this.$message.error('错误信息：' + err) });
     },
     searchResource() {

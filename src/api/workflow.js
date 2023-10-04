@@ -92,6 +92,14 @@ export function delExpenseCategory(data) {
     params: { id: data.id }
   })
 }
+// 修改保存已经完结的流程。- 仅修改关联的项目id和原因。
+export function saveCompleteFlow(pa) {
+  return request({
+    url: '/Workflows/SaveCompletedExpenseWorkflow',
+    method: 'post',
+    params: pa
+  })
+}
 //#endregion
 
 //#region 报销行动日志
