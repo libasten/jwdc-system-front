@@ -287,7 +287,6 @@ export default {
         if (that.$refs.postForm !== undefined) {
           that.$refs.postForm.clearValidate()
         }
-        console.log(res)
         that.departments = res.data.departments
         that.staffTypes = res.data.staffTypes
         that.roles = res.data.roles
