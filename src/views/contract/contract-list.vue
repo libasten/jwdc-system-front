@@ -86,9 +86,9 @@
             <span>{{ row.updateTimeFormat }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="项目编号" header-align="center" show-overflow-tooltip>
+        <el-table-column min-width="10%" label="项目编号" align="center" show-overflow-tooltip>
           <template slot-scope="{ row }">
-            <span>{{ row.projectCode }}</span>
+            <el-button type="primary" plain v-if="row.projectCode!==''" size="small" @click.native="goProjectDetail(row.projectId)"><span>{{row.projectCode}}</span></el-button>
           </template>
         </el-table-column>
         <el-table-column min-width="10%" label="描述" header-align="center" show-overflow-tooltip>
@@ -329,6 +329,10 @@ export default {
       }
       // 保存到本地
       workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "合同列表.xlsx")).catch((err) => console.log("Error writing excel export", err));
+    },
+    // 打开项目详情标签页
+    goProjectDetail(data) {
+      this.$router.push('/project/view/' + data)
     },
     // 选中行
     handleCurrentChange(val) {
