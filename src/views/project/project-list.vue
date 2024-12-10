@@ -93,9 +93,9 @@
             <span>{{ row.departmentName }}</span>
           </template>
         </el-table-column>
-        <el-table-column min-width="10%" label="技术负责人" align="center">
+        <el-table-column min-width="10%" label="项目经理" align="center">
           <template slot-scope="{ row }">
-            <span>{{ row.techniqueAdminsFormat }}</span>
+            <span>{{ row.manager }}</span>
           </template>
         </el-table-column>
         <el-table-column min-width="10%" label="市场负责人" align="center">
@@ -169,26 +169,24 @@
 </template>
 
 <script>
-
-import { fetchProjectListPaged, delProject, downProjects } from '@/api/project';
-import { headerCellStyle, columnStyle } from '@/utils/commonFunction'
-import ProjectAppoint from '@/views/project/components/project-appoint'
-import ProjectMilestone from '@/views/project/components/project-milestone'
-import ProjectShare from '@/views/project/components/project-share'
-import { checkAuth } from '@/utils/permission'
+import { fetchProjectListPaged, delProject, downProjects } from "@/api/project";
+import { headerCellStyle, columnStyle } from "@/utils/commonFunction";
+import ProjectAppoint from "@/views/project/components/project-appoint";
+import ProjectMilestone from "@/views/project/components/project-milestone";
+import ProjectShare from "@/views/project/components/project-share";
+import { checkAuth } from "@/utils/permission";
 const ExcelJS = require("exceljs");
 import { saveAs } from "file-saver";
 
 export default {
-  name: 'ProjectList',
+  name: "ProjectList",
   components: { ProjectAppoint, ProjectMilestone, ProjectShare },
   filters: {
     filterPrjType(val) {
-      if (val === '0') {
-        return '暂未分类'
-      }
-      else {
-        return val
+      if (val === "0") {
+        return "暂未分类";
+      } else {
+        return val;
       }
     },
   },
@@ -196,7 +194,7 @@ export default {
     return {
       rules: {},
       downRules: {
-        seDate: [{ required: true, message: '请选择时间段', trigger: 'blur' }],
+        seDate: [{ required: true, message: "请选择时间段", trigger: "blur" }],
       },
       list: [],
       listLoading: true,
@@ -210,24 +208,29 @@ export default {
       milestoneDialogVisible: false,
       shareFlag: false,
       shareDialogVisible: false,
-      pCurPrjTitle: '',
+      pCurPrjTitle: "",
       // 当前选中的项目ID,传递给子组件
-      pCurPrjId: '',
+      pCurPrjId: "",
       searchForm: {
         searchType: 0,
-        keyword: '',
+        keyword: "",
         searchTypeOpts: [
-          { text: '全部', value: 0 },
-          { text: '项目名称', value: 3 },
-          { text: '项目类型', value: 1 },
-          { text: '承担部门', value: 2 },
-          { text: '项目负责', value: 4 },
-          { text: '市场负责', value: 5 },
-          { text: '技术负责', value: 6 },],
+          { text: "全部", value: 0 },
+          { text: "项目名称", value: 3 },
+          { text: "项目类型", value: 1 },
+          { text: "承担部门", value: 2 },
+          { text: "项目负责", value: 4 },
+          { text: "市场负责", value: 5 },
+          { text: "技术负责", value: 6 },
+        ],
         // 日期过滤的枚举， 0 创建日期 1 开始日期  2 结束日期 ，落在下面的区间内
         dateType: 0,
-        dateTypes: [{ id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
-        seDate: '',
+        dateTypes: [
+          { id: 0, text: "创建时间" },
+          { id: 1, text: "开始日期" },
+          { id: 2, text: "结束日期" },
+        ],
+        seDate: "",
         startDate: new Date(),
         endDate: new Date(),
       },
@@ -238,11 +241,15 @@ export default {
       downloadLoading: false,
       downloadForm: {
         dateType: 0,
-        dateTypes: [{ id: 0, text: '创建时间' }, { id: 1, text: '开始日期' }, { id: 2, text: '结束日期' }],
-        seDate: '',
+        dateTypes: [
+          { id: 0, text: "创建时间" },
+          { id: 1, text: "开始日期" },
+          { id: 2, text: "结束日期" },
+        ],
+        seDate: "",
         startDate: new Date(),
         endDate: new Date(),
-      }
+      },
     };
   },
   computed: {},
@@ -252,51 +259,63 @@ export default {
   methods: {
     // 获取数据列表
     getList(cPage, pSize) {
-      let that = this
-      that.listLoading = true
-      that.list = []
+      let that = this;
+      that.listLoading = true;
+      that.list = [];
       const param = {
         skpCount: (cPage - 1) * this.pageSize,
         maxCount: pSize,
-        searchType: 0, searchValue: '',
-        dateType: 0, steartDate: '1900-1-1', endDate: '2099-12-31'
-      }
-      fetchProjectListPaged(param).then(res => {
-        console.log(res)
-        that.total = res.data.totalCount
-        that.list = res.data.items
-        that.canDownload = res.data.canDownloadProjects
-        that.listLoading = false
-      }).catch(err => { that.$message.error('错误信息：' + err) })
+        searchType: 0,
+        searchValue: "",
+        dateType: 0,
+        steartDate: "1900-1-1",
+        endDate: "2099-12-31",
+      };
+      fetchProjectListPaged(param)
+        .then((res) => {
+          that.total = res.data.totalCount;
+          that.list = res.data.items;
+          that.canDownload = res.data.canDownloadProjects;
+          that.listLoading = false;
+        })
+        .catch((err) => {
+          that.$message.error("错误信息：" + err);
+        });
     },
     // 执行搜索
     doSearch(cPage, pSize) {
-      let that = this
-      that.listLoading = true
-      that.list = []
+      let that = this;
+      that.listLoading = true;
+      that.list = [];
       const param = {
         skpCount: (cPage - 1) * this.pageSize,
         maxCount: pSize,
         searchType: that.searchForm.searchType,
         searchValue: that.searchForm.keyword.trim(),
-        dateType: that.searchForm.dateType, startDate: that.searchForm.seDate[0], endDate: that.searchForm.seDate[1]
-      }
+        dateType: that.searchForm.dateType,
+        startDate: that.searchForm.seDate[0],
+        endDate: that.searchForm.seDate[1],
+      };
       // 后台逻辑: 如果不输入关键字, 要把搜索类型设置为"全部"
-      if (param.searchValue === '') {
-        param.searchType = 0
+      if (param.searchValue === "") {
+        param.searchType = 0;
       }
       if (param.startDate === undefined || param.endDate === undefined) {
         // 因为日期区间是后台必填项,这里设置一个长期的时间段.
-        param.startDate = '1979-1-1'
-        param.endDate = '2099-12-31'
+        param.startDate = "1979-1-1";
+        param.endDate = "2099-12-31";
       }
-      fetchProjectListPaged(param).then(res => {
-        that.total = res.data.totalCount
-        that.list = res.data.items
-        that.listLoading = false
-        that.canDownload = res.data.canDownloadProjects
-        that.showQueryTip = true
-      }).catch(err => { that.$message.error('错误信息：' + err) })
+      fetchProjectListPaged(param)
+        .then((res) => {
+          that.total = res.data.totalCount;
+          that.list = res.data.items;
+          that.listLoading = false;
+          that.canDownload = res.data.canDownloadProjects;
+          that.showQueryTip = true;
+        })
+        .catch((err) => {
+          that.$message.error("错误信息：" + err);
+        });
     },
     // 清空关键字
     clearKW() {
@@ -305,154 +324,182 @@ export default {
     },
     clearParams() {
       this.getList(1, this.pageSize);
-      Object.assign(this.$data.searchForm, this.$options.data().searchForm)
+      Object.assign(this.$data.searchForm, this.$options.data().searchForm);
       this.showQueryTip = false;
     },
     goEdit() {
-      this.$router.push({ path: '/project/edit/' + this.currentRow.id })
+      this.$router.push({ path: "/project/edit/" + this.currentRow.id });
     },
     goView() {
-      this.$router.push({ path: '/project/view/' + this.currentRow.id })
+      this.$router.push({ path: "/project/view/" + this.currentRow.id });
     },
     goCreate() {
-      this.$router.push({ path: '/project/create' })
+      this.$router.push({ path: "/project/create" });
     },
     // 人员任命
     showAppoint() {
       if (this.appointDialogVisible === false) {
-        this.pCurPrjTitle = this.currentRow.name + ' - 项目人员'
-        this.pCurPrjId = this.currentRow.id
-        this.appointFlag = true
-        this.appointDialogVisible = true
+        this.pCurPrjTitle = this.currentRow.name + " - 项目人员";
+        this.pCurPrjId = this.currentRow.id;
+        this.appointFlag = true;
+        this.appointDialogVisible = true;
       }
     },
     closeAppoint() {
-      this.appointFlag = false
-      this.appointDialogVisible = false
+      this.appointFlag = false;
+      this.appointDialogVisible = false;
     },
     // 里程碑
     showMilestone() {
       if (this.milestoneDialogVisible === false) {
-        this.pCurPrjTitle = this.currentRow.name + ' - 里程碑'
-        this.pCurPrjId = this.currentRow.id
-        this.milestoneFlag = true
-        this.milestoneDialogVisible = true
+        this.pCurPrjTitle = this.currentRow.name + " - 里程碑";
+        this.pCurPrjId = this.currentRow.id;
+        this.milestoneFlag = true;
+        this.milestoneDialogVisible = true;
       }
     },
     closeMilestone() {
-      this.milestoneFlag = false
-      this.milestoneDialogVisible = false
+      this.milestoneFlag = false;
+      this.milestoneDialogVisible = false;
     },
     // 分享
     showShare() {
       if (this.shareDialogVisible === false) {
-        this.pCurPrjTitle = this.currentRow.name + ' - 分享'
-        this.pCurPrjId = this.currentRow.id
-        this.shareFlag = true
-        this.shareDialogVisible = true
+        this.pCurPrjTitle = this.currentRow.name + " - 分享";
+        this.pCurPrjId = this.currentRow.id;
+        this.shareFlag = true;
+        this.shareDialogVisible = true;
       }
     },
     closeShare() {
-      this.shareFlag = false
-      this.shareDialogVisible = false
+      this.shareFlag = false;
+      this.shareDialogVisible = false;
     },
     // 删除项目
     deleteProject() {
-      this.$confirm('永久删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      }).then(() => {
-        delProject(this.currentRow).then((res) => {
-          const idx = this.list.findIndex(a => a.id === this.currentRow.id)
-          this.list.splice(idx, 1);
-          this.total = this.list.length;
+      this.$confirm("永久删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          delProject(this.currentRow)
+            .then((res) => {
+              const idx = this.list.findIndex(
+                (a) => a.id === this.currentRow.id
+              );
+              this.list.splice(idx, 1);
+              this.total = this.list.length;
+              this.$message({
+                type: "success",
+                message: "删除成功!",
+              });
+            })
+            .catch((error) => {
+              this.$message.error("删除失败，错误：" + error);
+            });
+        })
+        .catch((err) => {
           this.$message({
-            type: 'success',
-            message: '删除成功!',
+            type: "info",
+            message: "已取消删除",
           });
-        }).catch(error => { this.$message.error("删除失败，错误：" + error) });
-      }).catch((err) => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除',
         });
-      });
     },
     // 打开下载弹窗体
     goDownload() {
-      this.downloadDialogVisible = true
+      this.downloadDialogVisible = true;
     },
     // 下载项目列表
     downloadProjects() {
-      this.$refs.downloadForm.validate(valid => {
-        this.downloadLoading = true
+      this.$refs.downloadForm.validate((valid) => {
+        this.downloadLoading = true;
         let params = {
           dateType: this.downloadForm.dateType,
           dateType: this.downloadForm.dateType,
           startDate: this.downloadForm.seDate[0],
-          endDate: this.downloadForm.seDate[1]
-        }
-        this.downloadLoading = true
-        downProjects(params).then(res => {
-          if (res.data.length < 1) {
-            this.$message.info('当前时间内无项目信息！')
-            this.downloadLoading = false
-            return
-          }
-          const borderStyle = { top: { style: "thin" }, left: { style: "thin" }, bottom: { style: "thin" }, right: { style: "thin" }, };
-          const contentCenter = { vertical: "middle", horizontal: "center" };
-          const workbook = new ExcelJS.Workbook();
-          const worksheet = workbook.addWorksheet("项目列表", { views: [{ showGridLines: true }], });
+          endDate: this.downloadForm.seDate[1],
+        };
+        this.downloadLoading = true;
+        downProjects(params)
+          .then((res) => {
+            if (res.data.length < 1) {
+              this.$message.info("当前时间内无项目信息！");
+              this.downloadLoading = false;
+              return;
+            }
+            const borderStyle = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+            const contentCenter = { vertical: "middle", horizontal: "center" };
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet("项目列表", {
+              views: [{ showGridLines: true }],
+            });
 
-          // 填充表头 - 用refs获取表头列表
-          let headerEx = []
-          this.$refs.vTable.$children.forEach(obj => { obj.label !== undefined ? headerEx.push(obj.label) : '' })
-          const headerRow = worksheet.addRow(headerEx);
-          headerRow.eachCell(function (cell, colNumber) {
-            cell.border = borderStyle
-            cell.alignment = contentCenter
-            cell.font = { bold: true, size: 11 }
-          });
-
-          // 填充数据行
-          res.data.forEach(e => {
-            let arrTemp = new Array(headerEx.length).fill('-');
-            arrTemp[0] = e.code === null ? '' : e.code
-            arrTemp[1] = e.projectTypeName === '0' ? '暂未分类' : e.projectTypeName
-            arrTemp[2] = e.name === null ? '' : e.name
-            arrTemp[3] = e.progressName === null ? '' : e.progressName
-            arrTemp[4] = e.departmentName === null ? '' : e.departmentName
-            arrTemp[5] = e.techniqueAdminsFormat === null ? '' : e.techniqueAdminsFormat
-            arrTemp[6] = e.marketAdminNamesFormat === null ? '' : e.marketAdminNamesFormat
-            arrTemp[7] = e.startFormat === null ? '' : e.startFormat
-            arrTemp[8] = e.completionFormat === null ? '' : e.completionFormat
-            arrTemp[9] = e.createName === null ? '' : e.createName
-            arrTemp[10] = e.createTimeFormat === null ? '' : e.createTimeFormat
-            const tempRow = worksheet.addRow(arrTemp);
-            tempRow.eachCell(function (cell, colNumber) {
+            // 填充表头 - 用refs获取表头列表
+            let headerEx = [];
+            this.$refs.vTable.$children.forEach((obj) => {
+              obj.label !== undefined ? headerEx.push(obj.label) : "";
+            });
+            const headerRow = worksheet.addRow(headerEx);
+            headerRow.eachCell(function (cell, colNumber) {
               cell.border = borderStyle;
               cell.alignment = contentCenter;
+              cell.font = { bold: true, size: 11 };
             });
+
+            // 填充数据行
+            res.data.forEach((e) => {
+              let arrTemp = new Array(headerEx.length).fill("-");
+              arrTemp[0] = e.code === null ? "" : e.code;
+              arrTemp[1] =
+                e.projectTypeName === "0" ? "暂未分类" : e.projectTypeName;
+              arrTemp[2] = e.name === null ? "" : e.name;
+              arrTemp[3] = e.progressName === null ? "" : e.progressName;
+              arrTemp[4] = e.departmentName === null ? "" : e.departmentName;
+              arrTemp[5] =
+                e.techniqueAdminsFormat === null ? "" : e.techniqueAdminsFormat;
+              arrTemp[6] =
+                e.marketAdminNamesFormat === null
+                  ? ""
+                  : e.marketAdminNamesFormat;
+              arrTemp[7] = e.startFormat === null ? "" : e.startFormat;
+              arrTemp[8] =
+                e.completionFormat === null ? "" : e.completionFormat;
+              arrTemp[9] = e.createName === null ? "" : e.createName;
+              arrTemp[10] =
+                e.createTimeFormat === null ? "" : e.createTimeFormat;
+              const tempRow = worksheet.addRow(arrTemp);
+              tempRow.eachCell(function (cell, colNumber) {
+                cell.border = borderStyle;
+                cell.alignment = contentCenter;
+              });
+            });
+            // 设置列属性 - 宽度
+            for (let i = 0; i < headerEx.length; i++) {
+              if (i == 2) {
+                worksheet.getColumn(i + 1).width = 45;
+              } else {
+                worksheet.getColumn(i + 1).width = 20;
+              }
+            }
+            // 保存到本地
+            workbook.xlsx
+              .writeBuffer()
+              .then((buffer) => saveAs(new Blob([buffer]), "项目列表.xlsx"))
+              .catch((err) => console.log("Error writing excel export", err));
+            this.$message.success("数据查询完成，即将开始下载，请稍候...");
+            this.downloadLoading = false;
           })
-          // 设置列属性 - 宽度
-          for (let i = 0; i < headerEx.length; i++) {
-            if (i == 2) {
-              worksheet.getColumn(i + 1).width = 45;
-            }
-            else {
-              worksheet.getColumn(i + 1).width = 20;
-            }
-          }
-          // 保存到本地
-          workbook.xlsx.writeBuffer().then((buffer) => saveAs(new Blob([buffer]), "项目列表.xlsx")).catch((err) => console.log("Error writing excel export", err));
-          this.$message.success('数据查询完成，即将开始下载，请稍候...')
-          this.downloadLoading = false
-        }).catch(err => {
-          this.$message.error('获取下载内容出错：' + err)
-          this.downloadLoading = false
-        })
-      })
+          .catch((err) => {
+            this.$message.error("获取下载内容出错：" + err);
+            this.downloadLoading = false;
+          });
+      });
     },
     // 选中行
     handleCurrentChange(val) {
@@ -460,17 +507,16 @@ export default {
     },
     // 取消选中行
     cancelSelected() {
-      this.$refs.vTable.setCurrentRow()
-      this.pCurPrjId = null
+      this.$refs.vTable.setCurrentRow();
+      this.pCurPrjId = null;
     },
     // 每页显示数目变动
     handleSizeChange(val) {
       this.pageSize = val;
       if (this.searchForm.keyword.trim() === "") {
         this.getList(this.currentPage, this.pageSize);
-      }
-      else {
-        this.doSearch(this.currentPage, this.pageSize)
+      } else {
+        this.doSearch(this.currentPage, this.pageSize);
       }
     },
     // 切换页码-后台分页
@@ -478,14 +524,13 @@ export default {
       this.currentPage = val;
       if (this.searchForm.keyword.trim() === "") {
         this.getList(this.currentPage, this.pageSize);
-      }
-      else {
-        this.doSearch(this.currentPage, this.pageSize)
+      } else {
+        this.doSearch(this.currentPage, this.pageSize);
       }
     },
     headerCellStyle,
     columnStyle,
-    checkAuth
+    checkAuth,
   },
 };
 </script>
