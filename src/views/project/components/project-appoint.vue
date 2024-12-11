@@ -59,7 +59,7 @@
         </el-form-item>
         <el-form-item label="市场负责" prop="marketAdminIds" v-if="checkAuth('25-5')">
           <el-select v-model="postForm.marketAdminIds" filterable placeholder="请选择" multiple>
-            <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
+            <el-option v-for="(item,idx) in marketStaffs" :key="idx" :label="item.text" :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
@@ -82,147 +82,191 @@
 </template>
 
 <script>
-
-import { fetchAppointList, fetchNewAppoint, createPrjAppoint, editPrjAppoint, deletePrjAppoint } from '@/api/project';
-import { headerCellStyle, columnStyle, array2myString, myString2Array } from '@/utils/commonFunction'
-import { deepClone } from '@/utils/index'
-import { checkAuth } from '@/utils/permission'
+import {
+  fetchAppointList,
+  fetchNewAppoint,
+  createPrjAppoint,
+  editPrjAppoint,
+  deletePrjAppoint,
+} from "@/api/project";
+import {
+  headerCellStyle,
+  columnStyle,
+  array2myString,
+  myString2Array,
+} from "@/utils/commonFunction";
+import { deepClone } from "@/utils/index";
+import { checkAuth } from "@/utils/permission";
 
 export default {
-  name: 'ProjectAppoint',
+  name: "ProjectAppoint",
   components: {},
   data() {
     return {
       rules: {
-        managerId: [{ required: true, message: '请选负责人', trigger: 'blur' }],
-        memberIds: [{ required: true, message: '请选项目成员', trigger: 'blur' }]
+        managerId: [{ required: true, message: "请选负责人", trigger: "blur" }],
+        memberIds: [
+          { required: true, message: "请选项目成员", trigger: "blur" },
+        ],
+        marketAdminIds: [
+          { required: true, message: "请选市场负责", trigger: "blur" },
+        ],
+        techniqueAdminIds: [
+          { required: true, message: "请选技术负责", trigger: "blur" },
+        ],
       },
       list: [],
       listLoading: true,
-      staffs: '',
+      staffs: "",
+      // 仅显示市场部门的人员 2024-12-11
+      marketStaffs: "",
       currentRow: null,
       dialogVisible: false,
       postForm: {
-        id: '',
-        projectId: '',
-        managerId: '',
-        memberIds: '',
-        marketAdminIds: '',
-        techniqueAdminIds: '',
-        appointmentStart: new Date()
+        id: "",
+        projectId: "",
+        managerId: "",
+        memberIds: "",
+        marketAdminIds: "",
+        techniqueAdminIds: "",
+        appointmentStart: new Date(),
       },
     };
   },
   props: {
-    projectId: { type: Number, default: 0 }
+    projectId: { type: Number, default: 0 },
   },
   created() {
-    this.getList()
+    this.getList();
   },
   methods: {
     submit() {
       this.$refs.postForm.validate((valid) => {
         if (valid) {
-          let that = this
-          that.postForm.projectId = that.projectId
-          that.postForm.memberIds = that.array2myString(that.postForm.memberIds)
-          that.postForm.marketAdminIds = that.array2myString(that.postForm.marketAdminIds)
-          that.postForm.techniqueAdminIds = that.array2myString(that.postForm.techniqueAdminIds)
+          let that = this;
+          that.postForm.projectId = that.projectId;
+          that.postForm.memberIds = that.array2myString(
+            that.postForm.memberIds
+          );
+          that.postForm.marketAdminIds = that.array2myString(
+            that.postForm.marketAdminIds
+          );
+          that.postForm.techniqueAdminIds = that.array2myString(
+            that.postForm.techniqueAdminIds
+          );
           // 新建
-          if (that.postForm.id === '') {
-            createPrjAppoint(that.postForm).then((res) => {
-              that.getList()
-              that.$message.success('新建成功！')
-              that.dialogVisible = false
-            }).catch((err) => {
-              that.$message.error('新建失败：' + err)
-            })
+          if (that.postForm.id === "") {
+            createPrjAppoint(that.postForm)
+              .then((res) => {
+                that.getList();
+                that.$message.success("新建成功！");
+                that.dialogVisible = false;
+              })
+              .catch((err) => {
+                that.$message.error("新建失败：" + err);
+              });
           }
           // 编辑更新
           else {
-            editPrjAppoint(that.postForm).then((res) => {
-              that.getList()
-              that.$message.success('更新成功！')
-              that.dialogVisible = false
-            }).catch((err) => {
-              that.$message.error('更新失败：' + err)
-            })
+            editPrjAppoint(that.postForm)
+              .then((res) => {
+                that.getList();
+                that.$message.success("更新成功！");
+                that.dialogVisible = false;
+              })
+              .catch((err) => {
+                that.$message.error("更新失败：" + err);
+              });
           }
         }
-      })
+      });
     },
     // 获取人员任命列表
     getList() {
-      let that = this
+      let that = this;
       that.listLoading = true;
       that.list = [];
-      fetchAppointList(this.projectId).then((res) => {
-        that.list = res.data.appointments.filter(x => x.status === 1)
-        that.listLoading = false
-      }).catch((err) => {
-        that.$message({
-          message: '错误信息：' + err,
-          type: 'error'
+      fetchAppointList(this.projectId)
+        .then((res) => {
+          that.list = res.data.appointments.filter((x) => x.status === 1);
+          that.listLoading = false;
+        })
+        .catch((err) => {
+          that.$message({
+            message: "错误信息：" + err,
+            type: "error",
+          });
         });
-      });
     },
     addAppoint() {
-      fetchNewAppoint().then((res) => {
-        this.staffs = res.data.staffs
-        if (this.$refs.postForm !== undefined) {
-          // 这个方法用于重置data属性中的值。
-          Object.assign(this.$data.postForm, this.$options.data().postForm)
-          // 清空校验信息
-          this.$refs.postForm.resetFields()
-        }
-        this.dialogVisible = true
-      }).catch((err) => {
-        this.$message({
-          message: '错误信息：' + err,
-          type: 'error'
+      fetchNewAppoint()
+        .then((res) => {
+          this.staffs = res.data.staffs;
+          this.marketStaffs = res.data.marketStaffs;
+          if (this.$refs.postForm !== undefined) {
+            // 这个方法用于重置data属性中的值。
+            Object.assign(this.$data.postForm, this.$options.data().postForm);
+            // 清空校验信息
+            this.$refs.postForm.resetFields();
+          }
+          this.dialogVisible = true;
         })
-      })
+        .catch((err) => {
+          this.$message({
+            message: "错误信息：" + err,
+            type: "error",
+          });
+        });
     },
     editAppoint() {
-      const that = this
-      fetchNewAppoint().then((res) => {
-        that.staffs = res.data.staffs
-        if (that.$refs.postForm !== undefined) {
-          that.$refs.postForm.clearValidate()
-        }
-        that.postForm = deepClone(that.currentRow)
-        that.postForm.memberIds = this.myString2Array(that.postForm.memberIds)
-        that.postForm.marketAdminIds = that.myString2Array(that.postForm.marketAdminIds)
-        that.postForm.techniqueAdminIds = that.myString2Array(that.postForm.techniqueAdminIds)
-        that.dialogVisible = true
-      }).catch((err) => {
-        that.$message({
-          message: '错误信息：' + err,
-          type: 'error'
+      const that = this;
+      fetchNewAppoint()
+        .then((res) => {
+          that.staffs = res.data.staffs;
+          that.marketStaffs = res.data.marketStaffs;
+          if (that.$refs.postForm !== undefined) {
+            that.$refs.postForm.clearValidate();
+          }
+          that.postForm = deepClone(that.currentRow);
+          that.postForm.memberIds = this.myString2Array(
+            that.postForm.memberIds
+          );
+          that.postForm.marketAdminIds = that.myString2Array(
+            that.postForm.marketAdminIds
+          );
+          that.postForm.techniqueAdminIds = that.myString2Array(
+            that.postForm.techniqueAdminIds
+          );
+          that.dialogVisible = true;
         })
-      })
+        .catch((err) => {
+          that.$message({
+            message: "错误信息：" + err,
+            type: "error",
+          });
+        });
     },
     deleteAppoint() {
-      this.$confirm('永久删除, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
+      this.$confirm("永久删除, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       })
         .then(() => {
           deletePrjAppoint(this.currentRow).then((res) => {
-            const idx = this.list.findIndex(a => a.id === this.currentRow.id)
+            const idx = this.list.findIndex((a) => a.id === this.currentRow.id);
             this.list.splice(idx, 1);
             this.total = this.list.length;
             this.$message({
-              type: 'success',
-              message: '删除成功!',
+              type: "success",
+              message: "删除成功!",
             });
           });
         })
         .catch((err) => {
           this.$message({
-            type: 'info',
-            message: '已取消删除',
+            type: "info",
+            message: "已取消删除",
           });
         });
     },
@@ -235,8 +279,10 @@ export default {
       this.$refs.vTable.setCurrentRow();
     },
     checkAuth,
-    array2myString, myString2Array,
-    headerCellStyle, columnStyle
+    array2myString,
+    myString2Array,
+    headerCellStyle,
+    columnStyle,
   },
 };
 </script>
