@@ -80,7 +80,7 @@ export function editStaffType(pa) {
 export function delStaffType(data) {
   return request({
     url: '/Staffs/DeleteStaffType',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -114,7 +114,7 @@ export function editDepartment(pa) {
 export function delDepartment(data) {
   return request({
     url: '/Departments/DeleteDepartment',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -141,7 +141,7 @@ export function resumeStaff(data) {
 export function delStaff(data) {
   return request({
     url: '/Staffs/DeleteStaff',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -175,7 +175,7 @@ export function editRole(pa) {
 export function delRole(data) {
   return request({
     url: '/Roles/DeleteRole',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }

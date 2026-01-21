@@ -47,7 +47,7 @@ export function editCompanyArchive(pa, data) {
 export function delCompanyArchive(data) {
   return request({
     url: '/Companies/DeleteCompanyArchive',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }

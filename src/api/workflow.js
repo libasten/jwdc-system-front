@@ -88,7 +88,7 @@ export function editExpenseCategory(pa) {
 export function delExpenseCategory(data) {
   return request({
     url: '/Workflows/DeleteExpenseCategory',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -123,7 +123,7 @@ export function editLog(pa) {
 export function delLog(data) {
   return request({
     url: '/Workflows/DeleteTravelLog',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }

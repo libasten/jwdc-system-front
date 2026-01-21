@@ -56,7 +56,7 @@ export function editBid(pa) {
 export function deleteBid(data) {
   return request({
     url: '/Bids/DeleteBid',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -93,7 +93,7 @@ export function editBidArchive(pa, data) {
 export function delBidArchive(data) {
   return request({
     url: '/Bids/DeleteBidArchive',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -132,7 +132,7 @@ export function editBidSecurity(pa) {
 export function deleteBidSecurity(data) {
   return request({
     url: '/Bids/DeleteBidSecurity',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -169,7 +169,7 @@ export function editBidSecurityArchive(pa, data) {
 export function delBidSecurityArchive(data) {
   return request({
     url: '/Bids/DeleteBidSecurityArchive',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }

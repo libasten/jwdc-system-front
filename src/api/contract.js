@@ -45,7 +45,7 @@ export function editContract(pa) {
 export function deleteContract(data) {
   return request({
     url: '/Contracts/DeleteContract',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -82,7 +82,7 @@ export function editContractArchive(pa, data) {
 export function delContractArchive(data) {
   return request({
     url: '/Contracts/DeleteContractArchive',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }

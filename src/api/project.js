@@ -62,7 +62,7 @@ export function fetchProjectDetail(id) {
 export function delProject(data) {
   return request({
     url: '/Projects/DeleteProject',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -116,7 +116,7 @@ export function editPrjAppoint(pa) {
 export function deletePrjAppoint(data) {
   return request({
     url: '/Projects/DeleteProjectAppointment',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -152,7 +152,7 @@ export function editPrjMilestone(pa) {
 export function deletePrjMilestone(data) {
   return request({
     url: '/Projects/DeleteProjectMilestone',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -195,7 +195,7 @@ export function editPrjShare(pa) {
 export function deletePrjShare(data) {
   return request({
     url: '/Projects/DeleteProjectShare',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -229,7 +229,7 @@ export function editProjectStage(pa) {
 export function delProjectStage(data) {
   return request({
     url: '/Projects/DeleteProjectStage',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -263,7 +263,7 @@ export function editProjectType(pa) {
 export function delProjectType(data) {
   return request({
     url: '/Projects/DeleteProjectType',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -297,7 +297,7 @@ export function editProjectImportance(pa) {
 export function delProjectImportance(data) {
   return request({
     url: '/Projects/DeleteProjectImportance',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -331,7 +331,7 @@ export function editProjectNoteType(pa) {
 export function delProjectNoteType(data) {
   return request({
     url: '/Projects/DeleteProjectNoteType',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -365,7 +365,7 @@ export function editProjectArchiveType(pa) {
 export function delProjectArchiveType(data) {
   return request({
     url: '/Projects/DeleteProjectArchiveType',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -406,7 +406,7 @@ export function editProjectNote(pa) {
 export function delProjectNote(data) {
   return request({
     url: '/Projects/DeleteProjectNote',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -449,7 +449,7 @@ export function editProjectArchive(pa, data) {
 export function delProjectArchive(data) {
   return request({
     url: '/Projects/DeleteProjectArchive',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -484,7 +484,7 @@ export function delInvoicingProgress(data) {
   return request({
     url: '/InvoicingProgresses/DeleteInvoicingProgress',
 
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }
@@ -518,7 +518,7 @@ export function editCollectionProgress(pa) {
 export function delCollectionProgress(data) {
   return request({
     url: '/CollectionProgresses/DeleteCollectionProgress',
-    method: 'delete',
+    method: 'post',
     params: { id: data.id }
   })
 }

@@ -33,6 +33,6 @@ export function updateRole(id, data) {
 export function deleteRole(id) {
   return request({
     url: `/vue-element-admin/role/${id}`,
-    method: 'delete'
+    method: 'post'
   })
 }
