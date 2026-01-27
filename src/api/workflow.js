@@ -1,24 +1,27 @@
 import request from '@/utils/request'
 //#region 工作流列表
 // 获取待办列表
-export function fetchTodoList() {
+export function fetchTodoList(params) {
   return request({
     url: '/Workflows/GetWorkflowings',
     method: 'get',
+    params: params
   })
 }
 // 获取经办列表
-export function fetchDoingList() {
+export function fetchDoingList(params) {
   return request({
     url: '/Workflows/GetHandlingWorkflows',
     method: 'get',
+    params: params
   })
 }
 // 获取完结流程列表
-export function fetchDoneList() {
+export function fetchDoneList(params) {
   return request({
     url: '/Workflows/GetCompletedWorkflows',
     method: 'get',
+    params: params
   })
 }
 

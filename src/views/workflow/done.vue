@@ -8,11 +8,14 @@
       <el-button icon="el-icon-finished" size="small" :type="$route.name==='Done'? 'primary' : 'info'" @click.native="goDone">完结流程</el-button>
     </div>
     <el-row>
-      <el-col :span="12" style="margin-bottom:10px;">
-        <el-input v-model="keywords" placeholder="请输入搜索关键字" clearable><template slot="prepend">搜索过滤</template></el-input>
+      <el-col :span="8" style="margin-bottom:10px;">
+        <el-input v-model="keywords" placeholder="请输入项目或人员搜索关键字" clearable @keyup.enter.native="search" @clear="search"><template slot="prepend">搜索过滤</template></el-input>
+      </el-col>
+      <el-col :span="4" style="margin-bottom:10px; margin-left:10px;">
+        <el-button icon="el-icon-search" size="small" type="primary" @click="search">搜索</el-button>
       </el-col>
     </el-row>
-    <el-table :data="showTable" border v-loading="loading" :header-cell-style="headerCellStyle" :row-style="workflowRowStyle" @row-click="rowClick">
+    <el-table :data="doneList" border v-loading="loading" :header-cell-style="headerCellStyle" :row-style="workflowRowStyle" @row-click="rowClick">
       <el-table-column label="id" v-if="false">
         <template slot-scope="{ row }">
           <span>{{ row.id }}</span>
@@ -33,7 +36,12 @@
           <span>{{ row.projectName }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="当前状态" min-width="15" align="center" show-overflow-tooltip>
+      <el-table-column label="报销金额" min-width="15" align="center" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <span>{{ row.totalAmount }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" min-width="15" align="center" show-overflow-tooltip>
         <template slot-scope="{ row }">
           <span>{{ row.currentStatus }}</span>
         </template>
@@ -63,25 +71,10 @@ export default {
       total: 0,
       doneList: [], // 表格数据源
       keywords: '',// 检索文本关键字
-      filterDataShow: [],
     };
   },
   created() {
     this.getDoneList()
-  },
-  watch: { //监听搜索框内容，当搜索框内容发生变化时调用searchResource方法
-    keywords: {
-      handler() { this.searchResource() },
-    }
-  },
-  computed: {
-    //showTable计算属性通过slice方法计算表格当前应显示的数据
-    showTable() {
-      return this.filterDataShow.slice(
-        (this.currentPage - 1) * this.pageSize,
-        this.currentPage * this.pageSize
-      );
-    }
   },
   methods: {
     goTodo, goCreate, goDoing, goDone, headerCellStyle, workflowRowStyle,
@@ -89,40 +82,37 @@ export default {
     getDoneList() {
       this.loading = true;
       this.doneList = [];
-      fetchDoneList().then(res => {
-        this.doneList = res.data
-        this.total = res.data.length
-        this.searchResource()
+      const params = {
+        skipCount: (this.currentPage - 1) * this.pageSize,
+        maxCount: this.pageSize,
+        searchValue: ''
+      }
+      if (this.keywords.trim()) {
+        params.searchValue = this.keywords.trim();
+      }
+      fetchDoneList(params).then(res => {
+        this.doneList = res.data.data
+        this.total = res.data.totalCount
         this.loading = false
-        console.log(this.doneList)
       }).catch(err => { this.$message.error('错误信息：' + err) });
     },
-    searchResource() {
-      this.currentPage = 1 //将当前页设置为1，确保每次都是从第一页开始搜
-      let filterKeywords = this.keywords.trim()
-      let filerReasource = this.doneList.filter(item => { //过滤全部数据
-        // 此处筛选方法可扩展成多个字段的
-        if (
-          item.starterName.includes(filterKeywords)
-          // 有些经办的流程是出差单，中间没有关联项目
-          || (item.projectName !== null && item.projectName.includes(filterKeywords))
-          || item.updateTimeFormat.includes(filterKeywords)) {
-          return item
-        }
-      })
-      this.filterDataShow = filerReasource //将符合条件的内容赋给filterDataShow
-      this.total = this.filterDataShow.length
+    search() {
+      this.currentPage = 1
+      this.getDoneList()
     },
     rowClick(row, column, event) {
       this.$router.push({ path: '/workflow/expense/detail/' + row.id })
     },
     // 每页显示数目变动
     handleSizeChange(val) {
+      this.currentPage = 1
       this.pageSize = val
+      this.getDoneList()
     },
     // 切换页码
     handleCurrentPageChange(val) {
       this.currentPage = val
+      this.getDoneList()
     },
   },
 };
