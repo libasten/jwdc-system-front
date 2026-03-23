@@ -59,7 +59,7 @@
         </el-form-item>
         <el-form-item label="市场负责" prop="marketAdminIds" v-if="checkAuth('25-5')">
           <el-select v-model="postForm.marketAdminIds" filterable placeholder="请选择" multiple>
-            <el-option v-for="(item,idx) in marketStaffs" :key="idx" :label="item.text" :value="item.id">
+            <el-option v-for="(item,idx) in staffs" :key="idx" :label="item.text" :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
