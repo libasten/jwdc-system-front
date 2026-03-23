@@ -88,7 +88,7 @@ export default {
       this.loading = true;
       this.todoList = [];
       const params = {
-        skipCount: (this.currentPage - 1) * this.pageSize,
+        skpCount: (this.currentPage - 1) * this.pageSize,
         maxCount: this.pageSize,
         searchValue: ''
       };

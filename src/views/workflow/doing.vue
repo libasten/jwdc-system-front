@@ -88,7 +88,7 @@ export default {
       this.loading = true;
       this.doingList = [];
       const params = {
-        skipCount: (this.currentPage - 1) * this.pageSize,
+        skpCount: (this.currentPage - 1) * this.pageSize,
         maxCount: this.pageSize,
         searchValue: ''
       }
